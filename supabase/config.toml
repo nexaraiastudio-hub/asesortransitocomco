@@ -1,1 +1,4 @@
 project_id = "ubgekbswuwbocrcxqhlo"
+
+[functions.verify-epayco-payment]
+verify_jwt = false
