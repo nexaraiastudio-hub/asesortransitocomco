@@ -1,50 +1,21 @@
 
 
-# Abogado Experto en Tránsito y Transporte Col
+## Desactivar pantalla de pago temporalmente
 
-## Visión General
-Aplicación web móvil profesional de asesoría legal automatizada especializada en tránsito y transporte en Colombia. Diseño corporativo elegante con fondo azul navy (#002147) y acentos dorados (#D4AF37).
+Se modificaran los archivos necesarios para que el flujo salte directamente al chat sin pasar por la verificacion de pago. Esto es temporal, para pruebas.
 
----
+### Cambios a realizar
 
-## Pantalla 1: Bienvenida
-- Logo proporcionado centrado en la pantalla
-- Nombre de la app "Abogado Experto en Tránsito y Transporte Col"
-- Botón dorado "INICIAR ASESORÍA" que lleva a la pantalla de pago
-- Fondo azul navy oscuro, diseño minimalista y elegante
+1. **`src/pages/Payment.tsx`** - En lugar de mostrar la pantalla de pago, redirigir automaticamente a `/chat` cuando el usuario este autenticado.
 
-## Pantalla 2: Muro de Pago
-- Diseño premium con el logo visible
-- Texto "Acceso Premium: $4.900 COP / mes"
-- Integración real con **Stripe** para procesar el pago mensual recurrente (suscripción)
-- Al pagar exitosamente, se desbloquea el acceso al chat de IA
-- Los usuarios que ya pagaron pasan directo al chat
+2. **`src/pages/Chat.tsx`** - Eliminar la verificacion de suscripcion activa que redirige a `/payment`. Solo mantener la verificacion de autenticacion (que el usuario haya iniciado sesion).
 
-## Pantalla 3: Chat de IA
-- Interfaz limpia de chat con el logo visible
-- El usuario escribe sus consultas legales
-- La IA responde **exclusivamente** con base en la fuente de datos cargada por el administrador
-- **Regla de oro**: si la pregunta no se puede responder con la información cargada, la IA indica que no tiene información al respecto
-- Se usa **Lovable AI** como motor del chat, con instrucciones estrictas de solo usar el contenido administrado
+3. **`supabase/functions/legal-chat/index.ts`** - Comentar o eliminar temporalmente el bloque que verifica `has_active_subscription` y retorna error 403. Esto permite que el edge function responda sin importar el estado de suscripcion.
 
-## Pantalla 4: Panel de Administrador
-- Acceso protegido solo para el rol de administrador
-- Interfaz para cargar y gestionar documentos en formato **Markdown** que servirán como fuente de conocimiento para la IA
-- Posibilidad de agregar, editar y eliminar contenido
-- Los documentos se almacenan en Supabase Storage y su contenido se usa como contexto para las respuestas del chat
+### Resultado esperado
 
----
-
-## Backend (Lovable Cloud + Supabase)
-- **Autenticación**: Registro/login de usuarios con Supabase Auth
-- **Base de datos**: Tabla de documentos de conocimiento, roles de usuario (admin/user)
-- **Storage**: Bucket para almacenar los archivos markdown del administrador
-- **Edge Function**: Función para el chat que toma la fuente de datos y la pasa como contexto a Lovable AI
-- **Stripe**: Suscripción mensual de $4.900 COP para acceso premium
-
-## Diseño
-- Mobile-first, optimizado para uso en celular
-- Paleta: Azul navy (#002147), dorado (#D4AF37), texto blanco
-- Tipografía elegante y espaciado generoso
-- Logo presente en todas las pantallas sin alteración
+- El usuario inicia sesion y llega directamente al chat legal
+- No se muestra la pantalla de pago
+- El chat funciona sin verificar suscripcion
+- Cuando se quiera reactivar el pago, se revierten estos 3 cambios
 
