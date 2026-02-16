@@ -95,24 +95,13 @@ serve(async (req) => {
       .map((doc: any) => `## ${doc.title}\n${doc.content}`)
       .join("\n\n---\n\n");
 
-    // Call Lovable AI
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+    // Call Google Gemini API
+    const GOOGLE_GEMINI_API_KEY = Deno.env.get("GOOGLE_GEMINI_API_KEY");
+    if (!GOOGLE_GEMINI_API_KEY) {
+      throw new Error("GOOGLE_GEMINI_API_KEY is not configured");
     }
 
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          {
-            role: "system",
-            content: `Actúa como un Asistente Legal IA especializado en Tránsito en Colombia. Tu única fuente de verdad y conocimiento es la base de conocimientos proporcionada a continuación.
+    const systemInstruction = `Actúa como un Asistente Legal IA especializado en Tránsito en Colombia. Tu única fuente de verdad y conocimiento es la base de conocimientos proporcionada a continuación.
 
 REGLAS CRÍTICAS DE RESPUESTA:
 
@@ -129,24 +118,39 @@ FLUJO DE TRABAJO:
 - Paso 3: Si la información existe, entrégala citando la fuente. De lo contrario, admite que no está en la base de datos.
 
 BASE DE CONOCIMIENTO LEGAL:
-${knowledgeBase}`,
-          },
-          {
-            role: "user",
-            content: message,
-          },
-        ],
-        max_tokens: 2000,
-        temperature: 0.3,
-      }),
-    });
+${knowledgeBase}`;
 
-    if (!aiResponse.ok) {
-      throw new Error(`AI API call failed: ${aiResponse.status}`);
+    const geminiResponse = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${GOOGLE_GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          systemInstruction: {
+            parts: [{ text: systemInstruction }],
+          },
+          contents: [
+            {
+              role: "user",
+              parts: [{ text: message }],
+            },
+          ],
+          generationConfig: {
+            temperature: 0.3,
+            maxOutputTokens: 2000,
+          },
+        }),
+      }
+    );
+
+    if (!geminiResponse.ok) {
+      const errText = await geminiResponse.text();
+      console.error("Gemini API error:", geminiResponse.status, errText);
+      throw new Error(`Gemini API call failed: ${geminiResponse.status}`);
     }
 
-    const aiData = await aiResponse.json();
-    const response = aiData.choices?.[0]?.message?.content || "No pude generar una respuesta.";
+    const geminiData = await geminiResponse.json();
+    const response = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || "No pude generar una respuesta.";
 
     return new Response(JSON.stringify({ response }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
