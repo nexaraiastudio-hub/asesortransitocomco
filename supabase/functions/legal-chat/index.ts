@@ -40,17 +40,16 @@ serve(async (req) => {
 
     const userId = claimsData.claims.sub;
 
-    // Verify active subscription
-    const { data: hasSubscription } = await supabaseClient.rpc("has_active_subscription", {
-      _user_id: userId,
-    });
-
-    if (!hasSubscription) {
-      return new Response(JSON.stringify({ error: "Active subscription required" }), {
-        status: 403,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    // TEMPORAL: Verificación de suscripción desactivada para pruebas
+    // const { data: hasSubscription } = await supabaseClient.rpc("has_active_subscription", {
+    //   _user_id: userId,
+    // });
+    // if (!hasSubscription) {
+    //   return new Response(JSON.stringify({ error: "Active subscription required" }), {
+    //     status: 403,
+    //     headers: { ...corsHeaders, "Content-Type": "application/json" },
+    //   });
+    // }
 
     const { message } = await req.json();
 
