@@ -89,17 +89,17 @@ serve(async (req) => {
       .map((doc: any) => `## ${doc.title}\n${doc.content}`)
       .join("\n\n---\n\n");
 
-    // Call Google Gemini API
-    const GOOGLE_GEMINI_API_KEY = Deno.env.get("GOOGLE_GEMINI_API_KEY");
-    if (!GOOGLE_GEMINI_API_KEY) {
-      console.error("GOOGLE_GEMINI_API_KEY is not configured");
+    // Call Lovable AI Gateway
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      console.error("LOVABLE_API_KEY is not configured");
       return new Response(JSON.stringify({ error: "El servicio de IA no está configurado. Contacte al administrador." }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const systemInstruction = `# PERFIL Y ROL
+    const systemPrompt = `# PERFIL Y ROL
 
 Eres un Abogado Penalista y de Tránsito de élite en Colombia. Tu misión es asesorar en la defensa al usuario frente a procedimientos de tránsito, inmovilizaciones y comparendos. Tu tono es profesional, asertivo y protector.
 
@@ -139,45 +139,45 @@ Si el comparendo ya fue impuesto:
 BASE DE CONOCIMIENTO LEGAL:
 ${knowledgeBase}`;
 
-    let geminiResponse: Response;
+    let aiResponse: Response;
     try {
-      geminiResponse = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GOOGLE_GEMINI_API_KEY}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            systemInstruction: {
-              parts: [{ text: systemInstruction }],
-            },
-            contents: [
-              {
-                role: "user",
-                parts: [{ text: message }],
-              },
-            ],
-            generationConfig: {
-              temperature: 0.3,
-              maxOutputTokens: 2000,
-            },
-          }),
-        }
-      );
+      aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "google/gemini-3-flash-preview",
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: message },
+          ],
+          temperature: 0.3,
+          max_tokens: 2000,
+        }),
+      });
     } catch (fetchError) {
-      console.error("Network error calling Gemini:", fetchError);
+      console.error("Network error calling AI gateway:", fetchError);
       return new Response(JSON.stringify({ error: "Error de conexión con el servicio de IA. Intenta de nuevo." }), {
         status: 502,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    if (!geminiResponse.ok) {
-      const errText = await geminiResponse.text();
-      console.error("Gemini API error:", geminiResponse.status, errText);
+    if (!aiResponse.ok) {
+      const errText = await aiResponse.text();
+      console.error("AI gateway error:", aiResponse.status, errText);
 
-      if (geminiResponse.status === 429) {
+      if (aiResponse.status === 429) {
         return new Response(JSON.stringify({ error: "Se ha superado el límite de consultas. Por favor espera unos minutos e intenta de nuevo." }), {
           status: 429,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (aiResponse.status === 402) {
+        return new Response(JSON.stringify({ error: "Créditos de IA agotados. Contacte al administrador." }), {
+          status: 402,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
@@ -188,8 +188,8 @@ ${knowledgeBase}`;
       });
     }
 
-    const geminiData = await geminiResponse.json();
-    const response = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || "No pude generar una respuesta.";
+    const aiData = await aiResponse.json();
+    const response = aiData.choices?.[0]?.message?.content || "No pude generar una respuesta.";
 
     return new Response(JSON.stringify({ response }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
