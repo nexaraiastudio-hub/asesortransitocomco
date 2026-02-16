@@ -3,7 +3,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 serve(async (req) => {
@@ -15,7 +16,7 @@ serve(async (req) => {
     // Authenticate user
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      return new Response(JSON.stringify({ error: "No autorizado" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -23,63 +24,56 @@ serve(async (req) => {
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
     const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } },
     });
 
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await supabaseClient.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+    if (userError || !user) {
+      return new Response(JSON.stringify({ error: "No autorizado" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const userId = claimsData.claims.sub;
-
-    // TEMPORAL: Verificación de suscripción desactivada para pruebas
-    // const { data: hasSubscription } = await supabaseClient.rpc("has_active_subscription", {
-    //   _user_id: userId,
-    // });
-    // if (!hasSubscription) {
-    //   return new Response(JSON.stringify({ error: "Active subscription required" }), {
-    //     status: 403,
-    //     headers: { ...corsHeaders, "Content-Type": "application/json" },
-    //   });
-    // }
-
     const { message } = await req.json();
 
     if (!message) {
-      return new Response(JSON.stringify({ error: "No message provided" }), {
+      return new Response(JSON.stringify({ error: "No se proporcionó mensaje" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Search for relevant documents based on the user's message keywords
+    // Search for relevant documents
     const keywords = message.toLowerCase().split(/\s+/).filter((w: string) => w.length > 3).slice(0, 5);
-    
+
     const docsResponse = await fetch(`${supabaseUrl}/rest/v1/knowledge_documents?select=title,content`, {
       headers: {
-        apikey: supabaseKey,
-        Authorization: `Bearer ${supabaseKey}`,
+        apikey: supabaseServiceKey,
+        Authorization: `Bearer ${supabaseServiceKey}`,
       },
     });
 
+    if (!docsResponse.ok) {
+      console.error("Error fetching documents:", docsResponse.status);
+      return new Response(JSON.stringify({ error: "Error al consultar la base de conocimientos" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const documents = await docsResponse.json();
-    
-    // Score and rank documents by relevance to the query
+
+    // Score and rank documents by relevance
     const scoredDocs = documents.map((doc: any) => {
       const text = `${doc.title} ${doc.content}`.toLowerCase();
       const score = keywords.reduce((acc: number, kw: string) => acc + (text.includes(kw) ? 1 : 0), 0);
       return { ...doc, score };
     });
-    
-    // Take top relevant documents, limiting total size to ~80k chars
+
     const sortedDocs = scoredDocs.sort((a: any, b: any) => b.score - a.score);
     let totalChars = 0;
     const maxChars = 80000;
@@ -90,7 +84,7 @@ serve(async (req) => {
       selectedDocs.push(doc);
       totalChars += doc.content.length;
     }
-    
+
     const knowledgeBase = selectedDocs
       .map((doc: any) => `## ${doc.title}\n${doc.content}`)
       .join("\n\n---\n\n");
@@ -98,7 +92,11 @@ serve(async (req) => {
     // Call Google Gemini API
     const GOOGLE_GEMINI_API_KEY = Deno.env.get("GOOGLE_GEMINI_API_KEY");
     if (!GOOGLE_GEMINI_API_KEY) {
-      throw new Error("GOOGLE_GEMINI_API_KEY is not configured");
+      console.error("GOOGLE_GEMINI_API_KEY is not configured");
+      return new Response(JSON.stringify({ error: "El servicio de IA no está configurado. Contacte al administrador." }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const systemInstruction = `# PERFIL Y ROL
@@ -141,33 +139,53 @@ Si el comparendo ya fue impuesto:
 BASE DE CONOCIMIENTO LEGAL:
 ${knowledgeBase}`;
 
-    const geminiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GOOGLE_GEMINI_API_KEY}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          systemInstruction: {
-            parts: [{ text: systemInstruction }],
-          },
-          contents: [
-            {
-              role: "user",
-              parts: [{ text: message }],
+    let geminiResponse: Response;
+    try {
+      geminiResponse = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GOOGLE_GEMINI_API_KEY}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            systemInstruction: {
+              parts: [{ text: systemInstruction }],
             },
-          ],
-          generationConfig: {
-            temperature: 0.3,
-            maxOutputTokens: 2000,
-          },
-        }),
-      }
-    );
+            contents: [
+              {
+                role: "user",
+                parts: [{ text: message }],
+              },
+            ],
+            generationConfig: {
+              temperature: 0.3,
+              maxOutputTokens: 2000,
+            },
+          }),
+        }
+      );
+    } catch (fetchError) {
+      console.error("Network error calling Gemini:", fetchError);
+      return new Response(JSON.stringify({ error: "Error de conexión con el servicio de IA. Intenta de nuevo." }), {
+        status: 502,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     if (!geminiResponse.ok) {
       const errText = await geminiResponse.text();
       console.error("Gemini API error:", geminiResponse.status, errText);
-      throw new Error(`Gemini API call failed: ${geminiResponse.status}`);
+
+      if (geminiResponse.status === 429) {
+        return new Response(JSON.stringify({ error: "Se ha superado el límite de consultas. Por favor espera unos minutos e intenta de nuevo." }), {
+          status: 429,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      return new Response(JSON.stringify({ error: "Error en el servicio de IA. Intenta de nuevo más tarde." }), {
+        status: 502,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const geminiData = await geminiResponse.json();
@@ -179,7 +197,7 @@ ${knowledgeBase}`;
   } catch (error) {
     console.error("Error in legal-chat:", error);
     return new Response(
-      JSON.stringify({ error: "Error procesando la consulta" }),
+      JSON.stringify({ error: "Error procesando la consulta. Intenta de nuevo." }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
