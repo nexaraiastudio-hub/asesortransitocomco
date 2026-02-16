@@ -61,6 +61,9 @@ serve(async (req) => {
       });
     }
 
+    // Search for relevant documents based on the user's message keywords
+    const keywords = message.toLowerCase().split(/\s+/).filter((w: string) => w.length > 3).slice(0, 5);
+    
     const docsResponse = await fetch(`${supabaseUrl}/rest/v1/knowledge_documents?select=title,content`, {
       headers: {
         apikey: supabaseKey,
@@ -69,7 +72,27 @@ serve(async (req) => {
     });
 
     const documents = await docsResponse.json();
-    const knowledgeBase = documents
+    
+    // Score and rank documents by relevance to the query
+    const scoredDocs = documents.map((doc: any) => {
+      const text = `${doc.title} ${doc.content}`.toLowerCase();
+      const score = keywords.reduce((acc: number, kw: string) => acc + (text.includes(kw) ? 1 : 0), 0);
+      return { ...doc, score };
+    });
+    
+    // Take top relevant documents, limiting total size to ~80k chars
+    const sortedDocs = scoredDocs.sort((a: any, b: any) => b.score - a.score);
+    let totalChars = 0;
+    const maxChars = 80000;
+    const selectedDocs: any[] = [];
+    for (const doc of sortedDocs) {
+      if (doc.score === 0 && selectedDocs.length > 0) break;
+      if (totalChars + doc.content.length > maxChars) break;
+      selectedDocs.push(doc);
+      totalChars += doc.content.length;
+    }
+    
+    const knowledgeBase = selectedDocs
       .map((doc: any) => `## ${doc.title}\n${doc.content}`)
       .join("\n\n---\n\n");
 
