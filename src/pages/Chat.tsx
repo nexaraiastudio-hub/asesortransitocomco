@@ -45,8 +45,12 @@ const Chat = () => {
     setLoading(true);
 
     try {
+      const history = messages.map((m) => ({
+        role: m.role,
+        content: m.content,
+      }));
       const { data, error } = await supabase.functions.invoke("legal-chat", {
-        body: { message: userMessage },
+        body: { message: userMessage, history },
       });
 
       if (error) throw error;
@@ -111,14 +115,14 @@ const Chat = () => {
             className={`mb-4 flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
           >
             <div
-              className={`max-w-[85%] rounded-xl px-4 py-3 text-sm ${
+              className={`max-w-[85%] rounded-xl px-4 py-3 text-base ${
                 msg.role === "user"
                   ? "bg-primary text-primary-foreground"
                   : "bg-secondary text-foreground"
               }`}
             >
               {msg.role === "assistant" ? (
-                <div className="prose prose-invert prose-sm max-w-none">
+                <div className="prose prose-invert max-w-none text-base">
                   <ReactMarkdown>{msg.content}</ReactMarkdown>
                 </div>
               ) : (
@@ -130,7 +134,7 @@ const Chat = () => {
 
         {loading && (
           <div className="mb-4 flex justify-start">
-            <div className="rounded-xl bg-secondary px-4 py-3 text-sm text-muted-foreground">
+            <div className="rounded-xl bg-secondary px-4 py-3 text-base text-muted-foreground">
               Consultando base legal...
             </div>
           </div>
@@ -148,7 +152,7 @@ const Chat = () => {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && sendMessage()}
             placeholder="Escribe tu consulta legal..."
-            className="flex-1 rounded-lg border border-border bg-secondary px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            className="flex-1 rounded-lg border border-border bg-secondary px-4 py-3 text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           />
           <button
             onClick={sendMessage}
