@@ -37,20 +37,8 @@ const Payment = () => {
         navigate("/auth");
         return;
       }
-      setUser(user);
-
-      // Check if user has active subscription
-      const { data } = await supabase.rpc("has_active_subscription", {
-        _user_id: user.id,
-      });
-
-      if (data === true) {
-        navigate("/chat");
-        return;
-      }
-
-      setChecking(false);
-      setLoading(false);
+      // TEMPORAL: Saltar pago, ir directo al chat
+      navigate("/chat");
     };
 
     checkAuth();

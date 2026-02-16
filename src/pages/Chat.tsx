@@ -25,15 +25,7 @@ const Chat = () => {
         return;
       }
 
-      const { data } = await supabase.rpc("has_active_subscription", {
-        _user_id: user.id,
-      });
-
-      if (data !== true) {
-        navigate("/payment");
-        return;
-      }
-
+      // TEMPORAL: Verificación de suscripción desactivada para pruebas
       setChecking(false);
     };
 
