@@ -38,7 +38,7 @@ serve(async (req) => {
       });
     }
 
-    const { message } = await req.json();
+    const { message, history } = await req.json();
 
     if (!message) {
       return new Response(JSON.stringify({ error: "No se proporcionó mensaje" }), {
@@ -151,6 +151,7 @@ ${knowledgeBase}`;
           model: "google/gemini-3-flash-preview",
           messages: [
             { role: "system", content: systemPrompt },
+            ...(history || []).map((m: any) => ({ role: m.role, content: m.content })),
             { role: "user", content: message },
           ],
           temperature: 0.3,
