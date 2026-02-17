@@ -115,14 +115,14 @@ const Chat = () => {
             className={`mb-4 flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
           >
             <div
-              className={`max-w-[85%] rounded-xl px-4 py-3 text-base ${
+              className={`max-w-[85%] rounded-xl px-4 py-3 text-lg ${
                 msg.role === "user"
                   ? "bg-primary text-primary-foreground"
                   : "bg-secondary text-foreground"
               }`}
             >
               {msg.role === "assistant" ? (
-                <div className="prose prose-invert max-w-none text-base">
+                <div className="prose prose-invert prose-lg max-w-none text-lg">
                   <ReactMarkdown>{msg.content}</ReactMarkdown>
                 </div>
               ) : (
@@ -134,7 +134,7 @@ const Chat = () => {
 
         {loading && (
           <div className="mb-4 flex justify-start">
-            <div className="rounded-xl bg-secondary px-4 py-3 text-base text-muted-foreground">
+            <div className="rounded-xl bg-secondary px-4 py-3 text-lg text-muted-foreground">
               Consultando base legal...
             </div>
           </div>
@@ -152,7 +152,7 @@ const Chat = () => {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && sendMessage()}
             placeholder="Escribe tu consulta legal..."
-            className="flex-1 rounded-lg border border-border bg-secondary px-4 py-3 text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            className="flex-1 rounded-lg border border-border bg-secondary px-4 py-3 text-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           />
           <button
             onClick={sendMessage}
