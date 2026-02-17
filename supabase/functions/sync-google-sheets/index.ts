@@ -159,7 +159,16 @@ serve(async (req) => {
     if (!serviceAccountJson) {
       throw new Error("GOOGLE_SERVICE_ACCOUNT_JSON not configured");
     }
-    const serviceAccount = JSON.parse(serviceAccountJson);
+    console.log("Service account JSON length:", serviceAccountJson.length);
+    console.log("First 20 chars:", serviceAccountJson.substring(0, 20));
+    
+    let serviceAccount: any;
+    try {
+      serviceAccount = JSON.parse(serviceAccountJson);
+    } catch (parseErr) {
+      console.error("JSON parse error. Raw value starts with:", serviceAccountJson.substring(0, 50));
+      throw new Error(`Invalid GOOGLE_SERVICE_ACCOUNT_JSON: ${parseErr.message}`);
+    }
 
     // Get access token
     const accessToken = await getGoogleAccessToken(serviceAccount);
