@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-// Logo will be imported here once uploaded
+import logo from "@/assets/logo.png";
 import { Users, BarChart3, FileText, ArrowLeft, RefreshCw } from "lucide-react";
 
 interface Document {
@@ -162,7 +162,7 @@ const Admin = () => {
             <button onClick={() => navigate("/chat")} className="text-muted-foreground hover:text-foreground">
               <ArrowLeft className="h-5 w-5" />
             </button>
-            <span className="text-2xl">⚖️</span>
+            <img src={logo} alt="Logo" className="h-10 w-10 object-contain" />
             <h1 className="text-lg font-bold text-foreground">Panel de Administrador</h1>
           </div>
         </div>
