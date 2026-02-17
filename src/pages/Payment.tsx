@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-// Logo will be imported here once uploaded
+import logo from "@/assets/logo.png";
 
 declare global {
   interface Window {
@@ -87,7 +87,7 @@ const Payment = () => {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6">
-      <div className="mb-6 text-5xl">⚖️</div>
+      <img src={logo} alt="Logo" className="mb-6 h-20 w-20 object-contain" />
 
       <div className="w-full max-w-sm rounded-xl border border-border bg-card p-8 text-center shadow-xl">
         <h2 className="mb-2 text-xl font-bold text-foreground">Acceso Premium</h2>

@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-// Logo will be imported here once uploaded
+import logo from "@/assets/logo.png";
 import ReactMarkdown from "react-markdown";
 import { Mic, MicOff, Send, Paperclip, Volume2, VolumeX, X, ChevronDown, Shield } from "lucide-react";
 
@@ -292,7 +292,7 @@ const Chat = () => {
       {/* Header */}
       <header className="flex items-center justify-between border-b border-border px-3 py-2">
         <div className="flex items-center gap-2 min-w-0">
-          <span className="text-2xl">⚖️</span>
+          <img src={logo} alt="Logo" className="h-10 w-10 flex-shrink-0 object-contain" />
           <h1 className="truncate text-sm font-bold text-foreground">Asesor Legal</h1>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
@@ -350,7 +350,7 @@ const Chat = () => {
       <div className="flex-1 overflow-y-auto px-4 py-4">
         {messages.length === 0 && (
           <div className="flex h-full flex-col items-center justify-center text-center">
-            <div className="mb-4 text-7xl">⚖️</div>
+            <img src={logo} alt="Logo" className="mb-4 h-40 w-40 object-contain md:h-52 md:w-52" />
             <p className="text-base font-medium text-foreground">
               Escribe tu consulta legal sobre tránsito y transporte en Colombia
             </p>
