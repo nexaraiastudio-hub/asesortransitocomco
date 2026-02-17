@@ -24,12 +24,8 @@ interface VoiceOption {
 }
 
 const VOICE_OPTIONS: VoiceOption[] = [
-  { name: "es-US-Standard-A", label: "Sofía (Femenina)", gender: "FEMALE" },
-  { name: "es-US-Standard-B", label: "Carlos (Masculino)", gender: "MALE" },
-  { name: "es-US-Standard-C", label: "Valentina (Femenina)", gender: "FEMALE" },
-  { name: "es-US-Neural2-A", label: "Laura (Neural)", gender: "FEMALE" },
-  { name: "es-US-Neural2-B", label: "Andrés (Neural)", gender: "MALE" },
-  { name: "es-US-Neural2-C", label: "Diana (Neural)", gender: "FEMALE" },
+  { name: "es-US-Neural2-A", label: "Sofía (Neural)", gender: "FEMALE" },
+  { name: "es-US-Neural2-B", label: "Carlos (Neural)", gender: "MALE" },
 ];
 
 const Chat = () => {
@@ -302,25 +298,9 @@ const Chat = () => {
               <ChevronDown className="h-3 w-3" />
             </button>
             {showVoiceMenu && (
-              <div className="absolute right-0 top-full z-50 mt-1 w-52 rounded-lg border border-border bg-background shadow-lg">
+              <div className="absolute right-0 top-full z-50 mt-1 w-48 rounded-lg border border-border bg-background shadow-lg">
                 <div className="p-1">
-                  <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Voces Neuronales</p>
-                  {VOICE_OPTIONS.filter(v => v.name.includes("Neural")).map((voice) => (
-                    <button
-                      key={voice.name}
-                      onClick={() => { setSelectedVoice(voice); setShowVoiceMenu(false); }}
-                      className={`flex w-full items-center gap-2 rounded px-2 py-1.5 text-xs transition-colors ${
-                        selectedVoice.name === voice.name
-                          ? "bg-primary text-primary-foreground"
-                          : "text-foreground hover:bg-muted"
-                      }`}
-                    >
-                      <span>{voice.gender === "FEMALE" ? "👩" : "👨"}</span>
-                      {voice.label}
-                    </button>
-                  ))}
-                  <p className="mt-1 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Voces Estándar</p>
-                  {VOICE_OPTIONS.filter(v => v.name.includes("Standard")).map((voice) => (
+                  {VOICE_OPTIONS.map((voice) => (
                     <button
                       key={voice.name}
                       onClick={() => { setSelectedVoice(voice); setShowVoiceMenu(false); }}
