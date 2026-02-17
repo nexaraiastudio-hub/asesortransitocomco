@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import logo from "@/assets/logo.png";
+// Logo will be imported here once uploaded
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -47,7 +47,7 @@ const Auth = () => {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6">
-      <img src={logo} alt="Logo" className="mb-6 h-20 w-20 object-contain" />
+      <div className="mb-6 text-5xl">⚖️</div>
       <h2 className="mb-6 text-xl font-bold text-foreground">
         {isLogin ? "Iniciar Sesión" : "Crear Cuenta"}
       </h2>

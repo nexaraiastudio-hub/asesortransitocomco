@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import logo from "@/assets/logo.png";
+// Logo will be imported here once uploaded
 
 const Welcome = () => {
   const navigate = useNavigate();
@@ -13,11 +13,9 @@ const Welcome = () => {
         transition={{ duration: 0.8 }}
         className="flex flex-col items-center text-center"
       >
-        <img
-          src={logo}
-          alt="Logo Abogado Experto en Tránsito"
-          className="-mb-16 h-96 w-96 object-contain md:-mb-20 md:h-[30rem] md:w-[30rem]"
-        />
+        <div className="-mb-16 flex h-96 w-96 items-center justify-center md:-mb-20 md:h-[30rem] md:w-[30rem]">
+          <span className="text-6xl font-bold text-primary">⚖️</span>
+        </div>
         <p className="mb-3 max-w-md text-base font-medium text-foreground md:text-lg">
           Asesoría legal automatizada especializada en tránsito y transporte en Colombia
         </p>

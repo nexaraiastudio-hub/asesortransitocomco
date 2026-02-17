@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import logo from "@/assets/logo.png";
+// Logo will be imported here once uploaded
 
 const PaymentResponse = () => {
   const navigate = useNavigate();
@@ -46,7 +46,7 @@ const PaymentResponse = () => {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 text-center">
-      <img src={logo} alt="Logo" className="mb-6 h-20 w-20 object-contain" />
+      <div className="mb-6 text-5xl">⚖️</div>
 
       {status === "loading" && (
         <p className="text-muted-foreground">Verificando tu pago...</p>
