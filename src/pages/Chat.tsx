@@ -26,11 +26,13 @@ const Chat = () => {
   const [userName, setUserName] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [speakingMsgIndex, setSpeakingMsgIndex] = useState<number | null>(null);
+  const [ttsLoading, setTtsLoading] = useState<number | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [pendingAttachments, setPendingAttachments] = useState<Attachment[]>([]);
   const [uploading, setUploading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
-  const synthRef = useRef<SpeechSynthesisUtterance | null>(null);
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
   const userIdRef = useRef<string>("");
 
@@ -93,22 +95,49 @@ const Chat = () => {
     setIsRecording(true);
   };
 
-  // Text-to-Speech
-  const toggleSpeak = (text: string, index: number) => {
+  const stopAudio = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
+    }
+    setSpeakingMsgIndex(null);
+  };
+
+  const toggleSpeak = async (text: string, index: number) => {
     if (speakingMsgIndex === index) {
-      window.speechSynthesis.cancel();
-      setSpeakingMsgIndex(null);
+      stopAudio();
       return;
     }
 
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "es-CO";
-    utterance.rate = 1;
-    utterance.onend = () => setSpeakingMsgIndex(null);
-    synthRef.current = utterance;
-    setSpeakingMsgIndex(index);
-    window.speechSynthesis.speak(utterance);
+    stopAudio();
+    setTtsLoading(index);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("text-to-speech", {
+        body: { text },
+      });
+
+      if (error) throw error;
+      if (!data?.audioContent) throw new Error("No audio returned");
+
+      const audioBytes = Uint8Array.from(atob(data.audioContent), c => c.charCodeAt(0));
+      const blob = new Blob([audioBytes], { type: "audio/mp3" });
+      const url = URL.createObjectURL(blob);
+
+      const audio = new Audio(url);
+      audio.onended = () => {
+        setSpeakingMsgIndex(null);
+        URL.revokeObjectURL(url);
+      };
+      audioRef.current = audio;
+      setSpeakingMsgIndex(index);
+      audio.play();
+    } catch (err) {
+      console.error("TTS error:", err);
+    } finally {
+      setTtsLoading(null);
+    }
   };
 
   // File upload
@@ -187,14 +216,31 @@ const Chat = () => {
       const assistantMsg: Message = { role: "assistant", content: data.response };
       setMessages(prev => [...prev, assistantMsg]);
 
-      // Auto-play TTS for AI response
-      const utterance = new SpeechSynthesisUtterance(data.response);
-      utterance.lang = "es-CO";
-      utterance.rate = 1;
-      const newIndex = messages.length + 1; // index of the assistant message
-      setSpeakingMsgIndex(newIndex);
-      utterance.onend = () => setSpeakingMsgIndex(null);
-      window.speechSynthesis.speak(utterance);
+      // Auto-play TTS for AI response using Google Cloud TTS
+      const newIndex = messages.length + 1;
+      setTtsLoading(newIndex);
+      try {
+        const ttsRes = await supabase.functions.invoke("text-to-speech", {
+          body: { text: data.response },
+        });
+        if (ttsRes.data?.audioContent) {
+          const audioBytes = Uint8Array.from(atob(ttsRes.data.audioContent), c => c.charCodeAt(0));
+          const blob = new Blob([audioBytes], { type: "audio/mp3" });
+          const url = URL.createObjectURL(blob);
+          const audio = new Audio(url);
+          audio.onended = () => {
+            setSpeakingMsgIndex(null);
+            URL.revokeObjectURL(url);
+          };
+          audioRef.current = audio;
+          setSpeakingMsgIndex(newIndex);
+          audio.play();
+        }
+      } catch (ttsErr) {
+        console.error("Auto TTS error:", ttsErr);
+      } finally {
+        setTtsLoading(null);
+      }
     } catch {
       setMessages(prev => [
         ...prev,
@@ -206,8 +252,10 @@ const Chat = () => {
   };
 
   const handleLogout = async () => {
-    window.speechSynthesis.cancel();
+    stopAudio();
     await supabase.auth.signOut();
+    navigate("/");
+  };
     navigate("/");
   };
 
@@ -287,9 +335,14 @@ const Chat = () => {
                   </div>
                   <button
                     onClick={() => toggleSpeak(msg.content, i)}
-                    className="mt-2 flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                    disabled={ttsLoading === i}
+                    className="mt-2 flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
                   >
-                    {speakingMsgIndex === i ? (
+                    {ttsLoading === i ? (
+                      <>
+                        <Volume2 className="h-4 w-4 animate-pulse" /> Cargando voz...
+                      </>
+                    ) : speakingMsgIndex === i ? (
                       <>
                         <VolumeX className="h-4 w-4" /> Detener audio
                       </>
