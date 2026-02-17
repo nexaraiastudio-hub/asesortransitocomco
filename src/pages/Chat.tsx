@@ -334,11 +334,11 @@ const Chat = () => {
       <div className="flex-1 overflow-y-auto px-4 py-4">
         {messages.length === 0 && (
           <div className="flex h-full flex-col items-center justify-center text-center">
-            <img src={logo} alt="Logo" className="mb-4 h-28 w-28 object-contain opacity-50" />
-            <p className="text-sm text-muted-foreground">
+            <img src={logo} alt="Logo" className="mb-4 h-40 w-40 object-contain md:h-52 md:w-52" />
+            <p className="text-base font-medium text-foreground">
               Escribe tu consulta legal sobre tránsito y transporte en Colombia
             </p>
-            <p className="mt-2 text-xs text-muted-foreground/70">
+            <p className="mt-2 text-sm text-accent">
               🎤 También puedes hablar usando el micrófono
             </p>
           </div>
