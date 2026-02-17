@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import logo from "@/assets/logo.png";
-import { Users, BarChart3, FileText, ArrowLeft, RefreshCw } from "lucide-react";
+import { Users, BarChart3, FileText, ArrowLeft, RefreshCw, Download } from "lucide-react";
 
 interface Document {
   id: string;
@@ -66,6 +66,28 @@ const Admin = () => {
     } finally {
       setSyncing(false);
     }
+  };
+
+  const handleExportCSV = () => {
+    if (users.length === 0) return;
+    const headers = ["Nombre", "Correo", "Rol", "Suscripción", "Vencimiento", "Registro"];
+    const rows = users.map((u) => [
+      u.full_name || "",
+      u.email,
+      u.role,
+      u.subscription_status === "active" ? "Activa" : u.subscription_status === "none" ? "Sin plan" : "Inactiva",
+      u.subscription_end ? new Date(u.subscription_end).toLocaleDateString("es-CO") : "",
+      new Date(u.created_at).toLocaleDateString("es-CO"),
+    ]);
+    const csv = [headers, ...rows].map((r) => r.map((c) => `"${c}"`).join(",")).join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `usuarios_${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: "Exportación exitosa", description: `${users.length} usuarios exportados a CSV` });
   };
 
   useEffect(() => {
@@ -221,6 +243,13 @@ const Admin = () => {
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-bold text-foreground">Usuarios registrados ({users.length})</h2>
               <div className="flex items-center gap-3">
+                <button
+                  onClick={handleExportCSV}
+                  className="flex items-center gap-1.5 rounded-lg bg-primary/20 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/30 transition-colors"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  Exportar CSV
+                </button>
                 <button
                   onClick={handleSyncSheets}
                   disabled={syncing}
