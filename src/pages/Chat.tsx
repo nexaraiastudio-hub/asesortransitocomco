@@ -15,6 +15,7 @@ const Chat = () => {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
+  const [userName, setUserName] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -25,6 +26,7 @@ const Chat = () => {
         return;
       }
 
+      setUserName(user.user_metadata?.full_name || "");
       // TEMPORAL: Verificación de suscripción desactivada para pruebas
       setChecking(false);
     };
@@ -50,7 +52,7 @@ const Chat = () => {
         content: m.content,
       }));
       const { data, error } = await supabase.functions.invoke("legal-chat", {
-        body: { message: userMessage, history },
+        body: { message: userMessage, history, userName },
       });
 
       if (error) throw error;

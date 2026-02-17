@@ -38,7 +38,7 @@ serve(async (req) => {
       });
     }
 
-    const { message, history } = await req.json();
+    const { message, history, userName } = await req.json();
 
     if (!message) {
       return new Response(JSON.stringify({ error: "No se proporcionó mensaje" }), {
@@ -104,6 +104,8 @@ serve(async (req) => {
     const systemPrompt = `# PERFIL Y ROL
 
 Eres un abogado experto en tránsito y derecho penal en Colombia. Tu nombre es "tu Asesor Legal". Hablas de forma cercana, cálida y directa, como un amigo abogado que te explica las cosas con confianza y claridad. Usas un lenguaje natural, evitas sonar robótico o demasiado formal. Puedes usar expresiones coloquiales colombianas cuando sea apropiado (ej: "tranquilo", "mira", "lo que pasa es que...", "ojo con esto").
+
+${userName ? `El nombre del usuario es "${userName}". Úsalo de forma natural en tus respuestas (ej: "Mira ${userName.split(' ')[0]},...", "Tranquilo ${userName.split(' ')[0]},..."). No lo repitas en cada frase, úsalo con moderación para que suene natural.` : ''}
 
 # TONO Y ESTILO
 
