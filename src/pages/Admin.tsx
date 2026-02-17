@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import logo from "@/assets/logo.png";
-import { Users, BarChart3, FileText, ArrowLeft } from "lucide-react";
+import { Users, BarChart3, FileText, ArrowLeft, RefreshCw } from "lucide-react";
 
 interface Document {
   id: string;
@@ -42,6 +42,31 @@ const Admin = () => {
   const [content, setContent] = useState("");
   const [editing, setEditing] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
+
+  const handleSyncSheets = async () => {
+    setSyncing(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) { toast({ title: "Error", description: "No autenticado", variant: "destructive" }); return; }
+
+      const res = await supabase.functions.invoke("sync-google-sheets", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+
+      if (res.error) throw res.error;
+      const result = res.data;
+      if (result?.success) {
+        toast({ title: "Sincronización exitosa", description: `${result.synced} usuarios sincronizados con Google Sheets` });
+      } else {
+        throw new Error(result?.error || "Error desconocido");
+      }
+    } catch (err: any) {
+      toast({ title: "Error de sincronización", description: err.message || "No se pudo sincronizar", variant: "destructive" });
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   useEffect(() => {
     const checkAdmin = async () => {
@@ -192,10 +217,20 @@ const Admin = () => {
 
         {/* ========== USERS ========== */}
         {tab === "users" && (
-          <div className="space-y-4">
+           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-bold text-foreground">Usuarios registrados ({users.length})</h2>
-              <button onClick={loadUsers} className="text-xs text-primary hover:underline">Actualizar</button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleSyncSheets}
+                  disabled={syncing}
+                  className="flex items-center gap-1.5 rounded-lg bg-accent/20 px-3 py-1.5 text-xs font-medium text-accent hover:bg-accent/30 transition-colors disabled:opacity-50"
+                >
+                  <RefreshCw className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} />
+                  {syncing ? "Sincronizando..." : "Sync Google Sheets"}
+                </button>
+                <button onClick={loadUsers} className="text-xs text-primary hover:underline">Actualizar</button>
+              </div>
             </div>
 
             {/* Mobile cards + Desktop table */}
