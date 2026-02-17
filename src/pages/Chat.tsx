@@ -282,14 +282,14 @@ const Chat = () => {
   }
 
   return (
-    <div className="flex h-screen flex-col bg-background">
+    <div className="flex h-screen flex-col overflow-hidden bg-background">
       {/* Header */}
-      <header className="flex items-center justify-between border-b border-border px-4 py-3">
-        <div className="flex items-center gap-3">
-          <img src={logo} alt="Logo" className="h-14 w-14 object-contain" />
-          <h1 className="text-sm font-bold text-foreground">Asesor Legal</h1>
+      <header className="flex items-center justify-between border-b border-border px-3 py-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <img src={logo} alt="Logo" className="h-10 w-10 flex-shrink-0 object-contain" />
+          <h1 className="truncate text-sm font-bold text-foreground">Asesor Legal</h1>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 flex-shrink-0">
           {/* Voice selector */}
           <div className="relative">
             <button
@@ -446,8 +446,8 @@ const Chat = () => {
       )}
 
       {/* Input */}
-      <div className="border-t border-border px-4 py-3">
-        <div className="flex items-center gap-2">
+      <div className="border-t border-border px-3 py-2">
+        <div className="flex items-center gap-1">
           {/* File attach */}
           <input
             ref={fileInputRef}
@@ -486,14 +486,14 @@ const Chat = () => {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && sendMessage()}
             placeholder={isRecording ? "Escuchando..." : "Escribe tu consulta legal..."}
-            className="flex-1 rounded-lg border border-border bg-secondary px-4 py-3 text-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            className="min-w-0 flex-1 rounded-lg border border-border bg-secondary px-3 py-2 text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           />
 
           {/* Send */}
           <button
             onClick={sendMessage}
             disabled={loading || (!input.trim() && pendingAttachments.length === 0)}
-            className="rounded-lg bg-primary px-4 py-3 font-bold text-primary-foreground transition-all hover:brightness-110 disabled:opacity-50"
+            className="flex-shrink-0 rounded-lg bg-primary px-3 py-2 font-bold text-primary-foreground transition-all hover:brightness-110 disabled:opacity-50"
           >
             <Send className="h-5 w-5" />
           </button>
