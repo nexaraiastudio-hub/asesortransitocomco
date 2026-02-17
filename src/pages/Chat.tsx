@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.png";
 import ReactMarkdown from "react-markdown";
-import { Mic, MicOff, Send, Paperclip, Volume2, VolumeX, X, ChevronDown } from "lucide-react";
+import { Mic, MicOff, Send, Paperclip, Volume2, VolumeX, X, ChevronDown, Shield } from "lucide-react";
 
 interface Attachment {
   url: string;
@@ -44,6 +44,7 @@ const Chat = () => {
   const [selectedVoice, setSelectedVoice] = useState<VoiceOption>(VOICE_OPTIONS[0]);
   const [showVoiceMenu, setShowVoiceMenu] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const recognitionRef = useRef<any>(null);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -58,6 +59,11 @@ const Chat = () => {
       }
       userIdRef.current = user.id;
       setUserName(user.user_metadata?.full_name || "");
+
+      // Check if user is admin
+      const { data: adminCheck } = await supabase.rpc("has_role", { _user_id: user.id, _role: "admin" });
+      if (adminCheck === true) setIsAdmin(true);
+
       setChecking(false);
     };
     checkAccess();
@@ -321,6 +327,16 @@ const Chat = () => {
               </div>
             )}
           </div>
+          {isAdmin && (
+            <button
+              onClick={() => navigate("/admin")}
+              className="flex items-center gap-1 rounded-lg border border-primary/30 bg-primary/10 px-2 py-1 text-xs font-medium text-primary hover:bg-primary/20 transition-colors"
+              title="Panel de Administrador"
+            >
+              <Shield className="h-3 w-3" />
+              Admin
+            </button>
+          )}
           <button
             onClick={handleLogout}
             className="text-xs text-muted-foreground hover:text-foreground"
