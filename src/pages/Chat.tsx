@@ -3,10 +3,18 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.png";
 import ReactMarkdown from "react-markdown";
+import { Mic, MicOff, Send, Paperclip, Volume2, VolumeX, X } from "lucide-react";
+
+interface Attachment {
+  url: string;
+  type: "image" | "video" | "audio";
+  name: string;
+}
 
 interface Message {
   role: "user" | "assistant";
   content: string;
+  attachments?: Attachment[];
 }
 
 const Chat = () => {
@@ -16,7 +24,15 @@ const Chat = () => {
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
   const [userName, setUserName] = useState("");
+  const [isRecording, setIsRecording] = useState(false);
+  const [speakingMsgIndex, setSpeakingMsgIndex] = useState<number | null>(null);
+  const [pendingAttachments, setPendingAttachments] = useState<Attachment[]>([]);
+  const [uploading, setUploading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<any>(null);
+  const synthRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const userIdRef = useRef<string>("");
 
   useEffect(() => {
     const checkAccess = async () => {
@@ -25,12 +41,10 @@ const Chat = () => {
         navigate("/auth");
         return;
       }
-
+      userIdRef.current = user.id;
       setUserName(user.user_metadata?.full_name || "");
-      // TEMPORAL: Verificación de suscripción desactivada para pruebas
       setChecking(false);
     };
-
     checkAccess();
   }, [navigate]);
 
@@ -38,31 +52,151 @@ const Chat = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Speech Recognition
+  const toggleRecording = () => {
+    if (isRecording) {
+      recognitionRef.current?.stop();
+      setIsRecording(false);
+      return;
+    }
+
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Tu navegador no soporta reconocimiento de voz. Usa Chrome o Edge.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = "es-CO";
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    let finalTranscript = "";
+
+    recognition.onresult = (event: any) => {
+      let interim = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript + " ";
+        } else {
+          interim += event.results[i][0].transcript;
+        }
+      }
+      setInput(finalTranscript + interim);
+    };
+
+    recognition.onerror = () => setIsRecording(false);
+    recognition.onend = () => setIsRecording(false);
+
+    recognitionRef.current = recognition;
+    recognition.start();
+    setIsRecording(true);
+  };
+
+  // Text-to-Speech
+  const toggleSpeak = (text: string, index: number) => {
+    if (speakingMsgIndex === index) {
+      window.speechSynthesis.cancel();
+      setSpeakingMsgIndex(null);
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "es-CO";
+    utterance.rate = 1;
+    utterance.onend = () => setSpeakingMsgIndex(null);
+    synthRef.current = utterance;
+    setSpeakingMsgIndex(index);
+    window.speechSynthesis.speak(utterance);
+  };
+
+  // File upload
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploading(true);
+    const newAttachments: Attachment[] = [];
+
+    for (const file of Array.from(files)) {
+      const fileType = file.type.startsWith("image") ? "image" 
+        : file.type.startsWith("video") ? "video" 
+        : file.type.startsWith("audio") ? "audio" 
+        : null;
+
+      if (!fileType) continue;
+
+      const filePath = `${userIdRef.current}/${Date.now()}-${file.name}`;
+      const { error } = await supabase.storage
+        .from("chat-attachments")
+        .upload(filePath, file);
+
+      if (!error) {
+        const { data: urlData } = supabase.storage
+          .from("chat-attachments")
+          .getPublicUrl(filePath);
+
+        newAttachments.push({
+          url: urlData.publicUrl,
+          type: fileType,
+          name: file.name,
+        });
+      }
+    }
+
+    setPendingAttachments(prev => [...prev, ...newAttachments]);
+    setUploading(false);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const removeAttachment = (index: number) => {
+    setPendingAttachments(prev => prev.filter((_, i) => i !== index));
+  };
+
   const sendMessage = async () => {
-    if (!input.trim() || loading) return;
+    if ((!input.trim() && pendingAttachments.length === 0) || loading) return;
+
+    if (isRecording) {
+      recognitionRef.current?.stop();
+      setIsRecording(false);
+    }
 
     const userMessage = input.trim();
+    const attachments = [...pendingAttachments];
     setInput("");
-    setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
+    setPendingAttachments([]);
+    setMessages(prev => [...prev, { role: "user", content: userMessage, attachments }]);
     setLoading(true);
 
     try {
-      const history = messages.map((m) => ({
-        role: m.role,
-        content: m.content,
-      }));
+      const history = messages.map(m => ({ role: m.role, content: m.content }));
+
+      let messageToSend = userMessage;
+      if (attachments.length > 0) {
+        const attachmentDesc = attachments.map(a => `[Archivo adjunto: ${a.name} (${a.type})]`).join(" ");
+        messageToSend = messageToSend ? `${messageToSend}\n\n${attachmentDesc}` : attachmentDesc;
+      }
+
       const { data, error } = await supabase.functions.invoke("legal-chat", {
-        body: { message: userMessage, history, userName },
+        body: { message: messageToSend, history, userName },
       });
 
       if (error) throw error;
 
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: data.response },
-      ]);
+      const assistantMsg: Message = { role: "assistant", content: data.response };
+      setMessages(prev => [...prev, assistantMsg]);
+
+      // Auto-play TTS for AI response
+      const utterance = new SpeechSynthesisUtterance(data.response);
+      utterance.lang = "es-CO";
+      utterance.rate = 1;
+      const newIndex = messages.length + 1; // index of the assistant message
+      setSpeakingMsgIndex(newIndex);
+      utterance.onend = () => setSpeakingMsgIndex(null);
+      window.speechSynthesis.speak(utterance);
     } catch {
-      setMessages((prev) => [
+      setMessages(prev => [
         ...prev,
         { role: "assistant", content: "Lo siento, ocurrió un error. Intenta de nuevo." },
       ]);
@@ -72,6 +206,7 @@ const Chat = () => {
   };
 
   const handleLogout = async () => {
+    window.speechSynthesis.cancel();
     await supabase.auth.signOut();
     navigate("/");
   };
@@ -108,6 +243,9 @@ const Chat = () => {
             <p className="text-sm text-muted-foreground">
               Escribe tu consulta legal sobre tránsito y transporte en Colombia
             </p>
+            <p className="mt-2 text-xs text-muted-foreground/70">
+              🎤 También puedes hablar usando el micrófono
+            </p>
           </div>
         )}
 
@@ -123,12 +261,47 @@ const Chat = () => {
                   : "bg-secondary text-foreground"
               }`}
             >
+              {/* Attachments */}
+              {msg.attachments && msg.attachments.length > 0 && (
+                <div className="mb-2 flex flex-wrap gap-2">
+                  {msg.attachments.map((att, j) => (
+                    <div key={j} className="overflow-hidden rounded-lg">
+                      {att.type === "image" && (
+                        <img src={att.url} alt={att.name} className="max-h-48 max-w-full rounded-lg object-cover" />
+                      )}
+                      {att.type === "video" && (
+                        <video src={att.url} controls className="max-h-48 max-w-full rounded-lg" />
+                      )}
+                      {att.type === "audio" && (
+                        <audio src={att.url} controls className="max-w-full" />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
               {msg.role === "assistant" ? (
-                <div className="prose prose-invert prose-lg max-w-none text-lg">
-                  <ReactMarkdown>{msg.content}</ReactMarkdown>
+                <div>
+                  <div className="prose prose-invert prose-lg max-w-none text-lg">
+                    <ReactMarkdown>{msg.content}</ReactMarkdown>
+                  </div>
+                  <button
+                    onClick={() => toggleSpeak(msg.content, i)}
+                    className="mt-2 flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {speakingMsgIndex === i ? (
+                      <>
+                        <VolumeX className="h-4 w-4" /> Detener audio
+                      </>
+                    ) : (
+                      <>
+                        <Volume2 className="h-4 w-4" /> Escuchar respuesta
+                      </>
+                    )}
+                  </button>
                 </div>
               ) : (
-                msg.content
+                msg.content && <p>{msg.content}</p>
               )}
             </div>
           </div>
@@ -145,23 +318,84 @@ const Chat = () => {
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Pending attachments preview */}
+      {pendingAttachments.length > 0 && (
+        <div className="border-t border-border px-4 py-2">
+          <div className="flex flex-wrap gap-2">
+            {pendingAttachments.map((att, i) => (
+              <div key={i} className="relative rounded-lg border border-border bg-secondary p-1">
+                {att.type === "image" && (
+                  <img src={att.url} alt={att.name} className="h-16 w-16 rounded object-cover" />
+                )}
+                {att.type === "video" && (
+                  <div className="flex h-16 w-16 items-center justify-center rounded bg-muted text-xs text-muted-foreground">🎬</div>
+                )}
+                {att.type === "audio" && (
+                  <div className="flex h-16 w-16 items-center justify-center rounded bg-muted text-xs text-muted-foreground">🎵</div>
+                )}
+                <button
+                  onClick={() => removeAttachment(i)}
+                  className="absolute -right-1 -top-1 rounded-full bg-destructive p-0.5 text-destructive-foreground"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Input */}
       <div className="border-t border-border px-4 py-3">
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
+          {/* File attach */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*,video/*,audio/*"
+            multiple
+            onChange={handleFileSelect}
+            className="hidden"
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:opacity-50"
+            title="Adjuntar archivo"
+          >
+            <Paperclip className="h-5 w-5" />
+          </button>
+
+          {/* Mic */}
+          <button
+            onClick={toggleRecording}
+            className={`rounded-lg p-2 transition-colors ${
+              isRecording
+                ? "bg-destructive text-destructive-foreground animate-pulse"
+                : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+            }`}
+            title={isRecording ? "Detener grabación" : "Hablar"}
+          >
+            {isRecording ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+          </button>
+
+          {/* Input field */}
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-            placeholder="Escribe tu consulta legal..."
+            placeholder={isRecording ? "Escuchando..." : "Escribe tu consulta legal..."}
             className="flex-1 rounded-lg border border-border bg-secondary px-4 py-3 text-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           />
+
+          {/* Send */}
           <button
             onClick={sendMessage}
-            disabled={loading || !input.trim()}
+            disabled={loading || (!input.trim() && pendingAttachments.length === 0)}
             className="rounded-lg bg-primary px-4 py-3 font-bold text-primary-foreground transition-all hover:brightness-110 disabled:opacity-50"
           >
-            Enviar
+            <Send className="h-5 w-5" />
           </button>
         </div>
       </div>
