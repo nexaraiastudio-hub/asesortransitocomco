@@ -21,8 +21,25 @@ serve(async (req) => {
       throw new Error('Text is required');
     }
 
+    // Clean text: remove emojis, markdown formatting, and excessive punctuation
+    const cleanText = text
+      // Remove emojis and symbols
+      .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{FE00}-\u{FE0F}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{200D}\u{20E3}\u{E0020}-\u{E007F}✅❌⚠️🔍📋📌🔒⚖️👨👩🏛️📊💡🚗🚦✨🎯💰📝🔑⭐]/gu, '')
+      // Remove markdown bold/italic markers
+      .replace(/\*{1,3}/g, '')
+      // Remove markdown headers
+      .replace(/^#{1,6}\s+/gm, '')
+      // Remove markdown links but keep text
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      // Remove markdown bullet points
+      .replace(/^[-*+]\s+/gm, '')
+      // Collapse multiple spaces/newlines
+      .replace(/\n{3,}/g, '\n\n')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
+
     // Truncate to ~5000 chars to stay within API limits
-    const truncatedText = text.substring(0, 5000);
+    const truncatedText = cleanText.substring(0, 5000);
 
     const selectedVoiceName = voiceName || 'es-US-Standard-A';
     const selectedGender = voiceGender || 'FEMALE';
