@@ -286,7 +286,7 @@ const Chat = () => {
       {/* Header */}
       <header className="flex items-center justify-between border-b border-border px-4 py-3">
         <div className="flex items-center gap-3">
-          <img src={logo} alt="Logo" className="h-10 w-10 object-contain" />
+          <img src={logo} alt="Logo" className="h-14 w-14 object-contain" />
           <h1 className="text-sm font-bold text-foreground">Asesor Legal</h1>
         </div>
         <div className="flex items-center gap-3">
@@ -334,7 +334,7 @@ const Chat = () => {
       <div className="flex-1 overflow-y-auto px-4 py-4">
         {messages.length === 0 && (
           <div className="flex h-full flex-col items-center justify-center text-center">
-            <img src={logo} alt="Logo" className="mb-4 h-16 w-16 object-contain opacity-50" />
+            <img src={logo} alt="Logo" className="mb-4 h-28 w-28 object-contain opacity-50" />
             <p className="text-sm text-muted-foreground">
               Escribe tu consulta legal sobre tránsito y transporte en Colombia
             </p>
