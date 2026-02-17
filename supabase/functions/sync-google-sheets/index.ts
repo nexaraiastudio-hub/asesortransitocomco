@@ -154,29 +154,20 @@ serve(async (req) => {
       });
     }
 
-    // Get Google service account credentials
-    const serviceAccountRaw = Deno.env.get("GOOGLE_SERVICE_ACCOUNT_JSON");
-    if (!serviceAccountRaw) {
-      throw new Error("GOOGLE_SERVICE_ACCOUNT_JSON not configured");
+    // Get Google service account credentials from individual secrets
+    const clientEmail = Deno.env.get("GOOGLE_SA_CLIENT_EMAIL");
+    const privateKey = Deno.env.get("GOOGLE_SA_PRIVATE_KEY");
+    if (!clientEmail || !privateKey) {
+      throw new Error("GOOGLE_SA_CLIENT_EMAIL or GOOGLE_SA_PRIVATE_KEY not configured");
     }
-    console.log("Raw secret length:", serviceAccountRaw.length);
+    console.log("Client email length:", clientEmail.length);
+    console.log("Private key length:", privateKey.length);
     
-    let serviceAccount: any;
-    try {
-      // Try direct JSON parse first
-      if (serviceAccountRaw.trim().startsWith("{")) {
-        serviceAccount = JSON.parse(serviceAccountRaw);
-      } else {
-        // Try Base64 decode
-        console.log("Value is not JSON, trying Base64 decode...");
-        const decoded = atob(serviceAccountRaw);
-        console.log("Decoded length:", decoded.length);
-        serviceAccount = JSON.parse(decoded);
-      }
-    } catch (parseErr) {
-      console.error("Parse error. Raw length:", serviceAccountRaw.length, "First 20:", serviceAccountRaw.substring(0, 20));
-      throw new Error(`Invalid GOOGLE_SERVICE_ACCOUNT_JSON: ${parseErr.message}`);
-    }
+    // Build service account object from individual secrets
+    const serviceAccount = {
+      client_email: clientEmail,
+      private_key: privateKey.replace(/\\n/g, "\n"),
+    };
 
     // Get access token
     const accessToken = await getGoogleAccessToken(serviceAccount);
