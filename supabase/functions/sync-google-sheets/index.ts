@@ -155,18 +155,26 @@ serve(async (req) => {
     }
 
     // Get Google service account credentials
-    const serviceAccountJson = Deno.env.get("GOOGLE_SERVICE_ACCOUNT_JSON");
-    if (!serviceAccountJson) {
+    const serviceAccountRaw = Deno.env.get("GOOGLE_SERVICE_ACCOUNT_JSON");
+    if (!serviceAccountRaw) {
       throw new Error("GOOGLE_SERVICE_ACCOUNT_JSON not configured");
     }
-    console.log("Service account JSON length:", serviceAccountJson.length);
-    console.log("First 20 chars:", serviceAccountJson.substring(0, 20));
+    console.log("Raw secret length:", serviceAccountRaw.length);
     
     let serviceAccount: any;
     try {
-      serviceAccount = JSON.parse(serviceAccountJson);
+      // Try direct JSON parse first
+      if (serviceAccountRaw.trim().startsWith("{")) {
+        serviceAccount = JSON.parse(serviceAccountRaw);
+      } else {
+        // Try Base64 decode
+        console.log("Value is not JSON, trying Base64 decode...");
+        const decoded = atob(serviceAccountRaw);
+        console.log("Decoded length:", decoded.length);
+        serviceAccount = JSON.parse(decoded);
+      }
     } catch (parseErr) {
-      console.error("JSON parse error. Raw value starts with:", serviceAccountJson.substring(0, 50));
+      console.error("Parse error. Raw length:", serviceAccountRaw.length, "First 20:", serviceAccountRaw.substring(0, 20));
       throw new Error(`Invalid GOOGLE_SERVICE_ACCOUNT_JSON: ${parseErr.message}`);
     }
 
