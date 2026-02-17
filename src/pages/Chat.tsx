@@ -204,6 +204,9 @@ const Chat = () => {
       setIsRecording(false);
     }
 
+    // Stop any playing audio when sending a new message
+    stopAudio();
+
     const userMessage = input.trim();
     const attachments = [...pendingAttachments];
     setInput("");
