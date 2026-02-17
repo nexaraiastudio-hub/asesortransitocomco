@@ -26,11 +26,14 @@ async function getGoogleAccessToken(serviceAccount: any): Promise<string> {
   const payloadB64 = btoa(JSON.stringify(payload)).replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
   const unsignedToken = `${headerB64}.${payloadB64}`;
 
-  // Import private key
+  // Import private key - strip PEM headers and all whitespace
   const pemContents = serviceAccount.private_key
-    .replace("-----BEGIN PRIVATE KEY-----", "")
-    .replace("-----END PRIVATE KEY-----", "")
-    .replace(/\n/g, "");
+    .replace(/-----BEGIN PRIVATE KEY-----/g, "")
+    .replace(/-----END PRIVATE KEY-----/g, "")
+    .replace(/[\n\r\s]/g, "")
+    .trim();
+  
+  console.log("PEM base64 length:", pemContents.length);
   const binaryKey = Uint8Array.from(atob(pemContents), (c) => c.charCodeAt(0));
 
   const cryptoKey = await crypto.subtle.importKey(
@@ -180,11 +183,21 @@ serve(async (req) => {
       throw new Error("Google service account credentials not configured. Set GOOGLE_SERVICE_ACCOUNT_JSON or GOOGLE_SA_CLIENT_EMAIL + GOOGLE_SA_PRIVATE_KEY");
     }
     
-    console.log("Client email:", serviceAccount.client_email);
-    console.log("Private key length:", serviceAccount.private_key.length);
+    // Normalize private key - handle various formats
+    let pk = serviceAccount.private_key;
+    // Replace literal \n with real newlines
+    pk = pk.replace(/\\n/g, "\n");
+    // Remove carriage returns
+    pk = pk.replace(/\r/g, "");
+    // Ensure proper PEM format
+    if (!pk.includes("-----BEGIN PRIVATE KEY-----")) {
+      pk = `-----BEGIN PRIVATE KEY-----\n${pk}\n-----END PRIVATE KEY-----\n`;
+    }
+    serviceAccount.private_key = pk;
     
-    // Ensure newlines are real
-    serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, "\n");
+    console.log("Client email:", serviceAccount.client_email);
+    console.log("Private key starts with:", serviceAccount.private_key.substring(0, 40));
+    console.log("Private key length:", serviceAccount.private_key.length);
 
     // Get access token
     const accessToken = await getGoogleAccessToken(serviceAccount);
