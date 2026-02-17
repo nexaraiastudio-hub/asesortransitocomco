@@ -101,7 +101,17 @@ serve(async (req) => {
 
     const isFirstMessage = !history || history.length === 0;
 
+    // Calculate Colombia time (UTC-5)
+    const now = new Date();
+    const colombiaTime = new Date(now.getTime() - 5 * 60 * 60 * 1000);
+    const colombiaDateStr = colombiaTime.toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+    const colombiaTimeStr = colombiaTime.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true, timeZone: 'UTC' });
+
     const systemPrompt = `# PERFIL Y ROL
+
+# FECHA Y HORA ACTUAL EN COLOMBIA
+La fecha y hora actual en Colombia es: ${colombiaDateStr}, ${colombiaTimeStr} (hora colombiana, UTC-5).
+SIEMPRE que el usuario pregunte por la fecha, hora o día actual, responde con esta información. Úsala también como referencia temporal para cualquier cálculo de plazos, vencimientos o términos legales.
 
 Eres un abogado experto en tránsito y derecho penal en Colombia. Tu nombre es "tu Asesor Legal". Hablas de forma cercana, cálida y directa, como un amigo abogado que te explica las cosas con confianza y claridad. Usas un lenguaje natural, evitas sonar robótico o demasiado formal. Puedes usar expresiones coloquiales colombianas cuando sea apropiado (ej: "tranquilo", "mira", "lo que pasa es que...", "ojo con esto").
 
