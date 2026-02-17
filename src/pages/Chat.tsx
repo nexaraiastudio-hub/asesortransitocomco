@@ -24,12 +24,12 @@ interface VoiceOption {
 }
 
 const VOICE_OPTIONS: VoiceOption[] = [
-  { name: "es-CO-Neural2-A", label: "Sofía (Femenina)", gender: "FEMALE" },
-  { name: "es-CO-Neural2-B", label: "Carlos (Masculina)", gender: "MALE" },
-  { name: "es-CO-Neural2-C", label: "Valentina (Femenina)", gender: "FEMALE" },
-  { name: "es-CO-Neural2-D", label: "Andrés (Masculina)", gender: "MALE" },
-  { name: "es-CO-Standard-A", label: "Laura (Estándar)", gender: "FEMALE" },
-  { name: "es-CO-Standard-B", label: "Diego (Estándar)", gender: "MALE" },
+  { name: "es-US-Standard-A", label: "Sofía (Femenina)", gender: "FEMALE" },
+  { name: "es-US-Standard-B", label: "Carlos (Masculino)", gender: "MALE" },
+  { name: "es-US-Standard-C", label: "Valentina (Femenina)", gender: "FEMALE" },
+  { name: "es-US-Neural2-A", label: "Laura (Neural)", gender: "FEMALE" },
+  { name: "es-US-Neural2-B", label: "Andrés (Neural)", gender: "MALE" },
+  { name: "es-US-Neural2-C", label: "Diana (Neural)", gender: "FEMALE" },
 ];
 
 const Chat = () => {

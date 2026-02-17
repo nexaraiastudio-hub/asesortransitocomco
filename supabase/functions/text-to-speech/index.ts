@@ -24,8 +24,11 @@ serve(async (req) => {
     // Truncate to ~5000 chars to stay within API limits
     const truncatedText = text.substring(0, 5000);
 
-    const selectedVoiceName = voiceName || 'es-CO-Neural2-A';
+    const selectedVoiceName = voiceName || 'es-US-Standard-A';
     const selectedGender = voiceGender || 'FEMALE';
+
+    // Extract language code from voice name (e.g., "es-US-Standard-A" -> "es-US")
+    const languageCode = selectedVoiceName.split('-').slice(0, 2).join('-') || 'es-US';
 
     const response = await fetch(
       `https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`,
@@ -35,7 +38,7 @@ serve(async (req) => {
         body: JSON.stringify({
           input: { text: truncatedText },
           voice: {
-            languageCode: 'es-CO',
+            languageCode,
             name: selectedVoiceName,
             ssmlGender: selectedGender,
           },
