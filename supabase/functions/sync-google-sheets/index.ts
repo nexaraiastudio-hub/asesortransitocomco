@@ -154,22 +154,28 @@ serve(async (req) => {
       });
     }
 
-    // Get Google service account credentials from individual secrets
-    const clientEmail = Deno.env.get("GOOGLE_SA_CLIENT_EMAIL");
-    const privateKey = Deno.env.get("GOOGLE_SA_PRIVATE_KEY");
-    if (!clientEmail || !privateKey) {
-      throw new Error("GOOGLE_SA_CLIENT_EMAIL or GOOGLE_SA_PRIVATE_KEY not configured");
+    // Get Google service account credentials from JSON secret
+    const saJson = Deno.env.get("GOOGLE_SERVICE_ACCOUNT_JSON");
+    if (!saJson) {
+      throw new Error("GOOGLE_SERVICE_ACCOUNT_JSON not configured");
     }
-    console.log("Client email length:", clientEmail.length);
-    console.log("Private key length:", privateKey.length);
-    console.log("Private key starts with:", privateKey.substring(0, 30));
-    console.log("Private key ends with:", privateKey.substring(privateKey.length - 30));
     
-    // Build service account object from individual secrets
-    const serviceAccount = {
-      client_email: clientEmail,
-      private_key: privateKey.replace(/\\n/g, "\n"),
-    };
+    let serviceAccount: { client_email: string; private_key: string };
+    try {
+      serviceAccount = JSON.parse(saJson);
+    } catch (e) {
+      throw new Error("GOOGLE_SERVICE_ACCOUNT_JSON is not valid JSON");
+    }
+    
+    if (!serviceAccount.client_email || !serviceAccount.private_key) {
+      throw new Error("JSON missing client_email or private_key fields");
+    }
+    
+    console.log("Client email:", serviceAccount.client_email);
+    console.log("Private key length:", serviceAccount.private_key.length);
+    
+    // Ensure newlines are real
+    serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, "\n");
 
     // Get access token
     const accessToken = await getGoogleAccessToken(serviceAccount);
