@@ -157,46 +157,45 @@ serve(async (req) => {
       });
     }
 
-    // Get Google service account credentials - try JSON first, fallback to individual secrets
-    let serviceAccount: { client_email: string; private_key: string };
+    // Get Google service account credentials
+    const CLIENT_EMAIL = "abogado-sheets@gen-lang-client-0177456509.iam.gserviceaccount.com";
     
+    // Try to get private key from various sources
+    let privateKey = "";
+    
+    // First try: parse full JSON secret
     const saJson = Deno.env.get("GOOGLE_SERVICE_ACCOUNT_JSON");
     if (saJson) {
       try {
         const parsed = JSON.parse(saJson);
-        serviceAccount = { client_email: parsed.client_email, private_key: parsed.private_key };
+        if (parsed.private_key) {
+          privateKey = parsed.private_key;
+          console.log("Got private key from JSON secret");
+        }
       } catch {
-        console.log("GOOGLE_SERVICE_ACCOUNT_JSON not valid JSON, falling back to individual secrets");
-        serviceAccount = {
-          client_email: Deno.env.get("GOOGLE_SA_CLIENT_EMAIL") || "",
-          private_key: Deno.env.get("GOOGLE_SA_PRIVATE_KEY") || "",
-        };
+        console.log("GOOGLE_SERVICE_ACCOUNT_JSON not valid JSON");
       }
-    } else {
-      serviceAccount = {
-        client_email: Deno.env.get("GOOGLE_SA_CLIENT_EMAIL") || "",
-        private_key: Deno.env.get("GOOGLE_SA_PRIVATE_KEY") || "",
-      };
     }
     
-    if (!serviceAccount.client_email || !serviceAccount.private_key) {
-      throw new Error("Google service account credentials not configured. Set GOOGLE_SERVICE_ACCOUNT_JSON or GOOGLE_SA_CLIENT_EMAIL + GOOGLE_SA_PRIVATE_KEY");
+    // Second try: individual secret
+    if (!privateKey) {
+      privateKey = Deno.env.get("GOOGLE_SA_PRIVATE_KEY") || "";
+      if (privateKey) console.log("Got private key from individual secret");
     }
     
-    // Normalize private key - handle various formats
-    let pk = serviceAccount.private_key;
-    // Replace literal \n with real newlines
-    pk = pk.replace(/\\n/g, "\n");
-    // Remove carriage returns
-    pk = pk.replace(/\r/g, "");
-    // Ensure proper PEM format
-    if (!pk.includes("-----BEGIN PRIVATE KEY-----")) {
-      pk = `-----BEGIN PRIVATE KEY-----\n${pk}\n-----END PRIVATE KEY-----\n`;
+    if (!privateKey) {
+      throw new Error("No private key found. Set GOOGLE_SERVICE_ACCOUNT_JSON or GOOGLE_SA_PRIVATE_KEY");
     }
-    serviceAccount.private_key = pk;
+    
+    // Normalize private key
+    privateKey = privateKey.replace(/\\n/g, "\n").replace(/\r/g, "");
+    if (!privateKey.includes("-----BEGIN PRIVATE KEY-----")) {
+      privateKey = `-----BEGIN PRIVATE KEY-----\n${privateKey}\n-----END PRIVATE KEY-----\n`;
+    }
+    
+    const serviceAccount = { client_email: CLIENT_EMAIL, private_key: privateKey };
     
     console.log("Client email:", serviceAccount.client_email);
-    console.log("Private key starts with:", serviceAccount.private_key.substring(0, 40));
     console.log("Private key length:", serviceAccount.private_key.length);
 
     // Get access token
