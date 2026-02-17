@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,18 +12,56 @@ serve(async (req) => {
   }
 
   try {
-    const { ref_payco, user_id } = await req.json();
+    // 1. Authenticate the caller
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ success: false, error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
-    if (!ref_payco || !user_id) {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await supabaseAuth.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(JSON.stringify({ success: false, error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const userId = claimsData.claims.sub;
+
+    // 2. Parse and validate input
+    const { ref_payco } = await req.json();
+
+    if (!ref_payco || typeof ref_payco !== "string") {
       return new Response(JSON.stringify({ success: false, error: "Missing parameters" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Verify payment with ePayco API
+    // Validate ref_payco format: alphanumeric, dashes, underscores, max 100 chars
+    if (!/^[a-zA-Z0-9_-]{1,100}$/.test(ref_payco)) {
+      return new Response(JSON.stringify({ success: false, error: "Invalid reference format" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // 3. Verify payment with ePayco API
     const verifyResponse = await fetch(
-      `https://secure.epayco.co/validation/v1/reference/${ref_payco}`
+      `https://secure.epayco.co/validation/v1/reference/${encodeURIComponent(ref_payco)}`,
+      { signal: AbortSignal.timeout(10000) }
     );
 
     const paymentData = await verifyResponse.json();
@@ -43,21 +82,18 @@ serve(async (req) => {
       });
     }
 
-    // Activate subscription in database
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-
+    // 4. Activate subscription using service role key (for DB writes)
     // Calculate period end (30 days from now)
     const periodEnd = new Date();
     periodEnd.setDate(periodEnd.getDate() + 30);
 
     // Check if subscription exists
     const checkResponse = await fetch(
-      `${supabaseUrl}/rest/v1/subscriptions?user_id=eq.${user_id}&select=id`,
+      `${supabaseUrl}/rest/v1/subscriptions?user_id=eq.${userId}&select=id`,
       {
         headers: {
-          apikey: supabaseKey,
-          Authorization: `Bearer ${supabaseKey}`,
+          apikey: supabaseServiceKey,
+          Authorization: `Bearer ${supabaseServiceKey}`,
         },
       }
     );
@@ -66,11 +102,11 @@ serve(async (req) => {
 
     if (existing.length > 0) {
       // Update existing subscription
-      await fetch(`${supabaseUrl}/rest/v1/subscriptions?user_id=eq.${user_id}`, {
+      await fetch(`${supabaseUrl}/rest/v1/subscriptions?user_id=eq.${userId}`, {
         method: "PATCH",
         headers: {
-          apikey: supabaseKey,
-          Authorization: `Bearer ${supabaseKey}`,
+          apikey: supabaseServiceKey,
+          Authorization: `Bearer ${supabaseServiceKey}`,
           "Content-Type": "application/json",
           Prefer: "return=minimal",
         },
@@ -84,13 +120,13 @@ serve(async (req) => {
       await fetch(`${supabaseUrl}/rest/v1/subscriptions`, {
         method: "POST",
         headers: {
-          apikey: supabaseKey,
-          Authorization: `Bearer ${supabaseKey}`,
+          apikey: supabaseServiceKey,
+          Authorization: `Bearer ${supabaseServiceKey}`,
           "Content-Type": "application/json",
           Prefer: "return=minimal",
         },
         body: JSON.stringify({
-          user_id,
+          user_id: userId,
           status: "active",
           current_period_end: periodEnd.toISOString(),
         }),

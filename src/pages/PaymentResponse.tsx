@@ -26,7 +26,7 @@ const PaymentResponse = () => {
 
         // Call edge function to verify payment
         const { data, error } = await supabase.functions.invoke("verify-epayco-payment", {
-          body: { ref_payco: refPayco, user_id: user.id },
+          body: { ref_payco: refPayco },
         });
 
         if (error || !data?.success) {
