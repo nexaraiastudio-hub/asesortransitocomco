@@ -16,13 +16,16 @@ serve(async (req) => {
       throw new Error('GOOGLE_CLOUD_TTS_API_KEY is not configured');
     }
 
-    const { text } = await req.json();
+    const { text, voiceName, voiceGender } = await req.json();
     if (!text || typeof text !== 'string') {
       throw new Error('Text is required');
     }
 
     // Truncate to ~5000 chars to stay within API limits
     const truncatedText = text.substring(0, 5000);
+
+    const selectedVoiceName = voiceName || 'es-CO-Neural2-A';
+    const selectedGender = voiceGender || 'FEMALE';
 
     const response = await fetch(
       `https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`,
@@ -33,8 +36,8 @@ serve(async (req) => {
           input: { text: truncatedText },
           voice: {
             languageCode: 'es-CO',
-            name: 'es-CO-Neural2-A',
-            ssmlGender: 'FEMALE',
+            name: selectedVoiceName,
+            ssmlGender: selectedGender,
           },
           audioConfig: {
             audioEncoding: 'MP3',
@@ -44,7 +47,6 @@ serve(async (req) => {
         }),
       }
     );
-
     if (!response.ok) {
       const errorData = await response.text();
       throw new Error(`Google TTS API error [${response.status}]: ${errorData}`);

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.png";
 import ReactMarkdown from "react-markdown";
-import { Mic, MicOff, Send, Paperclip, Volume2, VolumeX, X } from "lucide-react";
+import { Mic, MicOff, Send, Paperclip, Volume2, VolumeX, X, ChevronDown } from "lucide-react";
 
 interface Attachment {
   url: string;
@@ -16,6 +16,21 @@ interface Message {
   content: string;
   attachments?: Attachment[];
 }
+
+interface VoiceOption {
+  name: string;
+  label: string;
+  gender: string;
+}
+
+const VOICE_OPTIONS: VoiceOption[] = [
+  { name: "es-CO-Neural2-A", label: "Sofía (Femenina)", gender: "FEMALE" },
+  { name: "es-CO-Neural2-B", label: "Carlos (Masculina)", gender: "MALE" },
+  { name: "es-CO-Neural2-C", label: "Valentina (Femenina)", gender: "FEMALE" },
+  { name: "es-CO-Neural2-D", label: "Andrés (Masculina)", gender: "MALE" },
+  { name: "es-CO-Standard-A", label: "Laura (Estándar)", gender: "FEMALE" },
+  { name: "es-CO-Standard-B", label: "Diego (Estándar)", gender: "MALE" },
+];
 
 const Chat = () => {
   const navigate = useNavigate();
@@ -30,6 +45,8 @@ const Chat = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [pendingAttachments, setPendingAttachments] = useState<Attachment[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [selectedVoice, setSelectedVoice] = useState<VoiceOption>(VOICE_OPTIONS[0]);
+  const [showVoiceMenu, setShowVoiceMenu] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
   
@@ -115,7 +132,7 @@ const Chat = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke("text-to-speech", {
-        body: { text },
+        body: { text, voiceName: selectedVoice.name, voiceGender: selectedVoice.gender },
       });
 
       if (error) throw error;
@@ -221,7 +238,7 @@ const Chat = () => {
       setTtsLoading(newIndex);
       try {
         const ttsRes = await supabase.functions.invoke("text-to-speech", {
-          body: { text: data.response },
+          body: { text: data.response, voiceName: selectedVoice.name, voiceGender: selectedVoice.gender },
         });
         if (ttsRes.data?.audioContent) {
           const audioBytes = Uint8Array.from(atob(ttsRes.data.audioContent), c => c.charCodeAt(0));
@@ -256,8 +273,6 @@ const Chat = () => {
     await supabase.auth.signOut();
     navigate("/");
   };
-    navigate("/");
-  };
 
   if (checking) {
     return (
@@ -275,12 +290,61 @@ const Chat = () => {
           <img src={logo} alt="Logo" className="h-10 w-10 object-contain" />
           <h1 className="text-sm font-bold text-foreground">Asesor Legal</h1>
         </div>
-        <button
-          onClick={handleLogout}
-          className="text-xs text-muted-foreground hover:text-foreground"
-        >
-          Salir
-        </button>
+        <div className="flex items-center gap-3">
+          {/* Voice selector */}
+          <div className="relative">
+            <button
+              onClick={() => setShowVoiceMenu(!showVoiceMenu)}
+              className="flex items-center gap-1 rounded-lg border border-border bg-secondary px-2 py-1 text-xs text-foreground hover:bg-muted transition-colors"
+            >
+              <Volume2 className="h-3 w-3" />
+              {selectedVoice.label}
+              <ChevronDown className="h-3 w-3" />
+            </button>
+            {showVoiceMenu && (
+              <div className="absolute right-0 top-full z-50 mt-1 w-52 rounded-lg border border-border bg-background shadow-lg">
+                <div className="p-1">
+                  <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Voces Neuronales</p>
+                  {VOICE_OPTIONS.filter(v => v.name.includes("Neural")).map((voice) => (
+                    <button
+                      key={voice.name}
+                      onClick={() => { setSelectedVoice(voice); setShowVoiceMenu(false); }}
+                      className={`flex w-full items-center gap-2 rounded px-2 py-1.5 text-xs transition-colors ${
+                        selectedVoice.name === voice.name
+                          ? "bg-primary text-primary-foreground"
+                          : "text-foreground hover:bg-muted"
+                      }`}
+                    >
+                      <span>{voice.gender === "FEMALE" ? "👩" : "👨"}</span>
+                      {voice.label}
+                    </button>
+                  ))}
+                  <p className="mt-1 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Voces Estándar</p>
+                  {VOICE_OPTIONS.filter(v => v.name.includes("Standard")).map((voice) => (
+                    <button
+                      key={voice.name}
+                      onClick={() => { setSelectedVoice(voice); setShowVoiceMenu(false); }}
+                      className={`flex w-full items-center gap-2 rounded px-2 py-1.5 text-xs transition-colors ${
+                        selectedVoice.name === voice.name
+                          ? "bg-primary text-primary-foreground"
+                          : "text-foreground hover:bg-muted"
+                      }`}
+                    >
+                      <span>{voice.gender === "FEMALE" ? "👩" : "👨"}</span>
+                      {voice.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+          <button
+            onClick={handleLogout}
+            className="text-xs text-muted-foreground hover:text-foreground"
+          >
+            Salir
+          </button>
+        </div>
       </header>
 
       {/* Messages */}
