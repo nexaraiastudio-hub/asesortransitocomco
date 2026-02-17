@@ -162,6 +162,8 @@ serve(async (req) => {
     }
     console.log("Client email length:", clientEmail.length);
     console.log("Private key length:", privateKey.length);
+    console.log("Private key starts with:", privateKey.substring(0, 30));
+    console.log("Private key ends with:", privateKey.substring(privateKey.length - 30));
     
     // Build service account object from individual secrets
     const serviceAccount = {
