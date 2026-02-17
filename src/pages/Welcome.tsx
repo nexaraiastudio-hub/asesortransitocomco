@@ -16,9 +16,9 @@ const Welcome = () => {
         <img
           src={logo}
           alt="Logo Abogado Experto en Tránsito"
-          className="mb-2 h-72 w-72 object-contain md:h-96 md:w-96"
+          className="-mb-16 h-96 w-96 object-contain md:-mb-20 md:h-[30rem] md:w-[30rem]"
         />
-        <p className="mb-4 max-w-sm text-sm text-foreground">
+        <p className="mb-3 max-w-sm text-sm text-foreground">
           Asesoría legal automatizada especializada en tránsito y transporte en Colombia
         </p>
         <button
