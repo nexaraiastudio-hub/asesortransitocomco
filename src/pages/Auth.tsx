@@ -20,7 +20,12 @@ const Auth = () => {
     try {
       if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+        if (error) {
+          if (error.message.toLowerCase().includes("email not confirmed")) {
+            throw new Error("Debes confirmar tu correo electrónico antes de iniciar sesión. Revisa tu bandeja de entrada.");
+          }
+          throw error;
+        }
         navigate("/payment");
       } else {
         const { data, error } = await supabase.auth.signUp({
@@ -44,8 +49,8 @@ const Auth = () => {
         }
 
         toast({
-          title: "Registro exitoso",
-          description: "Revisa tu correo electrónico para confirmar tu cuenta.",
+          title: "¡Registro exitoso! 📧",
+          description: "Te enviamos un correo de verificación. Debes confirmarlo antes de iniciar sesión.",
         });
         setIsLogin(true);
       }
