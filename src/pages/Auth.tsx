@@ -10,6 +10,7 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -22,12 +23,24 @@ const Auth = () => {
         if (error) throw error;
         navigate("/payment");
       } else {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: { data: { full_name: fullName } },
         });
         if (error) throw error;
+
+        // Save lead
+        if (data.user) {
+          await supabase.from("leads_usuarios").insert({
+            user_id: data.user.id,
+            full_name: fullName,
+            email,
+            phone,
+            source: "registro",
+          });
+        }
+
         toast({
           title: "Registro exitoso",
           description: "Revisa tu correo electrónico para confirmar tu cuenta.",
@@ -54,14 +67,23 @@ const Auth = () => {
 
       <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
         {!isLogin && (
-          <input
-            type="text"
-            placeholder="Nombre completo"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-            required
-            className="w-full rounded-lg border border-border bg-secondary px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-          />
+          <>
+            <input
+              type="text"
+              placeholder="Nombre completo"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              required
+              className="w-full rounded-lg border border-border bg-secondary px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            />
+            <input
+              type="tel"
+              placeholder="Teléfono (ej: 300 123 4567)"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="w-full rounded-lg border border-border bg-secondary px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            />
+          </>
         )}
         <input
           type="email"
