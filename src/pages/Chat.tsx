@@ -275,34 +275,39 @@ const Chat = () => {
 
       if (error) throw error;
 
+      // Calculate the index BEFORE updating state so it's stable
+      const newMsgIndex = messages.length + 1;
       const assistantMsg: Message = { role: "assistant", content: data.response };
       setMessages(prev => [...prev, assistantMsg]);
 
-      // Auto-play TTS for AI response using Google Cloud TTS
-      const newIndex = messages.length + 1;
-      setTtsLoading(newIndex);
-      try {
-        const ttsRes = await supabase.functions.invoke("text-to-speech", {
-          body: { text: data.response, voiceName: selectedVoice.name, voiceGender: selectedVoice.gender },
-        });
+      // Auto-play TTS — runs in background, does NOT block UI (no await on the whole block)
+      setTtsLoading(newMsgIndex);
+      supabase.functions.invoke("text-to-speech", {
+        body: { text: data.response, voiceName: selectedVoice.name, voiceGender: selectedVoice.gender },
+      }).then((ttsRes) => {
         if (ttsRes.data?.audioContent) {
-          const audioBytes = Uint8Array.from(atob(ttsRes.data.audioContent), c => c.charCodeAt(0));
-          const blob = new Blob([audioBytes], { type: "audio/mp3" });
-          const url = URL.createObjectURL(blob);
-          const audio = new Audio(url);
-          audio.onended = () => {
-            setSpeakingMsgIndex(null);
-            URL.revokeObjectURL(url);
-          };
-          audioRef.current = audio;
-          setSpeakingMsgIndex(newIndex);
-          audio.play();
+          try {
+            const audioBytes = Uint8Array.from(atob(ttsRes.data.audioContent), c => c.charCodeAt(0));
+            const blob = new Blob([audioBytes], { type: "audio/mp3" });
+            const url = URL.createObjectURL(blob);
+            const audio = new Audio(url);
+            audio.onended = () => {
+              setSpeakingMsgIndex(null);
+              URL.revokeObjectURL(url);
+            };
+            audioRef.current = audio;
+            setSpeakingMsgIndex(newMsgIndex);
+            audio.play();
+          } catch (decodeErr) {
+            console.error("TTS decode error:", decodeErr);
+          }
         }
-      } catch (ttsErr) {
+      }).catch((ttsErr) => {
         console.error("Auto TTS error:", ttsErr);
-      } finally {
+      }).finally(() => {
         setTtsLoading(null);
-      }
+      });
+
     } catch (err: any) {
       const errorMsg = err?.message?.includes("429") || err?.message?.includes("rate")
         ? "Estamos experimentando alta demanda, intenta en un momento. ⏳"
@@ -320,8 +325,14 @@ const Chat = () => {
 
   const handleLogout = async () => {
     stopAudio();
-    await supabase.auth.signOut();
-    navigate("/");
+    recognitionRef.current?.stop();
+    try {
+      await supabase.auth.signOut();
+    } catch (_) {
+      // ignore sign out errors
+    } finally {
+      navigate("/", { replace: true });
+    }
   };
 
   const handleRestorePurchases = async () => {
@@ -345,9 +356,14 @@ const Chat = () => {
 
   const handleClearChat = () => {
     stopAudio();
+    recognitionRef.current?.stop();
+    setIsRecording(false);
     setMessages([]);
     setInput("");
     setPendingAttachments([]);
+    setTtsLoading(null);
+    setSpeakingMsgIndex(null);
+    setLoading(false);
   };
 
   if (checking) {
