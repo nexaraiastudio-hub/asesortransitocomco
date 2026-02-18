@@ -201,36 +201,66 @@ const Chat = () => {
   };
 
   // File upload
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+  const MAX_FILES = 5;
+  const ALLOWED_TYPES: Record<"image" | "video" | "audio", string[]> = {
+    image: ["image/jpeg", "image/png", "image/gif", "image/webp"],
+    video: ["video/mp4", "video/webm"],
+    audio: ["audio/mpeg", "audio/wav", "audio/ogg", "audio/mp4"],
+  };
+
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
+
+    if (files.length > MAX_FILES) {
+      toast({ title: "Demasiados archivos", description: `Máximo ${MAX_FILES} archivos por vez.`, variant: "destructive" });
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
 
     setUploading(true);
     const newAttachments: Attachment[] = [];
 
     for (const file of Array.from(files)) {
-      const fileType = file.type.startsWith("image") ? "image" 
-        : file.type.startsWith("video") ? "video" 
-        : file.type.startsWith("audio") ? "audio" 
-        : null;
+      // Size check
+      if (file.size > MAX_FILE_SIZE) {
+        toast({ title: "Archivo muy grande", description: `"${file.name}" supera el límite de 10 MB.`, variant: "destructive" });
+        continue;
+      }
 
-      if (!fileType) continue;
+      // Strict MIME type validation
+      let fileType: "image" | "video" | "audio" | null = null;
+      for (const [type, mimes] of Object.entries(ALLOWED_TYPES) as [keyof typeof ALLOWED_TYPES, string[]][]) {
+        if (mimes.includes(file.type)) { fileType = type; break; }
+      }
+      if (!fileType) {
+        toast({ title: "Tipo no permitido", description: `"${file.name}" no es un formato válido (jpg, png, gif, webp, mp4, webm, mp3, wav, ogg).`, variant: "destructive" });
+        continue;
+      }
 
-      const filePath = `${userIdRef.current}/${Date.now()}-${file.name}`;
-      const { error } = await supabase.storage
+      // Sanitize filename
+      const sanitizedName = file.name
+        .replace(/[^a-zA-Z0-9._-]/g, "_")
+        .substring(0, 100);
+      const filePath = `${userIdRef.current}/${Date.now()}-${sanitizedName}`;
+
+      const { error: uploadError } = await supabase.storage
         .from("chat-attachments")
-        .upload(filePath, file);
+        .upload(filePath, file, { cacheControl: "3600", upsert: false });
 
-      if (!error) {
-        const { data: urlData } = supabase.storage
-          .from("chat-attachments")
-          .getPublicUrl(filePath);
+      if (uploadError) {
+        toast({ title: "Error al subir archivo", description: uploadError.message, variant: "destructive" });
+        continue;
+      }
 
-        newAttachments.push({
-          url: urlData.publicUrl,
-          type: fileType,
-          name: file.name,
-        });
+      // Use signed URL (1 hour) — bucket is now private
+      const { data: urlData, error: urlError } = await supabase.storage
+        .from("chat-attachments")
+        .createSignedUrl(filePath, 3600);
+
+      if (!urlError && urlData) {
+        newAttachments.push({ url: urlData.signedUrl, type: fileType, name: file.name });
       }
     }
 
