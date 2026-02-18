@@ -1,9 +1,12 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { Capacitor } from "@capacitor/core";
 import { supabase } from "@/integrations/supabase/client";
+import { initPurchases, restorePurchases } from "@/lib/purchases";
+import { toast } from "@/hooks/use-toast";
 import logo from "@/assets/logo.png";
 import ReactMarkdown from "react-markdown";
-import { Mic, MicOff, Send, Paperclip, Volume2, VolumeX, X, ChevronDown, Shield, Trash2 } from "lucide-react";
+import { Mic, MicOff, Send, Paperclip, Volume2, VolumeX, X, ChevronDown, Shield, Trash2, RefreshCw, LogOut } from "lucide-react";
 
 interface Attachment {
   url: string;
@@ -67,6 +70,11 @@ const Chat = () => {
         setIsAdmin(true);
         setChecking(false);
         return;
+      }
+
+      // Initialize RevenueCat on native platforms
+      if (Capacitor.isNativePlatform()) {
+        await initPurchases(user.id);
       }
 
       // Check active subscription for regular users
@@ -316,6 +324,25 @@ const Chat = () => {
     navigate("/");
   };
 
+  const handleRestorePurchases = async () => {
+    if (!Capacitor.isNativePlatform()) {
+      toast({ title: "Solo disponible en app nativa", description: "Abre la app desde App Store o Google Play para restaurar compras." });
+      return;
+    }
+    try {
+      const restored = await restorePurchases();
+      if (restored) {
+        await supabase.functions.invoke("grant-premium", {});
+        toast({ title: "✅ Compras restauradas", description: "Tu suscripción Premium ha sido reactivada." });
+        window.location.reload();
+      } else {
+        toast({ title: "Sin compras previas", description: "No se encontraron compras anteriores para restaurar." });
+      }
+    } catch (err: any) {
+      toast({ title: "Error al restaurar", description: err?.message || "Intenta de nuevo.", variant: "destructive" });
+    }
+  };
+
   const handleClearChat = () => {
     stopAudio();
     setMessages([]);
@@ -392,11 +419,23 @@ const Chat = () => {
               Admin
             </button>
           )}
+          {/* Restore purchases (shows on native; visible in web too for reference) */}
+          <button
+            onClick={handleRestorePurchases}
+            className="flex items-center gap-1 rounded-lg border border-border bg-secondary px-2 py-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            title="Restaurar compras"
+          >
+            <RefreshCw className="h-3 w-3" />
+            <span className="hidden sm:inline">Restaurar</span>
+          </button>
+          {/* Sign out */}
           <button
             onClick={handleLogout}
-            className="text-xs text-muted-foreground hover:text-foreground"
+            className="flex items-center gap-1 rounded-lg border border-border bg-secondary px-2 py-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            title="Cerrar sesión"
           >
-            Salir
+            <LogOut className="h-3 w-3" />
+            <span className="hidden sm:inline">Salir</span>
           </button>
         </div>
       </header>
