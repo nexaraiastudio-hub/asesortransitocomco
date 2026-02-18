@@ -30,14 +30,16 @@ const Auth = () => {
         });
         if (error) throw error;
 
-        // Save lead
+        // Save lead via backend function (bypasses RLS during signup)
         if (data.user) {
-          await supabase.from("leads_usuarios").insert({
-            user_id: data.user.id,
-            full_name: fullName,
-            email,
-            phone,
-            source: "registro",
+          await supabase.functions.invoke("save-lead", {
+            body: {
+              user_id: data.user.id,
+              full_name: fullName,
+              email,
+              phone,
+              source: "registro",
+            },
           });
         }
 
