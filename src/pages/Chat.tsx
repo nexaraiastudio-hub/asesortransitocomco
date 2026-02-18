@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.png";
 import ReactMarkdown from "react-markdown";
-import { Mic, MicOff, Send, Paperclip, Volume2, VolumeX, X, ChevronDown, Shield } from "lucide-react";
+import { Mic, MicOff, Send, Paperclip, Volume2, VolumeX, X, ChevronDown, Shield, Trash2 } from "lucide-react";
 
 interface Attachment {
   url: string;
@@ -263,10 +263,15 @@ const Chat = () => {
       } finally {
         setTtsLoading(null);
       }
-    } catch {
+    } catch (err: any) {
+      const errorMsg = err?.message?.includes("429") || err?.message?.includes("rate")
+        ? "Estamos experimentando alta demanda, intenta en un momento. ⏳"
+        : err?.message?.includes("402")
+        ? "Se agotaron los créditos del servicio. Contacta al administrador."
+        : "Estamos experimentando alta demanda, intenta en un momento. ⏳";
       setMessages(prev => [
         ...prev,
-        { role: "assistant", content: "Lo siento, ocurrió un error. Intenta de nuevo." },
+        { role: "assistant", content: errorMsg },
       ]);
     } finally {
       setLoading(false);
@@ -277,6 +282,13 @@ const Chat = () => {
     stopAudio();
     await supabase.auth.signOut();
     navigate("/");
+  };
+
+  const handleClearChat = () => {
+    stopAudio();
+    setMessages([]);
+    setInput("");
+    setPendingAttachments([]);
   };
 
   if (checking) {
@@ -295,7 +307,18 @@ const Chat = () => {
           <img src={logo} alt="Logo" className="h-10 w-10 flex-shrink-0 object-contain" />
           <h1 className="truncate text-sm font-bold text-foreground">Asesor Legal</h1>
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          {/* Clear chat */}
+          {messages.length > 0 && (
+            <button
+              onClick={handleClearChat}
+              className="flex items-center gap-1 rounded-lg border border-border bg-secondary px-2 py-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              title="Nueva consulta"
+            >
+              <Trash2 className="h-3 w-3" />
+              <span className="hidden sm:inline">Nueva consulta</span>
+            </button>
+          )}
           {/* Voice selector */}
           <div className="relative">
             <button
@@ -514,6 +537,9 @@ const Chat = () => {
             <Send className="h-5 w-5" />
           </button>
         </div>
+        <p className="mt-1.5 text-center text-[10px] text-muted-foreground/60">
+          ⚖️ Asesoría informativa, no constituye defensa legal.
+        </p>
       </div>
     </div>
   );

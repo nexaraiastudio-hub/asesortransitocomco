@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import logo from "@/assets/logo.png";
-import { Users, BarChart3, FileText, ArrowLeft, RefreshCw, Download } from "lucide-react";
+import { Users, BarChart3, FileText, ArrowLeft, RefreshCw, Download, UserPlus } from "lucide-react";
 
 interface Document {
   id: string;
@@ -22,6 +22,15 @@ interface UserRow {
   created_at: string;
 }
 
+interface LeadRow {
+  id: string;
+  full_name: string;
+  email: string;
+  phone: string;
+  source: string;
+  created_at: string;
+}
+
 interface Stats {
   total_users: number;
   active_subscriptions: number;
@@ -30,13 +39,14 @@ interface Stats {
   new_users_this_month: number;
 }
 
-type Tab = "stats" | "users" | "documents";
+type Tab = "stats" | "users" | "leads" | "documents";
 
 const Admin = () => {
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("stats");
   const [documents, setDocuments] = useState<Document[]>([]);
   const [users, setUsers] = useState<UserRow[]>([]);
+  const [leads, setLeads] = useState<LeadRow[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -90,6 +100,27 @@ const Admin = () => {
     toast({ title: "Exportación exitosa", description: `${users.length} usuarios exportados a CSV` });
   };
 
+  const handleExportLeadsCSV = () => {
+    if (leads.length === 0) return;
+    const headers = ["Nombre", "Correo", "Teléfono", "Fuente", "Fecha"];
+    const rows = leads.map((l) => [
+      l.full_name || "",
+      l.email,
+      l.phone || "",
+      l.source || "",
+      new Date(l.created_at).toLocaleDateString("es-CO"),
+    ]);
+    const csv = [headers, ...rows].map((r) => r.map((c) => `"${c}"`).join(",")).join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `leads_${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: "Exportación exitosa", description: `${leads.length} leads exportados a CSV` });
+  };
+
   useEffect(() => {
     const checkAdmin = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -107,6 +138,7 @@ const Admin = () => {
   const loadAll = () => {
     loadStats();
     loadUsers();
+    loadLeads();
     loadDocuments();
   };
 
@@ -118,6 +150,14 @@ const Admin = () => {
   const loadUsers = async () => {
     const { data } = await supabase.rpc("admin_get_all_users");
     if (data) setUsers(data as unknown as UserRow[]);
+  };
+
+  const loadLeads = async () => {
+    const { data } = await supabase
+      .from("leads_usuarios")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (data) setLeads(data as unknown as LeadRow[]);
   };
 
   const loadDocuments = async () => {
@@ -169,9 +209,10 @@ const Admin = () => {
     );
   }
 
-  const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
+  const tabsList: { id: Tab; label: string; icon: React.ReactNode }[] = [
     { id: "stats", label: "Estadísticas", icon: <BarChart3 className="h-4 w-4" /> },
     { id: "users", label: "Usuarios", icon: <Users className="h-4 w-4" /> },
+    { id: "leads", label: "Leads", icon: <UserPlus className="h-4 w-4" /> },
     { id: "documents", label: "Documentos", icon: <FileText className="h-4 w-4" /> },
   ];
 
@@ -191,13 +232,13 @@ const Admin = () => {
       </header>
 
       {/* Tabs */}
-      <div className="border-b border-border">
+      <div className="border-b border-border overflow-x-auto">
         <div className="mx-auto flex max-w-4xl">
-          {tabs.map((t) => (
+          {tabsList.map((t) => (
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
-              className={`flex items-center gap-2 px-5 py-3 text-sm font-medium transition-colors ${
+              className={`flex items-center gap-2 whitespace-nowrap px-4 py-3 text-sm font-medium transition-colors ${
                 tab === t.id
                   ? "border-b-2 border-primary text-primary"
                   : "text-muted-foreground hover:text-foreground"
@@ -215,19 +256,16 @@ const Admin = () => {
         {tab === "stats" && stats && (
           <div className="space-y-6">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {/* Total users */}
               <div className="rounded-xl border border-border bg-card p-5">
                 <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Usuarios registrados</p>
                 <p className="mt-2 text-3xl font-bold text-foreground">{stats.total_users}</p>
                 <p className="mt-1 text-xs text-accent">+{stats.new_users_this_month} este mes</p>
               </div>
-              {/* Active subs */}
               <div className="rounded-xl border border-border bg-card p-5">
                 <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Suscripciones activas</p>
                 <p className="mt-2 text-3xl font-bold text-green-400">{stats.active_subscriptions}</p>
                 <p className="mt-1 text-xs text-muted-foreground">{stats.inactive_subscriptions} inactivas</p>
               </div>
-              {/* Revenue */}
               <div className="rounded-xl border border-border bg-card p-5">
                 <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Ingresos mensuales</p>
                 <p className="mt-2 text-3xl font-bold text-accent">{formatCurrency(stats.monthly_revenue)}</p>
@@ -239,10 +277,10 @@ const Admin = () => {
 
         {/* ========== USERS ========== */}
         {tab === "users" && (
-           <div className="space-y-4">
-            <div className="flex items-center justify-between">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <h2 className="text-sm font-bold text-foreground">Usuarios registrados ({users.length})</h2>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 flex-wrap">
                 <button
                   onClick={handleExportCSV}
                   className="flex items-center gap-1.5 rounded-lg bg-primary/20 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/30 transition-colors"
@@ -256,13 +294,13 @@ const Admin = () => {
                   className="flex items-center gap-1.5 rounded-lg bg-accent/20 px-3 py-1.5 text-xs font-medium text-accent hover:bg-accent/30 transition-colors disabled:opacity-50"
                 >
                   <RefreshCw className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} />
-                  {syncing ? "Sincronizando..." : "Sync Google Sheets"}
+                  {syncing ? "Sincronizando..." : "Sync Sheets"}
                 </button>
                 <button onClick={loadUsers} className="text-xs text-primary hover:underline">Actualizar</button>
               </div>
             </div>
 
-            {/* Mobile cards + Desktop table */}
+            {/* Desktop table */}
             <div className="hidden sm:block overflow-x-auto rounded-xl border border-border">
               <table className="w-full text-left text-sm">
                 <thead className="border-b border-border bg-secondary">
@@ -283,15 +321,11 @@ const Admin = () => {
                       <td className="px-4 py-3">
                         <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                           u.role === "admin" ? "bg-accent/20 text-accent" : "bg-secondary text-muted-foreground"
-                        }`}>
-                          {u.role}
-                        </span>
+                        }`}>{u.role}</span>
                       </td>
                       <td className="px-4 py-3">
                         <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                          u.subscription_status === "active"
-                            ? "bg-green-500/20 text-green-400"
-                            : "bg-red-500/20 text-red-400"
+                          u.subscription_status === "active" ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"
                         }`}>
                           {u.subscription_status === "active" ? "Activa" : u.subscription_status === "none" ? "Sin plan" : "Inactiva"}
                         </span>
@@ -315,9 +349,7 @@ const Admin = () => {
                     </div>
                     <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                       u.role === "admin" ? "bg-accent/20 text-accent" : "bg-secondary text-muted-foreground"
-                    }`}>
-                      {u.role}
-                    </span>
+                    }`}>{u.role}</span>
                   </div>
                   <div className="mt-3 flex items-center gap-4 text-xs">
                     <span className={`rounded-full px-2 py-0.5 font-medium ${
@@ -334,10 +366,77 @@ const Admin = () => {
           </div>
         )}
 
+        {/* ========== LEADS ========== */}
+        {tab === "leads" && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <h2 className="text-sm font-bold text-foreground">Leads capturados ({leads.length})</h2>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleExportLeadsCSV}
+                  className="flex items-center gap-1.5 rounded-lg bg-primary/20 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/30 transition-colors"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  Exportar CSV
+                </button>
+                <button onClick={loadLeads} className="text-xs text-primary hover:underline">Actualizar</button>
+              </div>
+            </div>
+
+            {/* Desktop table */}
+            <div className="hidden sm:block overflow-x-auto rounded-xl border border-border">
+              <table className="w-full text-left text-sm">
+                <thead className="border-b border-border bg-secondary">
+                  <tr>
+                    <th className="px-4 py-3 font-medium text-muted-foreground">Nombre</th>
+                    <th className="px-4 py-3 font-medium text-muted-foreground">Correo</th>
+                    <th className="px-4 py-3 font-medium text-muted-foreground">Teléfono</th>
+                    <th className="px-4 py-3 font-medium text-muted-foreground">Fuente</th>
+                    <th className="px-4 py-3 font-medium text-muted-foreground">Fecha</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {leads.map((l) => (
+                    <tr key={l.id} className="border-b border-border last:border-0">
+                      <td className="px-4 py-3 text-foreground">{l.full_name || "—"}</td>
+                      <td className="px-4 py-3 text-foreground">{l.email}</td>
+                      <td className="px-4 py-3 text-foreground">{l.phone || "—"}</td>
+                      <td className="px-4 py-3">
+                        <span className="rounded-full bg-accent/20 px-2 py-0.5 text-xs font-medium text-accent">{l.source}</span>
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground">{formatDate(l.created_at)}</td>
+                    </tr>
+                  ))}
+                  {leads.length === 0 && (
+                    <tr><td colSpan={5} className="px-4 py-8 text-center text-sm text-muted-foreground">No hay leads aún.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile view */}
+            <div className="space-y-3 sm:hidden">
+              {leads.map((l) => (
+                <div key={l.id} className="rounded-xl border border-border bg-card p-4">
+                  <p className="font-bold text-foreground">{l.full_name || "—"}</p>
+                  <p className="text-xs text-muted-foreground">{l.email}</p>
+                  {l.phone && <p className="text-xs text-foreground mt-1">📞 {l.phone}</p>}
+                  <div className="mt-2 flex items-center gap-3 text-xs">
+                    <span className="rounded-full bg-accent/20 px-2 py-0.5 font-medium text-accent">{l.source}</span>
+                    <span className="text-muted-foreground">{formatDate(l.created_at)}</span>
+                  </div>
+                </div>
+              ))}
+              {leads.length === 0 && (
+                <p className="text-center text-sm text-muted-foreground">No hay leads aún.</p>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* ========== DOCUMENTS ========== */}
         {tab === "documents" && (
           <div className="space-y-6">
-            {/* Form */}
             <div className="rounded-xl border border-border bg-card p-4">
               <h2 className="mb-3 text-sm font-bold text-foreground">
                 {editing ? "Editar Documento" : "Nuevo Documento"}
@@ -374,7 +473,6 @@ const Admin = () => {
               </div>
             </div>
 
-            {/* Documents list */}
             <div className="space-y-3">
               {documents.map((doc) => (
                 <div key={doc.id} className="rounded-xl border border-border bg-card p-4">
