@@ -37,8 +37,19 @@ const Payment = () => {
         navigate("/auth");
         return;
       }
-      // TEMPORAL: Saltar pago, ir directo al chat
-      navigate("/chat");
+      setUser(user);
+
+      // Check if user already has an active subscription → skip payment
+      const { data: hasSub } = await supabase.rpc("has_active_subscription", {
+        _user_id: user.id,
+      });
+      if (hasSub === true) {
+        navigate("/chat");
+        return;
+      }
+
+      setChecking(false);
+      setLoading(false);
     };
 
     checkAuth();

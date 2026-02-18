@@ -60,9 +60,22 @@ const Chat = () => {
       userIdRef.current = user.id;
       setUserName(user.user_metadata?.full_name || "");
 
-      // Check if user is admin
+      // Check if user is admin (admins always have access)
       const { data: adminCheck } = await supabase.rpc("has_role", { _user_id: user.id, _role: "admin" });
-      if (adminCheck === true) setIsAdmin(true);
+      if (adminCheck === true) {
+        setIsAdmin(true);
+        setChecking(false);
+        return;
+      }
+
+      // Check active subscription for regular users
+      const { data: hasSub } = await supabase.rpc("has_active_subscription", {
+        _user_id: user.id,
+      });
+      if (!hasSub) {
+        navigate("/payment");
+        return;
+      }
 
       setChecking(false);
     };
