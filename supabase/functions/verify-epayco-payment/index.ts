@@ -83,9 +83,17 @@ serve(async (req) => {
     }
 
     // 4. Activate subscription using service role key (for DB writes)
-    // Calculate period end (30 days from now)
-    const periodEnd = new Date();
-    periodEnd.setDate(periodEnd.getDate() + 30);
+    // Calculate period end: same day next calendar month, at 23:59:59 Colombia time (UTC-5).
+    // Colombia is UTC-5, so 23:59:59 local = next day 04:59:59 UTC.
+    const now = new Date();
+    const periodEnd = new Date(
+      Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth() + 1,   // advance one calendar month (JS handles overflow: Jan 31 → Feb 28/29)
+        now.getUTCDate(),
+        4, 59, 59, 999           // 04:59:59 UTC = 23:59:59 Colombia (UTC-5)
+      )
+    );
 
     // Check if subscription exists
     const checkResponse = await fetch(
