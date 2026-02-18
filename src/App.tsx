@@ -7,7 +7,6 @@ import Welcome from "./pages/Welcome";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import Payment from "./pages/Payment";
-import PaymentResponse from "./pages/PaymentResponse";
 import Chat from "./pages/Chat";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
@@ -25,7 +24,6 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/payment" element={<Payment />} />
-          <Route path="/payment/response" element={<PaymentResponse />} />
           <Route path="/chat" element={<Chat />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="*" element={<NotFound />} />
