@@ -45,6 +45,7 @@ const Chat = () => {
   const [showVoiceMenu, setShowVoiceMenu] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [daysUntilExpiry, setDaysUntilExpiry] = useState<number | null>(null);
   const recognitionRef = useRef<any>(null);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -75,6 +76,24 @@ const Chat = () => {
       if (!hasSub) {
         navigate("/payment");
         return;
+      }
+
+      // Check days until expiry for warning banner
+      const { data: subData } = await supabase
+        .from("subscriptions")
+        .select("current_period_end")
+        .eq("user_id", user.id)
+        .eq("status", "active")
+        .single();
+
+      if (subData?.current_period_end) {
+        const expiryDate = new Date(subData.current_period_end);
+        const now = new Date();
+        const diffMs = expiryDate.getTime() - now.getTime();
+        const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+        if (diffDays <= 3) {
+          setDaysUntilExpiry(diffDays);
+        }
       }
 
       setChecking(false);
@@ -381,6 +400,27 @@ const Chat = () => {
           </button>
         </div>
       </header>
+
+      {/* Expiry warning banner */}
+      {daysUntilExpiry !== null && (
+        <div className="flex items-center justify-between gap-2 border-b border-accent/40 bg-accent/10 px-4 py-2 text-sm text-accent">
+          <span>
+            ⚠️ Tu suscripción vence{" "}
+            {daysUntilExpiry <= 0
+              ? "hoy"
+              : daysUntilExpiry === 1
+              ? "mañana"
+              : `en ${daysUntilExpiry} días`}
+            . Renuévala para seguir con acceso completo.
+          </span>
+          <button
+            onClick={() => navigate("/payment")}
+            className="flex-shrink-0 rounded-lg border border-accent/50 bg-accent/20 px-3 py-1 text-xs font-bold text-accent hover:bg-accent/30 transition-colors"
+          >
+            Renovar
+          </button>
+        </div>
+      )}
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-4">
