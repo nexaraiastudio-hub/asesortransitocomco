@@ -36,6 +36,7 @@ const Chat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
   const [checking, setChecking] = useState(true);
   const [userName, setUserName] = useState("");
   const [isRecording, setIsRecording] = useState(false);
@@ -273,18 +274,42 @@ const Chat = () => {
         body: { message: messageToSend, history, userName },
       });
 
-      if (error) throw error;
+      // supabase.functions.invoke no lanza excepción: el error viene en el objeto
+      if (error) {
+        const code = (error as any)?.status || (error as any)?.context?.status;
+        const errorMsg = code === 429
+          ? "Estamos experimentando alta demanda, intenta en un momento. ⏳"
+          : code === 402
+          ? "Se agotaron los créditos del servicio. Contacta al administrador."
+          : "Hubo un problema al procesar tu consulta. Intenta de nuevo. ⏳";
+        setMessages(prev => [...prev, { role: "assistant", content: errorMsg }]);
+        return;
+      }
 
-      // Calculate the index BEFORE updating state so it's stable
-      const newMsgIndex = messages.length + 1;
+      if (!data?.response) {
+        setMessages(prev => [...prev, { role: "assistant", content: "No recibí respuesta. Intenta de nuevo." }]);
+        return;
+      }
+
+      // El índice del nuevo mensaje del asistente en el array final:
+      // messages ya tiene los mensajes anteriores + el de usuario se agregó con setMessages antes,
+      // pero como usamos functional update, calculamos: mensajes previos + 1 (user) + 1 (assistant que se va a agregar) - 1 (0-based) = messages.length + 1
+      // Usando el array 'messages' capturado al inicio del envío (antes de cualquier setMessages):
+      // user quedó en índice messages.length, assistant quedará en messages.length + 1
+      const assistantIndex = messages.length + 1;
+
       const assistantMsg: Message = { role: "assistant", content: data.response };
       setMessages(prev => [...prev, assistantMsg]);
 
-      // Auto-play TTS — runs in background, does NOT block UI (no await on the whole block)
-      setTtsLoading(newMsgIndex);
+      // Auto-play TTS — corre en background, no bloquea la UI
+      setTtsLoading(assistantIndex);
       supabase.functions.invoke("text-to-speech", {
         body: { text: data.response, voiceName: selectedVoice.name, voiceGender: selectedVoice.gender },
       }).then((ttsRes) => {
+        if (ttsRes.error) {
+          console.error("Auto TTS error:", ttsRes.error);
+          return;
+        }
         if (ttsRes.data?.audioContent) {
           try {
             const audioBytes = Uint8Array.from(atob(ttsRes.data.audioContent), c => c.charCodeAt(0));
@@ -296,42 +321,42 @@ const Chat = () => {
               URL.revokeObjectURL(url);
             };
             audioRef.current = audio;
-            setSpeakingMsgIndex(newMsgIndex);
+            setSpeakingMsgIndex(assistantIndex);
             audio.play();
           } catch (decodeErr) {
             console.error("TTS decode error:", decodeErr);
           }
         }
       }).catch((ttsErr) => {
-        console.error("Auto TTS error:", ttsErr);
+        console.error("Auto TTS network error:", ttsErr);
       }).finally(() => {
         setTtsLoading(null);
       });
 
     } catch (err: any) {
-      const errorMsg = err?.message?.includes("429") || err?.message?.includes("rate")
-        ? "Estamos experimentando alta demanda, intenta en un momento. ⏳"
-        : err?.message?.includes("402")
-        ? "Se agotaron los créditos del servicio. Contacta al administrador."
-        : "Estamos experimentando alta demanda, intenta en un momento. ⏳";
-      setMessages(prev => [
-        ...prev,
-        { role: "assistant", content: errorMsg },
-      ]);
+      // Solo llega aquí si hay un error de red real (no de la función)
+      const errorMsg = "No se pudo conectar con el servidor. Verifica tu conexión. ⏳";
+      setMessages(prev => [...prev, { role: "assistant", content: errorMsg }]);
     } finally {
       setLoading(false);
     }
   };
 
   const handleLogout = async () => {
+    if (loggingOut) return;
+    setLoggingOut(true);
     stopAudio();
     recognitionRef.current?.stop();
+    setIsRecording(false);
     try {
       await supabase.auth.signOut();
     } catch (_) {
-      // ignore sign out errors
+      // ignorar errores de signOut
     } finally {
-      navigate("/", { replace: true });
+      // Pequeño delay para que Supabase limpie la sesión antes de navegar
+      setTimeout(() => {
+        navigate("/", { replace: true });
+      }, 150);
     }
   };
 
@@ -447,11 +472,12 @@ const Chat = () => {
           {/* Sign out */}
           <button
             onClick={handleLogout}
-            className="flex items-center gap-1 rounded-lg border border-border bg-secondary px-2 py-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            disabled={loggingOut}
+            className="flex items-center gap-1 rounded-lg border border-border bg-secondary px-2 py-1 text-xs text-muted-foreground hover:text-foreground transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             title="Cerrar sesión"
           >
-            <LogOut className="h-3 w-3" />
-            <span className="hidden sm:inline">Salir</span>
+            <LogOut className={`h-3 w-3 ${loggingOut ? "animate-spin" : ""}`} />
+            <span className="hidden sm:inline">{loggingOut ? "Saliendo..." : "Salir"}</span>
           </button>
         </div>
       </header>
