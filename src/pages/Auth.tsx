@@ -44,13 +44,27 @@ const Auth = () => {
 
     try {
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data: signInData, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
           if (error.message.toLowerCase().includes("email not confirmed")) {
             throw new Error("Debes confirmar tu correo electrónico antes de iniciar sesión. Revisa tu bandeja de entrada.");
           }
           throw error;
         }
+
+        // Check if user is admin → go directly to chat (Chat.tsx handles access control)
+        if (signInData.user) {
+          const { data: isAdmin } = await supabase.rpc("has_role", {
+            _user_id: signInData.user.id,
+            _role: "admin",
+          });
+          if (isAdmin) {
+            navigate("/chat");
+            return;
+          }
+        }
+
+        // Regular users go to payment page (Chat.tsx will verify subscription)
         navigate("/payment");
       } else {
         const { data, error } = await supabase.auth.signUp({
