@@ -150,6 +150,14 @@ const Auth = () => {
               </>
             )}
             <input
+              type="email"
+              placeholder="Correo electrónico"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full rounded-lg border border-border bg-secondary px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            />
+            <input
               type="password"
               placeholder="Contraseña"
               value={password}
