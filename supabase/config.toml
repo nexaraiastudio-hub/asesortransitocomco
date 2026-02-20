@@ -1,8 +1,5 @@
 project_id = "ubgekbswuwbocrcxqhlo"
 
-[functions.verify-epayco-payment]
-verify_jwt = false
-
 [functions.load-knowledge]
 verify_jwt = false
 
