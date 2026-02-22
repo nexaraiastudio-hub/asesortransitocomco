@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,7 +13,45 @@ serve(async (req) => {
 
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    // Auth check - only admins can trigger knowledge reload
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const { data: { user }, error: userError } = await supabaseAuth.auth.getUser();
+    if (userError || !user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Check admin role
+    const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
+    const { data: roleData } = await supabaseAdmin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("role", "admin")
+      .maybeSingle();
+
+    if (!roleData) {
+      return new Response(JSON.stringify({ error: "Admin access required" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // Download the markdown file from storage
     const fileUrl = `${supabaseUrl}/storage/v1/object/knowledge-files/Base_Datos_Leyes_Completa.md`;
@@ -40,7 +79,6 @@ serve(async (req) => {
     let chunkIndex = 1;
 
     for (const section of sections) {
-      // Extract title from sourceFile if available
       const titleMatch = section.match(/sourceFile:\s*"([^"]+)"/);
       const sectionTitle = titleMatch ? titleMatch[1].replace(/\.pdf$/i, "") : "";
 
@@ -57,7 +95,6 @@ serve(async (req) => {
       }
     }
 
-    // Push last chunk
     if (currentChunk.trim().length > 0) {
       chunks.push({ title: currentTitle, content: currentChunk.trim() });
     }
@@ -114,7 +151,7 @@ serve(async (req) => {
   } catch (error) {
     console.error("Error processing knowledge base:", error);
     return new Response(
-      JSON.stringify({ success: false, error: String(error) }),
+      JSON.stringify({ success: false, error: "Internal server error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
