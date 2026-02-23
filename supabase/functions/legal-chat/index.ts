@@ -349,7 +349,7 @@ ${knowledgeBase}`;
             contents: geminiMessages,
             generationConfig: {
               temperature: 0.3,
-              maxOutputTokens: 2000,
+              maxOutputTokens: 8192,
             },
           }),
         }
