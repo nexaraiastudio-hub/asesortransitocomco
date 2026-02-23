@@ -117,10 +117,10 @@ serve(async (req) => {
       .map((doc: any) => `## ${doc.title}\n${doc.content}`)
       .join("\n\n---\n\n");
 
-    // Call Lovable AI Gateway
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      console.error("LOVABLE_API_KEY is not configured");
+    // Call Google Gemini API directly
+    const GEMINI_API_KEY = Deno.env.get("GOOGLE_GEMINI_API_KEY");
+    if (!GEMINI_API_KEY) {
+      console.error("GOOGLE_GEMINI_API_KEY is not configured");
       return new Response(JSON.stringify({ error: "El servicio de IA no está configurado. Contacte al administrador." }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -279,24 +279,30 @@ BASE DE CONOCIMIENTO LEGAL:
 ${knowledgeBase}`;
 
     let aiResponse: Response;
+    const geminiMessages = [
+      { role: "user", parts: [{ text: systemPrompt }] },
+      ...(history || []).map((m: any) => ({
+        role: m.role === "assistant" ? "model" : "user",
+        parts: [{ text: m.content }],
+      })),
+      { role: "user", parts: [{ text: message }] },
+    ];
+
     try {
-      aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
-          messages: [
-            { role: "system", content: systemPrompt },
-            ...(history || []).map((m: any) => ({ role: m.role, content: m.content })),
-            { role: "user", content: message },
-          ],
-          temperature: 0.3,
-          max_tokens: 2000,
-        }),
-      });
+      aiResponse = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: geminiMessages,
+            generationConfig: {
+              temperature: 0.3,
+              maxOutputTokens: 2000,
+            },
+          }),
+        }
+      );
     } catch (fetchError) {
       console.error("Network error calling AI gateway:", fetchError);
       return new Response(JSON.stringify({ error: "Error de conexión con el servicio de IA. Intenta de nuevo." }), {
@@ -329,7 +335,7 @@ ${knowledgeBase}`;
     }
 
     const aiData = await aiResponse.json();
-    const response = aiData.choices?.[0]?.message?.content || "No pude generar una respuesta.";
+    const response = aiData.candidates?.[0]?.content?.parts?.[0]?.text || "No pude generar una respuesta.";
 
     return new Response(JSON.stringify({ response }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
