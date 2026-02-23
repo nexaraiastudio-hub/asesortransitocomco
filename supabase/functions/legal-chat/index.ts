@@ -40,11 +40,44 @@ serve(async (req) => {
 
     const { message, history, userName } = await req.json();
 
-    if (!message) {
+    // Input validation
+    if (!message || typeof message !== "string") {
       return new Response(JSON.stringify({ error: "No se proporcionó mensaje" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    if (message.length > 5000) {
+      return new Response(JSON.stringify({ error: "Mensaje demasiado largo (máximo 5000 caracteres)" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (userName && (typeof userName !== "string" || userName.length > 100)) {
+      return new Response(JSON.stringify({ error: "Nombre inválido" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (history && (!Array.isArray(history) || history.length > 50)) {
+      return new Response(JSON.stringify({ error: "Historial inválido" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (history) {
+      for (const msg of history) {
+        if (!msg.role || !msg.content || typeof msg.content !== "string" || msg.content.length > 10000) {
+          return new Response(JSON.stringify({ error: "Formato de historial inválido" }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      }
     }
 
     // Search for relevant documents
