@@ -48,12 +48,7 @@ serve(async (req) => {
       });
     }
 
-    if (message.length > 5000) {
-      return new Response(JSON.stringify({ error: "Mensaje demasiado largo (máximo 5000 caracteres)" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    // No message length limit — users can send messages of any size
 
     if (userName && (typeof userName !== "string" || userName.length > 100)) {
       return new Response(JSON.stringify({ error: "Nombre inválido" }), {
