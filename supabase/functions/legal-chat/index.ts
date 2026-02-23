@@ -7,6 +7,26 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Simple in-memory cache for document search results (persists across warm invocations)
+const docCache = new Map<string, { docs: string; timestamp: number }>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+function extractKeywords(text: string): string[] {
+  const stopWords = new Set([
+    "que", "para", "por", "con", "una", "los", "las", "del", "como", "más",
+    "pero", "sus", "este", "esta", "estos", "estas", "tiene", "puede", "hace",
+    "desde", "sobre", "entre", "cuando", "donde", "cual", "sido", "estar",
+    "haber", "todo", "también", "otro", "otra", "otros", "otras", "cada",
+    "después", "antes", "bien", "solo", "mismo", "ella", "ellos", "nosotros",
+  ]);
+  return text
+    .toLowerCase()
+    .replace(/[^\w\sáéíóúñü]/g, " ")
+    .split(/\s+/)
+    .filter((w) => w.length > 3 && !stopWords.has(w))
+    .slice(0, 8);
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -40,15 +60,12 @@ serve(async (req) => {
 
     const { message, history, userName } = await req.json();
 
-    // Input validation
     if (!message || typeof message !== "string") {
       return new Response(JSON.stringify({ error: "No se proporcionó mensaje" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-
-    // No message length limit — users can send messages of any size
 
     if (userName && (typeof userName !== "string" || userName.length > 100)) {
       return new Response(JSON.stringify({ error: "Nombre inválido" }), {
@@ -75,49 +92,84 @@ serve(async (req) => {
       }
     }
 
-    // Search for relevant documents
-    const keywords = message.toLowerCase().split(/\s+/).filter((w: string) => w.length > 3).slice(0, 5);
+    // --- OPTIMIZED: SQL-level keyword filtering ---
+    const keywords = extractKeywords(message);
+    const cacheKey = keywords.sort().join("|");
 
-    const docsResponse = await fetch(`${supabaseUrl}/rest/v1/knowledge_documents?select=title,content`, {
-      headers: {
-        apikey: supabaseServiceKey,
-        Authorization: `Bearer ${supabaseServiceKey}`,
-      },
-    });
+    let knowledgeBase = "";
+    const cached = docCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+      knowledgeBase = cached.docs;
+    } else {
+      // Build SQL filter: match documents containing ANY keyword in title or content
+      let filterQuery = `${supabaseUrl}/rest/v1/knowledge_documents?select=title,content`;
 
-    if (!docsResponse.ok) {
-      console.error("Error fetching documents:", docsResponse.status);
-      return new Response(JSON.stringify({ error: "Error al consultar la base de conocimientos" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      if (keywords.length > 0) {
+        // Use OR filter to find docs matching any keyword
+        const orFilters = keywords.map((kw) =>
+          `content.ilike.*${kw}*,title.ilike.*${kw}*`
+        ).join(",");
+        filterQuery += `&or=(${orFilters})`;
+      }
+
+      // Limit to top 5 documents max
+      filterQuery += `&limit=5`;
+
+      const docsResponse = await fetch(filterQuery, {
+        headers: {
+          apikey: supabaseServiceKey,
+          Authorization: `Bearer ${supabaseServiceKey}`,
+        },
       });
+
+      if (!docsResponse.ok) {
+        console.error("Error fetching documents:", docsResponse.status);
+        return new Response(JSON.stringify({ error: "Error al consultar la base de conocimientos" }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const documents = await docsResponse.json();
+
+      // Score locally and truncate content to reduce token usage
+      const maxContentLen = 8000; // max chars per document
+      const maxTotalChars = 30000; // reduced from 80k
+
+      const scoredDocs = documents.map((doc: any) => {
+        const text = `${doc.title} ${doc.content}`.toLowerCase();
+        const score = keywords.reduce((acc: number, kw: string) => acc + (text.includes(kw) ? 1 : 0), 0);
+        return { ...doc, score };
+      });
+
+      scoredDocs.sort((a: any, b: any) => b.score - a.score);
+
+      let totalChars = 0;
+      const selectedDocs: any[] = [];
+      for (const doc of scoredDocs) {
+        const truncated = doc.content.length > maxContentLen
+          ? doc.content.substring(0, maxContentLen) + "\n[... contenido truncado ...]"
+          : doc.content;
+        if (totalChars + truncated.length > maxTotalChars) break;
+        selectedDocs.push({ ...doc, content: truncated });
+        totalChars += truncated.length;
+      }
+
+      knowledgeBase = selectedDocs
+        .map((doc: any) => `## ${doc.title}\n${doc.content}`)
+        .join("\n\n---\n\n");
+
+      // Cache result
+      docCache.set(cacheKey, { docs: knowledgeBase, timestamp: Date.now() });
+
+      // Evict old cache entries
+      if (docCache.size > 100) {
+        const oldest = [...docCache.entries()].sort((a, b) => a[1].timestamp - b[1].timestamp);
+        for (let i = 0; i < 20; i++) docCache.delete(oldest[i][0]);
+      }
     }
 
-    const documents = await docsResponse.json();
-
-    // Score and rank documents by relevance
-    const scoredDocs = documents.map((doc: any) => {
-      const text = `${doc.title} ${doc.content}`.toLowerCase();
-      const score = keywords.reduce((acc: number, kw: string) => acc + (text.includes(kw) ? 1 : 0), 0);
-      return { ...doc, score };
-    });
-
-    const sortedDocs = scoredDocs.sort((a: any, b: any) => b.score - a.score);
-    let totalChars = 0;
-    const maxChars = 80000;
-    const selectedDocs: any[] = [];
-    for (const doc of sortedDocs) {
-      if (doc.score === 0 && selectedDocs.length > 0) break;
-      if (totalChars + doc.content.length > maxChars) break;
-      selectedDocs.push(doc);
-      totalChars += doc.content.length;
-    }
-
-    const knowledgeBase = selectedDocs
-      .map((doc: any) => `## ${doc.title}\n${doc.content}`)
-      .join("\n\n---\n\n");
-
-    // Call Google Gemini API directly
+    // --- AI Model: gemini-2.0-flash (fast, no thinking overhead) ---
     const GEMINI_API_KEY = Deno.env.get("GOOGLE_GEMINI_API_KEY");
     if (!GEMINI_API_KEY) {
       console.error("GOOGLE_GEMINI_API_KEY is not configured");
@@ -129,7 +181,6 @@ serve(async (req) => {
 
     const isFirstMessage = !history || history.length === 0;
 
-    // Calculate Colombia time (UTC-5)
     const now = new Date();
     const colombiaTime = new Date(now.getTime() - 5 * 60 * 60 * 1000);
     const colombiaDateStr = colombiaTime.toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
@@ -278,7 +329,6 @@ Esta NO es la primera interacción. Ve directo al grano, no saludes de nuevo. Re
 BASE DE CONOCIMIENTO LEGAL:
 ${knowledgeBase}`;
 
-    let aiResponse: Response;
     const geminiMessages = [
       { role: "user", parts: [{ text: systemPrompt }] },
       ...(history || []).map((m: any) => ({
@@ -288,9 +338,10 @@ ${knowledgeBase}`;
       { role: "user", parts: [{ text: message }] },
     ];
 
+    let aiResponse: Response;
     try {
       aiResponse = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -304,7 +355,7 @@ ${knowledgeBase}`;
         }
       );
     } catch (fetchError) {
-      console.error("Network error calling AI gateway:", fetchError);
+      console.error("Network error calling Gemini:", fetchError);
       return new Response(JSON.stringify({ error: "Error de conexión con el servicio de IA. Intenta de nuevo." }), {
         status: 502,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -313,17 +364,11 @@ ${knowledgeBase}`;
 
     if (!aiResponse.ok) {
       const errText = await aiResponse.text();
-      console.error("AI gateway error:", aiResponse.status, errText);
+      console.error("Gemini error:", aiResponse.status, errText);
 
       if (aiResponse.status === 429) {
         return new Response(JSON.stringify({ error: "Se ha superado el límite de consultas. Por favor espera unos minutos e intenta de nuevo." }), {
           status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (aiResponse.status === 402) {
-        return new Response(JSON.stringify({ error: "Créditos de IA agotados. Contacte al administrador." }), {
-          status: 402,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
