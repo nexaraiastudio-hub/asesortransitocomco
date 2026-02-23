@@ -1,4 +1,4 @@
-// Asesor Legal de Tránsito — Entry point
+// Asesor Legal de Tránsito — App entry point
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
