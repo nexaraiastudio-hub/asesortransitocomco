@@ -2,7 +2,7 @@ import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
   appId: "app.lovable.54550d301cbc40c392c67c59f0b23403",
-  appName: "asesortransitocomco",
+  appName: "Asesor Tránsito CO",
   webDir: "dist",
   server: {
     // Hot-reload desde sandbox de Lovable durante desarrollo.
@@ -11,11 +11,22 @@ const config: CapacitorConfig = {
     cleartext: true,
   },
   plugins: {
-    // Supabase usa localStorage; en Capacitor está disponible vía WebView
     SplashScreen: {
-      launchShowDuration: 0,
+      launchShowDuration: 2000,
+      backgroundColor: "#002147",
+      showSpinner: false,
+    },
+    Keyboard: {
+      resize: "body",
+      resizeOnFullScreen: true,
     },
   },
+  // iOS permissions are configured in Info.plist after `npx cap add ios`
+  // Android permissions are configured in AndroidManifest.xml after `npx cap add android`
+  // Required permissions:
+  //   - NSMicrophoneUsageDescription (iOS) / RECORD_AUDIO (Android)
+  //   - NSCameraUsageDescription (iOS) / CAMERA (Android)
+  //   - NSPhotoLibraryUsageDescription (iOS) / READ_EXTERNAL_STORAGE (Android)
 };
 
 export default config;

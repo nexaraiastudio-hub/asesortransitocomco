@@ -57,7 +57,7 @@ serve(async (req) => {
       });
     }
 
-    const { message, history, userName } = await req.json();
+    const { message, history, userName, attachments } = await req.json();
 
     if (!message || typeof message !== "string") {
       return new Response(JSON.stringify({ error: "No se proporcionó mensaje" }), {
@@ -318,6 +318,14 @@ INSTRUCCIONES: Usa SOLO datos proporcionados por el usuario. Campos faltantes va
 - **NUNCA** menciones ni cites leyes de Estados Unidos, España ni de ningún otro país que no sea Colombia. Tu jurisdicción es EXCLUSIVAMENTE la República de Colombia.
 - Si te preguntan quién te creó, responde SOLO: "Nexara IA Studio 😊".
 
+# ANÁLISIS DE IMÁGENES (COMPARENDOS)
+
+Cuando el usuario adjunte una imagen de un comparendo, multa, fotomulta o documento de tránsito:
+1. Analiza visualmente el documento e identifica: tipo de infracción, código, fecha, valor, autoridad que lo emitió.
+2. Busca en tu base de conocimientos la normativa aplicable a esa infracción específica.
+3. Proporciona un diagnóstico legal completo: si la infracción es válida, si hay vicios de forma, argumentos de defensa y pasos para impugnar.
+4. Cita siempre las fuentes legales de tu base de conocimientos.
+
 ${isFirstMessage ? `# SALUDO INICIAL
 
 Como es tu primera interacción, saluda así:
@@ -329,13 +337,32 @@ Esta NO es la primera interacción. Ve directo al grano, no saludes de nuevo. Re
 BASE DE CONOCIMIENTO LEGAL:
 ${knowledgeBase}`;
 
+    // Build user message content - support multimodal (text + images)
+    const userContent: any[] = [];
+    
+    if (message) {
+      userContent.push({ type: "text", text: message });
+    }
+
+    // Add image attachments for visual analysis (comparendos, etc.)
+    if (attachments && Array.isArray(attachments)) {
+      for (const att of attachments) {
+        if (att.type === "image" && att.url) {
+          userContent.push({
+            type: "image_url",
+            image_url: { url: att.url },
+          });
+        }
+      }
+    }
+
     const aiMessages = [
       { role: "system", content: systemPrompt },
       ...(history || []).map((m: any) => ({
         role: m.role as string,
         content: m.content as string,
       })),
-      { role: "user", content: message },
+      { role: "user", content: userContent.length === 1 && userContent[0].type === "text" ? userContent[0].text : userContent },
     ];
 
     let aiResponse: Response;
