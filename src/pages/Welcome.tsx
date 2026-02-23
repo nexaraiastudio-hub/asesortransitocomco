@@ -28,6 +28,10 @@ const Welcome = () => {
           Iniciar Asesoría
         </button>
       </motion.div>
+
+      <p className="absolute bottom-6 text-sm font-medium text-primary opacity-80">
+        by Nexara IA Studio
+      </p>
     </div>
   );
 };
