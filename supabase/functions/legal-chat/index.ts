@@ -92,7 +92,7 @@ serve(async (req) => {
       }
     }
 
-    // --- OPTIMIZED: SQL-level keyword filtering ---
+    // --- OPTIMIZED: SQL-level keyword filtering + smart excerpt extraction ---
     const keywords = extractKeywords(message);
     const cacheKey = keywords.sort().join("|");
 
@@ -101,19 +101,17 @@ serve(async (req) => {
     if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
       knowledgeBase = cached.docs;
     } else {
-      // Build SQL filter: match documents containing ANY keyword in title or content
+      // Fetch docs matching any keyword
       let filterQuery = `${supabaseUrl}/rest/v1/knowledge_documents?select=title,content`;
 
       if (keywords.length > 0) {
-        // Use OR filter to find docs matching any keyword
         const orFilters = keywords.map((kw) =>
           `content.ilike.*${kw}*,title.ilike.*${kw}*`
         ).join(",");
         filterQuery += `&or=(${orFilters})`;
       }
 
-      // Limit to top 5 documents max
-      filterQuery += `&limit=5`;
+      filterQuery += `&limit=10`;
 
       const docsResponse = await fetch(filterQuery, {
         headers: {
@@ -132,32 +130,73 @@ serve(async (req) => {
 
       const documents = await docsResponse.json();
 
-      // Score locally and truncate content to reduce token usage
-      const maxContentLen = 8000; // max chars per document
-      const maxTotalChars = 30000; // reduced from 80k
+      // Extract RELEVANT EXCERPTS around keyword matches instead of truncating from start
+      const excerptRadius = 1500; // chars before and after each match
+      const maxTotalChars = 60000;
 
-      const scoredDocs = documents.map((doc: any) => {
-        const text = `${doc.title} ${doc.content}`.toLowerCase();
-        const score = keywords.reduce((acc: number, kw: string) => acc + (text.includes(kw) ? 1 : 0), 0);
-        return { ...doc, score };
-      });
+      const allExcerpts: { title: string; excerpt: string; score: number }[] = [];
 
-      scoredDocs.sort((a: any, b: any) => b.score - a.score);
+      for (const doc of documents) {
+        const contentLower = doc.content.toLowerCase();
+        const matchPositions: number[] = [];
 
-      let totalChars = 0;
-      const selectedDocs: any[] = [];
-      for (const doc of scoredDocs) {
-        const truncated = doc.content.length > maxContentLen
-          ? doc.content.substring(0, maxContentLen) + "\n[... contenido truncado ...]"
-          : doc.content;
-        if (totalChars + truncated.length > maxTotalChars) break;
-        selectedDocs.push({ ...doc, content: truncated });
-        totalChars += truncated.length;
+        for (const kw of keywords) {
+          let pos = 0;
+          while ((pos = contentLower.indexOf(kw, pos)) !== -1) {
+            matchPositions.push(pos);
+            pos += kw.length;
+          }
+        }
+
+        if (matchPositions.length === 0) {
+          // No keyword matches but was returned by ilike (title match) - include beginning
+          allExcerpts.push({
+            title: doc.title,
+            excerpt: doc.content.substring(0, 3000),
+            score: 0.5,
+          });
+          continue;
+        }
+
+        // Merge overlapping regions
+        matchPositions.sort((a, b) => a - b);
+        const regions: { start: number; end: number }[] = [];
+        for (const pos of matchPositions) {
+          const start = Math.max(0, pos - excerptRadius);
+          const end = Math.min(doc.content.length, pos + excerptRadius);
+          if (regions.length > 0 && start <= regions[regions.length - 1].end) {
+            regions[regions.length - 1].end = Math.max(regions[regions.length - 1].end, end);
+          } else {
+            regions.push({ start, end });
+          }
+        }
+
+        // Extract and join regions
+        const excerptParts = regions.slice(0, 5).map((r) => {
+          const prefix = r.start > 0 ? "..." : "";
+          const suffix = r.end < doc.content.length ? "..." : "";
+          return prefix + doc.content.substring(r.start, r.end) + suffix;
+        });
+
+        allExcerpts.push({
+          title: doc.title,
+          excerpt: excerptParts.join("\n\n"),
+          score: matchPositions.length,
+        });
       }
 
-      knowledgeBase = selectedDocs
-        .map((doc: any) => `## ${doc.title}\n${doc.content}`)
-        .join("\n\n---\n\n");
+      // Sort by relevance and build knowledge base
+      allExcerpts.sort((a, b) => b.score - a.score);
+
+      let totalChars = 0;
+      const selectedExcerpts: string[] = [];
+      for (const item of allExcerpts) {
+        if (totalChars + item.excerpt.length > maxTotalChars) break;
+        selectedExcerpts.push(`## ${item.title}\n${item.excerpt}`);
+        totalChars += item.excerpt.length;
+      }
+
+      knowledgeBase = selectedExcerpts.join("\n\n---\n\n");
 
       // Cache result
       docCache.set(cacheKey, { docs: knowledgeBase, timestamp: Date.now() });
