@@ -6,7 +6,7 @@ import { initPurchases, restorePurchases } from "@/lib/purchases";
 import { toast } from "@/hooks/use-toast";
 import logo from "@/assets/logo.png";
 import ReactMarkdown from "react-markdown";
-import { Mic, MicOff, Send, Paperclip, Volume2, VolumeX, X, ChevronDown, Shield, Trash2, RefreshCw, LogOut } from "lucide-react";
+import { Mic, MicOff, Send, Paperclip, Volume2, VolumeX, X, ChevronDown, Shield, Trash2, RefreshCw, LogOut, Camera } from "lucide-react";
 
 interface Attachment {
   url: string;
@@ -53,6 +53,7 @@ const Chat = () => {
   const recognitionRef = useRef<any>(null);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const userIdRef = useRef<string>("");
 
   useEffect(() => {
@@ -63,7 +64,14 @@ const Chat = () => {
         return;
       }
       userIdRef.current = user.id;
-      setUserName(user.user_metadata?.full_name || "");
+
+      // Fetch name from profiles table (more reliable than metadata)
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", user.id)
+        .single();
+      setUserName(profile?.full_name || user.user_metadata?.full_name || "");
 
       // Check if user is admin (admins always have access)
       const { data: adminCheck } = await supabase.rpc("has_role", { _user_id: user.id, _role: "admin" });
@@ -76,6 +84,19 @@ const Chat = () => {
       // Initialize RevenueCat on native platforms
       if (Capacitor.isNativePlatform()) {
         await initPurchases(user.id);
+      }
+
+      // Non-admin users must use mobile device
+      const isMobileDevice = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+      if (!isMobileDevice) {
+        toast({
+          title: "Acceso solo desde móvil",
+          description: "Esta aplicación está diseñada para usarse desde tu teléfono inteligente. Descárgala desde App Store o Google Play.",
+          variant: "destructive",
+        });
+        await supabase.auth.signOut();
+        navigate("/", { replace: true });
+        return;
       }
 
       // Check active subscription for regular users
@@ -301,7 +322,7 @@ const Chat = () => {
       }
 
       const { data, error } = await supabase.functions.invoke("legal-chat", {
-        body: { message: messageToSend, history, userName },
+        body: { message: messageToSend, history, userName, attachments: attachments.length > 0 ? attachments : undefined },
       });
 
       // supabase.functions.invoke no lanza excepción: el error viene en el objeto
@@ -660,6 +681,23 @@ const Chat = () => {
             onChange={handleFileSelect}
             className="hidden"
           />
+          {/* Camera capture */}
+          <input
+            ref={cameraInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={handleFileSelect}
+            className="hidden"
+          />
+          <button
+            onClick={() => cameraInputRef.current?.click()}
+            disabled={uploading}
+            className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:opacity-50"
+            title="Tomar foto de comparendo"
+          >
+            <Camera className="h-5 w-5" />
+          </button>
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
