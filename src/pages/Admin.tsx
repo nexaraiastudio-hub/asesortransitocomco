@@ -3,13 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import logo from "@/assets/logo.png";
-import { Users, BarChart3, FileText, ArrowLeft, RefreshCw, Download, UserPlus } from "lucide-react";
+import { Users, BarChart3, FileText, ArrowLeft, RefreshCw, Download, UserPlus, Loader2 } from "lucide-react";
 
-interface Document {
-  id: string;
-  title: string;
-  content: string;
-  created_at: string;
+interface LegalDocument {
+  id: number;
+  titulo: string;
+  contenido: string;
+  anclaje_legal: string | null;
+  tags: string[] | null;
 }
 
 interface UserRow {
@@ -44,14 +45,17 @@ type Tab = "stats" | "users" | "leads" | "documents";
 const Admin = () => {
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("stats");
-  const [documents, setDocuments] = useState<Document[]>([]);
+  const [documents, setDocuments] = useState<LegalDocument[]>([]);
   const [users, setUsers] = useState<UserRow[]>([]);
   const [leads, setLeads] = useState<LeadRow[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [editing, setEditing] = useState<string | null>(null);
+  const [titulo, setTitulo] = useState("");
+  const [contenido, setContenido] = useState("");
+  const [anclajeLegal, setAnclajeLegal] = useState("");
+  const [tagsInput, setTagsInput] = useState("");
+  const [editing, setEditing] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [syncing, setSyncing] = useState(false);
 
   const handleSyncSheets = async () => {
@@ -161,34 +165,75 @@ const Admin = () => {
   };
 
   const loadDocuments = async () => {
-    const { data } = await supabase
-      .from("knowledge_documents")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (data) setDocuments(data);
+    // Load from new conocimiento_legal table via direct fetch (not in generated types yet)
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+
+    const res = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/conocimiento_legal?select=id,titulo,contenido,anclaje_legal,tags&order=id.desc`,
+      {
+        headers: {
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      }
+    );
+    if (res.ok) {
+      const data = await res.json();
+      setDocuments(data);
+    }
   };
 
   const handleSave = async () => {
-    if (!title.trim() || !content.trim()) return;
-    if (editing) {
-      const { error } = await supabase.from("knowledge_documents").update({ title, content }).eq("id", editing);
-      if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
-    } else {
-      const { error } = await supabase.from("knowledge_documents").insert({ title, content });
-      if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    if (!titulo.trim() || !contenido.trim() || saving) return;
+    setSaving(true);
+
+    try {
+      const tags = tagsInput.trim() ? tagsInput.split(",").map(t => t.trim()).filter(Boolean) : null;
+      
+      const { data, error } = await supabase.functions.invoke("generate-embedding", {
+        body: {
+          action: editing ? "update" : "insert",
+          id: editing,
+          titulo: titulo.trim(),
+          contenido: contenido.trim(),
+          anclaje_legal: anclajeLegal.trim() || null,
+          tags,
+        },
+      });
+
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || "Error desconocido");
+
+      setTitulo(""); setContenido(""); setAnclajeLegal(""); setTagsInput(""); setEditing(null);
+      loadDocuments();
+      toast({ title: editing ? "Documento actualizado" : "Documento creado con embedding ✅" });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message || "No se pudo guardar", variant: "destructive" });
+    } finally {
+      setSaving(false);
     }
-    setTitle(""); setContent(""); setEditing(null);
-    loadDocuments();
-    toast({ title: editing ? "Documento actualizado" : "Documento creado" });
   };
 
-  const handleDelete = async (id: string) => {
-    const { error } = await supabase.from("knowledge_documents").delete().eq("id", id);
-    if (!error) { loadDocuments(); toast({ title: "Documento eliminado" }); }
+  const handleDelete = async (id: number) => {
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-embedding", {
+        body: { action: "delete", id },
+      });
+      if (error) throw error;
+      loadDocuments();
+      toast({ title: "Documento eliminado" });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    }
   };
 
-  const handleEdit = (doc: Document) => {
-    setTitle(doc.title); setContent(doc.content); setEditing(doc.id);
+  const handleEdit = (doc: LegalDocument) => {
+    setTitulo(doc.titulo);
+    setContenido(doc.contenido);
+    setAnclajeLegal(doc.anclaje_legal || "");
+    setTagsInput(doc.tags?.join(", ") || "");
+    setEditing(doc.id);
     setTab("documents");
   };
 
@@ -434,37 +479,53 @@ const Admin = () => {
           </div>
         )}
 
-        {/* ========== DOCUMENTS ========== */}
+        {/* ========== DOCUMENTS (conocimiento_legal) ========== */}
         {tab === "documents" && (
           <div className="space-y-6">
             <div className="rounded-xl border border-border bg-card p-4">
               <h2 className="mb-3 text-sm font-bold text-foreground">
-                {editing ? "Editar Documento" : "Nuevo Documento"}
+                {editing ? "Editar Documento Legal" : "Nuevo Documento Legal"}
               </h2>
               <input
                 type="text"
                 placeholder="Título del documento"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                value={titulo}
+                onChange={(e) => setTitulo(e.target.value)}
+                className="mb-3 w-full rounded-lg border border-border bg-secondary px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+              <input
+                type="text"
+                placeholder="Anclaje legal (ej: Ley 769 de 2002, Art. 131)"
+                value={anclajeLegal}
+                onChange={(e) => setAnclajeLegal(e.target.value)}
+                className="mb-3 w-full rounded-lg border border-border bg-secondary px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+              <input
+                type="text"
+                placeholder="Tags separados por coma (ej: casco, motocicleta, multa)"
+                value={tagsInput}
+                onChange={(e) => setTagsInput(e.target.value)}
                 className="mb-3 w-full rounded-lg border border-border bg-secondary px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
               />
               <textarea
-                placeholder="Contenido en Markdown..."
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
+                placeholder="Contenido del documento legal..."
+                value={contenido}
+                onChange={(e) => setContenido(e.target.value)}
                 rows={10}
                 className="mb-3 w-full rounded-lg border border-border bg-secondary px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
               />
               <div className="flex gap-2">
                 <button
                   onClick={handleSave}
-                  className="rounded-lg bg-primary px-6 py-2 text-sm font-bold text-primary-foreground transition-all hover:brightness-110"
+                  disabled={saving}
+                  className="flex items-center gap-2 rounded-lg bg-primary px-6 py-2 text-sm font-bold text-primary-foreground transition-all hover:brightness-110 disabled:opacity-50"
                 >
-                  {editing ? "Actualizar" : "Guardar"}
+                  {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+                  {saving ? "Generando embedding..." : editing ? "Actualizar" : "Guardar con Embedding"}
                 </button>
                 {editing && (
                   <button
-                    onClick={() => { setEditing(null); setTitle(""); setContent(""); }}
+                    onClick={() => { setEditing(null); setTitulo(""); setContenido(""); setAnclajeLegal(""); setTagsInput(""); }}
                     className="rounded-lg border border-border px-6 py-2 text-sm text-muted-foreground hover:text-foreground"
                   >
                     Cancelar
@@ -476,9 +537,18 @@ const Admin = () => {
             <div className="space-y-3">
               {documents.map((doc) => (
                 <div key={doc.id} className="rounded-xl border border-border bg-card p-4">
-                  <h3 className="mb-1 font-bold text-foreground">{doc.title}</h3>
-                  <p className="mb-3 text-xs text-muted-foreground">{formatDate(doc.created_at)}</p>
-                  <p className="mb-3 text-sm text-muted-foreground line-clamp-3">{doc.content.substring(0, 200)}...</p>
+                  <h3 className="mb-1 font-bold text-foreground">{doc.titulo}</h3>
+                  {doc.anclaje_legal && (
+                    <p className="mb-1 text-xs text-accent font-medium">📜 {doc.anclaje_legal}</p>
+                  )}
+                  {doc.tags && doc.tags.length > 0 && (
+                    <div className="mb-2 flex flex-wrap gap-1">
+                      {doc.tags.map((tag, i) => (
+                        <span key={i} className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">{tag}</span>
+                      ))}
+                    </div>
+                  )}
+                  <p className="mb-3 text-sm text-muted-foreground line-clamp-3">{doc.contenido.substring(0, 200)}...</p>
                   <div className="flex gap-2">
                     <button onClick={() => handleEdit(doc)} className="text-xs text-primary hover:underline">Editar</button>
                     <button onClick={() => handleDelete(doc.id)} className="text-xs text-destructive hover:underline">Eliminar</button>
@@ -486,7 +556,7 @@ const Admin = () => {
                 </div>
               ))}
               {documents.length === 0 && (
-                <p className="text-center text-sm text-muted-foreground">No hay documentos cargados aún.</p>
+                <p className="text-center text-sm text-muted-foreground">No hay documentos cargados aún. Los documentos se guardarán con embeddings para búsqueda semántica.</p>
               )}
             </div>
           </div>

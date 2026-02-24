@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      conocimiento_legal: {
+        Row: {
+          anclaje_legal: string | null
+          contenido: string
+          embedding: string | null
+          id: number
+          tags: string[] | null
+          titulo: string
+        }
+        Insert: {
+          anclaje_legal?: string | null
+          contenido: string
+          embedding?: string | null
+          id?: number
+          tags?: string[] | null
+          titulo: string
+        }
+        Update: {
+          anclaje_legal?: string | null
+          contenido?: string
+          embedding?: string | null
+          id?: number
+          tags?: string[] | null
+          titulo?: string
+        }
+        Relationships: []
+      }
       knowledge_documents: {
         Row: {
           content: string
@@ -155,6 +182,20 @@ export type Database = {
         }[]
       }
       admin_get_stats: { Args: never; Returns: Json }
+      buscar_conocimiento: {
+        Args: {
+          match_count: number
+          match_threshold: number
+          query_embedding: string
+        }
+        Returns: {
+          anclaje_legal: string
+          contenido: string
+          id: number
+          similarity: number
+          titulo: string
+        }[]
+      }
       has_active_subscription: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
