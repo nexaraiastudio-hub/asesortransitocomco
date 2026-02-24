@@ -7,26 +7,6 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const docCache = new Map<string, { docs: string; timestamp: number }>();
-const CACHE_TTL = 5 * 60 * 1000;
-
-function extractKeywords(text: string): string[] {
-  const stopWords = new Set([
-    "que", "para", "por", "con", "una", "los", "las", "del", "como", "más",
-    "pero", "sus", "este", "esta", "estos", "estas", "tiene", "puede", "hace",
-    "desde", "sobre", "entre", "cuando", "donde", "cual", "sido", "estar",
-    "haber", "todo", "también", "otro", "otra", "otros", "otras", "cada",
-    "después", "antes", "bien", "solo", "mismo", "ella", "ellos", "nosotros",
-    "hola", "dime", "quiero", "saber", "puedo", "hacer", "tengo", "necesito",
-  ]);
-  return text
-    .toLowerCase()
-    .replace(/[^\w\sáéíóúñü]/g, " ")
-    .split(/\s+/)
-    .filter((w) => w.length > 3 && !stopWords.has(w))
-    .slice(0, 12);
-}
-
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -91,121 +71,82 @@ serve(async (req) => {
       }
     }
 
-    // --- Smart keyword-based document retrieval with generous excerpts ---
-    const keywords = extractKeywords(message);
-    const cacheKey = keywords.sort().join("|");
-
+    // --- Semantic search via embeddings ---
+    const openaiKey = Deno.env.get("OPENAI_API_KEY");
     let knowledgeBase = "";
-    const cached = docCache.get(cacheKey);
-    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-      knowledgeBase = cached.docs;
-    } else {
-      let filterQuery = `${supabaseUrl}/rest/v1/knowledge_documents?select=title,content`;
 
-      if (keywords.length > 0) {
-        const orFilters = keywords.map((kw) =>
-          `content.ilike.*${kw}*,title.ilike.*${kw}*`
-        ).join(",");
-        filterQuery += `&or=(${orFilters})`;
-      }
-
-      filterQuery += `&limit=15`;
-
-      const docsResponse = await fetch(filterQuery, {
+    if (openaiKey) {
+      // Generate embedding for the user's query
+      const embResponse = await fetch("https://api.openai.com/v1/embeddings", {
+        method: "POST",
         headers: {
-          apikey: supabaseServiceKey,
-          Authorization: `Bearer ${supabaseServiceKey}`,
+          Authorization: `Bearer ${openaiKey}`,
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify({
+          model: "text-embedding-ada-002",
+          input: message,
+        }),
       });
 
-      if (!docsResponse.ok) {
-        console.error("Error fetching documents:", docsResponse.status);
-        return new Response(JSON.stringify({ error: "Error al consultar la base de conocimientos" }), {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
+      if (embResponse.ok) {
+        const embData = await embResponse.json();
+        const queryEmbedding = embData.data[0].embedding;
 
-      const documents = await docsResponse.json();
-
-      // Extract generous excerpts around keyword matches
-      const excerptRadius = 3000; // 3000 chars before and after each match
-      const maxTotalChars = 800000; // ~200k tokens, well within 1M limit
-
-      const allExcerpts: { title: string; excerpt: string; score: number }[] = [];
-
-      for (const doc of documents) {
-        const contentLower = doc.content.toLowerCase();
-        const matchPositions: number[] = [];
-
-        for (const kw of keywords) {
-          let pos = 0;
-          while ((pos = contentLower.indexOf(kw, pos)) !== -1) {
-            matchPositions.push(pos);
-            pos += kw.length;
-          }
-        }
-
-        if (matchPositions.length === 0) {
-          // Title match only - include generous beginning
-          allExcerpts.push({
-            title: doc.title,
-            excerpt: doc.content.substring(0, 10000),
-            score: 0.5,
-          });
-          continue;
-        }
-
-        // Merge overlapping regions
-        matchPositions.sort((a, b) => a - b);
-        const regions: { start: number; end: number }[] = [];
-        for (const pos of matchPositions) {
-          const start = Math.max(0, pos - excerptRadius);
-          const end = Math.min(doc.content.length, pos + excerptRadius);
-          if (regions.length > 0 && start <= regions[regions.length - 1].end) {
-            regions[regions.length - 1].end = Math.max(regions[regions.length - 1].end, end);
-          } else {
-            regions.push({ start, end });
-          }
-        }
-
-        // For highly relevant docs (many matches), include more content
-        const maxRegions = matchPositions.length > 5 ? 10 : 5;
-        const excerptParts = regions.slice(0, maxRegions).map((r) => {
-          const prefix = r.start > 0 ? "..." : "";
-          const suffix = r.end < doc.content.length ? "..." : "";
-          return prefix + doc.content.substring(r.start, r.end) + suffix;
+        // Call the semantic search function
+        const serviceClient = createClient(supabaseUrl, supabaseServiceKey);
+        const { data: results, error: searchError } = await serviceClient.rpc("buscar_conocimiento", {
+          query_embedding: JSON.stringify(queryEmbedding),
+          match_threshold: 0.3,
+          match_count: 10,
         });
 
-        allExcerpts.push({
-          title: doc.title,
-          excerpt: excerptParts.join("\n\n"),
-          score: matchPositions.length,
-        });
-      }
-
-      // Sort by relevance
-      allExcerpts.sort((a, b) => b.score - a.score);
-
-      let totalChars = 0;
-      const selectedExcerpts: string[] = [];
-      for (const item of allExcerpts) {
-        if (totalChars + item.excerpt.length > maxTotalChars) break;
-        selectedExcerpts.push(`## ${item.title}\n${item.excerpt}`);
-        totalChars += item.excerpt.length;
-      }
-
-      knowledgeBase = selectedExcerpts.join("\n\n---\n\n");
-
-      docCache.set(cacheKey, { docs: knowledgeBase, timestamp: Date.now() });
-
-      if (docCache.size > 100) {
-        const oldest = [...docCache.entries()].sort((a, b) => a[1].timestamp - b[1].timestamp);
-        for (let i = 0; i < 20; i++) docCache.delete(oldest[i][0]);
+        if (searchError) {
+          console.error("Semantic search error:", searchError);
+        } else if (results && results.length > 0) {
+          knowledgeBase = results
+            .map((r: any) => `## ${r.titulo}${r.anclaje_legal ? ` (${r.anclaje_legal})` : ""}\nSimilitud: ${(r.similarity * 100).toFixed(1)}%\n${r.contenido}`)
+            .join("\n\n---\n\n");
+        }
+      } else {
+        console.error("OpenAI embedding error:", embResponse.status);
       }
     }
 
-    console.log(`Knowledge base size: ${knowledgeBase.length} chars for keywords: [${keywords.join(", ")}]`);
+    // Fallback: if no results from semantic search, try keyword search on old table
+    if (!knowledgeBase) {
+      const keywords = message
+        .toLowerCase()
+        .replace(/[^\w\sáéíóúñü]/g, " ")
+        .split(/\s+/)
+        .filter((w: string) => w.length > 3)
+        .slice(0, 8);
+
+      if (keywords.length > 0) {
+        const orFilters = keywords.map((kw: string) =>
+          `content.ilike.*${kw}*,title.ilike.*${kw}*`
+        ).join(",");
+
+        const filterQuery = `${supabaseUrl}/rest/v1/knowledge_documents?select=title,content&or=(${orFilters})&limit=10`;
+        const docsResponse = await fetch(filterQuery, {
+          headers: {
+            apikey: supabaseServiceKey,
+            Authorization: `Bearer ${supabaseServiceKey}`,
+          },
+        });
+
+        if (docsResponse.ok) {
+          const documents = await docsResponse.json();
+          if (documents.length > 0) {
+            knowledgeBase = documents
+              .map((d: any) => `## ${d.title}\n${d.content.substring(0, 6000)}`)
+              .join("\n\n---\n\n");
+          }
+        }
+      }
+    }
+
+    console.log(`Knowledge base size: ${knowledgeBase.length} chars (semantic search: ${!!Deno.env.get("OPENAI_API_KEY")})`);
 
     // --- AI via Lovable AI Gateway ---
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
