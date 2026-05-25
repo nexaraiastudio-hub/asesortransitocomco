@@ -165,23 +165,20 @@ const Admin = () => {
   };
 
   const loadDocuments = async () => {
-    // Load from new conocimiento_legal table via direct fetch (not in generated types yet)
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return;
+    setLoading(true);
+    // Carga desde la nueva tabla conocimiento_legal usando el cliente tipado
+    const { data, error } = await supabase
+      .from("conocimiento_legal")
+      .select("*")
+      .order("id", { ascending: false });
 
-    const res = await fetch(
-      `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/conocimiento_legal?select=id,titulo,contenido,anclaje_legal,tags&order=id.desc`,
-      {
-        headers: {
-          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      }
-    );
-    if (res.ok) {
-      const data = await res.json();
-      setDocuments(data);
+    if (error) {
+      console.error("Error cargando conocimiento legal:", error);
+      toast({ title: "Error", description: "No se pudieron cargar las leyes", variant: "destructive" });
+    } else {
+      setDocuments(data as unknown as LegalDocument[]);
     }
+    setLoading(false);
   };
 
   const handleSave = async () => {
@@ -190,7 +187,7 @@ const Admin = () => {
 
     try {
       const tags = tagsInput.trim() ? tagsInput.split(",").map(t => t.trim()).filter(Boolean) : null;
-      
+
       const { data, error } = await supabase.functions.invoke("generate-embedding", {
         body: {
           action: editing ? "update" : "insert",
@@ -283,11 +280,10 @@ const Admin = () => {
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
-              className={`flex items-center gap-2 whitespace-nowrap px-4 py-3 text-sm font-medium transition-colors ${
-                tab === t.id
-                  ? "border-b-2 border-primary text-primary"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
+              className={`flex items-center gap-2 whitespace-nowrap px-4 py-3 text-sm font-medium transition-colors ${tab === t.id
+                ? "border-b-2 border-primary text-primary"
+                : "text-muted-foreground hover:text-foreground"
+                }`}
             >
               {t.icon}
               {t.label}
@@ -364,14 +360,12 @@ const Admin = () => {
                       <td className="px-4 py-3 text-foreground">{u.full_name || "—"}</td>
                       <td className="px-4 py-3 text-foreground">{u.email}</td>
                       <td className="px-4 py-3">
-                        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                          u.role === "admin" ? "bg-accent/20 text-accent" : "bg-secondary text-muted-foreground"
-                        }`}>{u.role}</span>
+                        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${u.role === "admin" ? "bg-accent/20 text-accent" : "bg-secondary text-muted-foreground"
+                          }`}>{u.role}</span>
                       </td>
                       <td className="px-4 py-3">
-                        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                          u.subscription_status === "active" ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"
-                        }`}>
+                        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${u.subscription_status === "active" ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"
+                          }`}>
                           {u.subscription_status === "active" ? "Activa" : u.subscription_status === "none" ? "Sin plan" : "Inactiva"}
                         </span>
                       </td>
@@ -392,14 +386,12 @@ const Admin = () => {
                       <p className="font-bold text-foreground">{u.full_name || "—"}</p>
                       <p className="text-xs text-muted-foreground">{u.email}</p>
                     </div>
-                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                      u.role === "admin" ? "bg-accent/20 text-accent" : "bg-secondary text-muted-foreground"
-                    }`}>{u.role}</span>
+                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${u.role === "admin" ? "bg-accent/20 text-accent" : "bg-secondary text-muted-foreground"
+                      }`}>{u.role}</span>
                   </div>
                   <div className="mt-3 flex items-center gap-4 text-xs">
-                    <span className={`rounded-full px-2 py-0.5 font-medium ${
-                      u.subscription_status === "active" ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"
-                    }`}>
+                    <span className={`rounded-full px-2 py-0.5 font-medium ${u.subscription_status === "active" ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"
+                      }`}>
                       {u.subscription_status === "active" ? "Activa" : u.subscription_status === "none" ? "Sin plan" : "Inactiva"}
                     </span>
                     <span className="text-muted-foreground">Vence: {formatDate(u.subscription_end)}</span>
@@ -484,7 +476,7 @@ const Admin = () => {
           <div className="space-y-6">
             <div className="rounded-xl border border-border bg-card p-4">
               <h2 className="mb-3 text-sm font-bold text-foreground">
-                {editing ? "Editar Documento Legal" : "Nuevo Documento Legal"}
+                {editing ? "Editar Ley Élite" : "Nueva Ley de Conocimiento (Élite)"}
               </h2>
               <input
                 type="text"
@@ -556,7 +548,7 @@ const Admin = () => {
                 </div>
               ))}
               {documents.length === 0 && (
-                <p className="text-center text-sm text-muted-foreground">No hay documentos cargados aún. Los documentos se guardarán con embeddings para búsqueda semántica.</p>
+                <p className="text-center text-sm text-muted-foreground">No hay leyes cargadas en la base de datos de élite aún. Utiliza el formulario de arriba para sembrar conocimiento.</p>
               )}
             </div>
           </div>

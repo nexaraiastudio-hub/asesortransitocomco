@@ -48,6 +48,24 @@ npm run dev
 - Click on the "Code" button (green button) near the top right.
 - Select the "Codespaces" tab.
 - Click on "New codespace" to launch a new Codespace environment.
+
+
+## Environment variables & embeddings script
+
+This project uses a `.env` file (ignored by Git, see `.gitignore`) for secrets. Copy `.env.example` and fill in your keys:
+
+```env
+SUPABASE_SERVICE_KEY=your_supabase_service_key_here
+OPENAI_API_KEY=your_openai_api_key_here
+```
+
+Once the variables are set, you can generate AI embeddings for the `conocimiento_legal` table by running:
+
+```bash
+node scripts/generar-embeddings.js
+```
+
+The script will look for rows with a null `embedding` column, call OpenAI’s embeddings endpoint, and update Supabase accordingly.
 - Edit files directly within the Codespace and commit and push your changes once you're done.
 
 ## What technologies are used for this project?

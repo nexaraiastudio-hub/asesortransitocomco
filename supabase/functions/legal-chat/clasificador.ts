@@ -114,6 +114,7 @@ export async function clasificarConsulta(
     subsanableEnSitio: raw.subsanableEnSitio ?? false,
     resumenHechos: raw.resumenHechos || "",
     arquetipo: arquetipoDetectado,
+    modo: arquetipoDetectado === "OFICIAL_CORRECTO" ? "B" : "A",
   };
 
   const t1 = performance.now();

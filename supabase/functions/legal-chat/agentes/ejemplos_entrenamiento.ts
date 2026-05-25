@@ -285,7 +285,6 @@ Para evaluar tu situación y buscar la mejor estrategia legal necesito que me co
   fase2_usuario: "Es una moto, dicen que tienen un video de una cámara de seguridad del sector, no hubo accidentes, estoy en el lugar",
   fase2_respuesta: `Esta es una situación de alto riesgo legal que requiere que actúes con estrategia.
 
-Los piques o carreras ilegales en vía pública están tipificados como infracción gravísima en el Artículo 131 de la Ley 769 de 2002, con sanción de suspensión de la licencia de conducción entre doce y veinticuatro meses, multa de treinta SMLDV y posible inmovilización del vehículo. Si además hubo peligro para peatones u otros vehículos, puede configurarse la conducta penal de puesta en peligro de la vida o integridad de las personas en el tránsito terrestre.
 
 Dígale exactamente esto al oficial:
 
@@ -324,7 +323,6 @@ El Seguro Obligatorio de Accidentes de Tránsito (SOAT) es un requisito legal ob
 
 Lo que procede legalmente:
 • Código de infracción: C.02
-• Sanción: Multa de 30 Salarios Mínimos Legales Diarios Vigentes (SMLDV)
 • La inmovilización del vehículo es legal y se mantendrá hasta que presentes el SOAT vigente ante la autoridad correspondiente
 
 Tu mejor estrategia ahora mismo:
@@ -386,7 +384,6 @@ Para evaluar tu situación necesito que me confirmes lo siguiente:
 Con una lectura de 0.12 mg/L de alcohol en aire expirado con alcohosensor certificado y calibrado, estás en grado 2 de embriaguez conforme a la Ley 1696 de 2013 y la Resolución 1844 de 2015. La prueba técnica es válida, el procedimiento está dentro del marco legal y no existe defensa técnica viable contra el fondo de este comparendo.
 
 Las consecuencias reales que debes conocer:
-• Grado 2 (0.10 a 0.149 mg/L): Multa de 45 Salarios Mínimos Legales Diarios Vigentes
 • Suspensión de la licencia de conducción entre 1 y 3 años según reincidencia
 • Inmovilización del vehículo: legal y obligatoria
 • Si hay accidente: las consecuencias se agravan significativamente
@@ -423,7 +420,6 @@ La Resolución 3777 de 2003 establece que los vidrios laterales delanteros deben
 
 Lo que procede legalmente:
 • Código de infracción: B.10
-• Sanción: Multa de 8 Salarios Mínimos Legales Diarios Vigentes
 • No procede la inmovilización del vehículo
 
 Tu mejor estrategia ahora mismo:
@@ -454,7 +450,6 @@ La Resolución 3027 de 2010 y la Norma Técnica Colombiana NTC 5375 establecen q
 
 Consecuencias legales:
 • Código de infracción: C.04
-• Sanción: Multa de 15 Salarios Mínimos Legales Diarios Vigentes
 • La inmovilización de la motocicleta es legal y obligatoria por seguridad vial. Esta falta no es subsanable en sitio.
 
 Tu plan de acción inmediato:
@@ -507,7 +502,6 @@ El Artículo 94 de la Ley 769 de 2002 establece claramente que las motocicletas 
 
 Implicaciones legales:
 • Código de infracción: D.05 (Transitar sobre andenes, plazas o ciclorrutas)
-• Sanción: Multa de 30 Salarios Mínimos Legales Diarios Vigentes (SMLDV)
 • Procede la inmovilización de la motocicleta
 
 Tu plan de acción:
@@ -538,7 +532,6 @@ El Artículo 94 de la Ley 769 de 2002 exige que las bicicletas utilicen las vía
 
 Consecuencias:
 • Código de infracción: A.04 (o similares para ciclistas)
-• Sanción: Multa equivalente a 4 Salarios Mínimos Legales Diarios Vigentes
 • Como ciclista, el oficial puede retener la bicicleta si considera que existe peligro inminente
 
 Qué debes hacer:

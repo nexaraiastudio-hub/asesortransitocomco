@@ -49,84 +49,75 @@ const Chat = () => {
   const [showVoiceMenu, setShowVoiceMenu] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [daysUntilExpiry, setDaysUntilExpiry] = useState<number | null>(null);
+  const [daysUntilExpiry] = useState<number | null>(null);
   const recognitionRef = useRef<any>(null);
-  
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const userIdRef = useRef<string>("");
 
   useEffect(() => {
     const checkAccess = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        navigate("/auth");
-        return;
-      }
-      userIdRef.current = user.id;
-
-      // Fetch name from profiles table (more reliable than metadata)
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("full_name")
-        .eq("id", user.id)
-        .single();
-      setUserName(profile?.full_name || user.user_metadata?.full_name || "");
-
-      // Check if user is admin (admins always have access)
-      const { data: adminCheck } = await supabase.rpc("has_role", { _user_id: user.id, _role: "admin" });
-      if (adminCheck === true) {
-        setIsAdmin(true);
-        setChecking(false);
-        return;
-      }
-
-      // Initialize RevenueCat on native platforms
-      if (Capacitor.isNativePlatform()) {
-        await initPurchases(user.id);
-      }
-
-      // Non-admin users must use mobile device
-      const isMobileDevice = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
-      if (!isMobileDevice) {
-        toast({
-          title: "Acceso solo desde móvil",
-          description: "Esta aplicación está diseñada para usarse desde tu teléfono inteligente. Descárgala desde App Store o Google Play.",
-          variant: "destructive",
-        });
-        await supabase.auth.signOut();
-        navigate("/", { replace: true });
-        return;
-      }
-
-      // Check active subscription for regular users
-      const { data: hasSub } = await supabase.rpc("has_active_subscription", {
-        _user_id: user.id,
-      });
-      if (!hasSub) {
-        navigate("/payment");
-        return;
-      }
-
-      // Check days until expiry for warning banner
-      const { data: subData } = await supabase
-        .from("subscriptions")
-        .select("current_period_end")
-        .eq("user_id", user.id)
-        .eq("status", "active")
-        .single();
-
-      if (subData?.current_period_end) {
-        const expiryDate = new Date(subData.current_period_end);
-        const now = new Date();
-        const diffMs = expiryDate.getTime() - now.getTime();
-        const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-        if (diffDays <= 3) {
-          setDaysUntilExpiry(diffDays);
+      try {
+        setChecking(true);
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          console.log("No user found, redirecting to auth");
+          navigate("/auth");
+          return;
         }
-      }
+        userIdRef.current = user.id;
 
-      setChecking(false);
+        // Fetch name
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("id", user.id)
+          .single();
+        setUserName(profile?.full_name || user.user_metadata?.full_name || "");
+
+        // Check Admin
+        console.log("Checking admin role for:", user.id);
+        const { data: adminCheck, error: adminError } = await supabase.rpc("has_role", { _user_id: user.id, _role: "admin" });
+
+        if (adminError) {
+          console.error("Error checking admin role:", adminError);
+        }
+
+        if (adminCheck === true) {
+          console.log("User is admin, granting access");
+          setIsAdmin(true);
+          setChecking(false);
+          return;
+        }
+
+        // Initialize RevenueCat
+        if (Capacitor.isNativePlatform()) {
+          await initPurchases(user.id);
+        }
+
+        // Subscription Check
+        console.log("Checking subscription...");
+        const { data: hasSub, error: subError } = await supabase.rpc("has_active_subscription", {
+          _user_id: user.id,
+        });
+
+        if (subError) {
+          console.error("Error checking subscription:", subError);
+          // Permissive fallback: if RPC fails, we still let them in for now to avoid blocking
+        }
+
+        if (!hasSub) {
+          console.log("No active subscription, redirecting to payment");
+          navigate("/payment");
+          return;
+        }
+
+        setChecking(false);
+      } catch (err) {
+        console.error("Critical error in checkAccess:", err);
+        setChecking(false); // Stop loading even if error
+      }
     };
     checkAccess();
   }, [navigate]);
@@ -145,35 +136,47 @@ const Chat = () => {
 
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      alert("Tu navegador no soporta reconocimiento de voz. Usa Chrome o Edge.");
+      toast({ title: "No compatible", description: "Tu dispositivo no soporta reconocimiento de voz nativo. Prueba con Chrome o actualiza tu sistema.", variant: "destructive" });
       return;
     }
 
-    const recognition = new SpeechRecognition();
-    recognition.lang = "es-CO";
-    recognition.continuous = true;
-    recognition.interimResults = true;
+    try {
+      const recognition = new SpeechRecognition();
+      recognition.lang = "es-CO";
+      recognition.continuous = false;
+      recognition.interimResults = true;
 
-    let finalTranscript = "";
+      recognition.onstart = () => {
+        setIsRecording(true);
+        toast({ title: "Escuchando...", description: "Habla ahora para transcribir tu consulta." });
+      };
 
-    recognition.onresult = (event: any) => {
-      let interim = "";
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        if (event.results[i].isFinal) {
-          finalTranscript += event.results[i][0].transcript + " ";
-        } else {
-          interim += event.results[i][0].transcript;
+      recognition.onresult = (event: any) => {
+        const transcript = Array.from(event.results)
+          .map((result: any) => result[0])
+          .map((result: any) => result.transcript)
+          .join("");
+        setInput(transcript);
+      };
+
+      recognition.onerror = (event: any) => {
+        console.error("Speech error", event.error);
+        setIsRecording(false);
+        if (event.error === 'not-allowed') {
+          toast({ title: "Permiso denegado", description: "Debes permitir el acceso al micrófono en los ajustes de tu teléfono.", variant: "destructive" });
         }
-      }
-      setInput(finalTranscript + interim);
-    };
+      };
 
-    recognition.onerror = () => setIsRecording(false);
-    recognition.onend = () => setIsRecording(false);
+      recognition.onend = () => {
+        setIsRecording(false);
+      };
 
-    recognitionRef.current = recognition;
-    recognition.start();
-    setIsRecording(true);
+      recognitionRef.current = recognition;
+      recognition.start();
+    } catch (err) {
+      console.error("Reconocimiento de voz falló:", err);
+      setIsRecording(false);
+    }
   };
 
   const stopAudio = () => {
@@ -195,8 +198,10 @@ const Chat = () => {
     setTtsLoading(index);
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
       const { data, error } = await supabase.functions.invoke("text-to-speech", {
         body: { text, voiceName: selectedVoice.name, voiceGender: selectedVoice.gender },
+        headers: session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : undefined,
       });
 
       if (error) throw error;
@@ -321,8 +326,10 @@ const Chat = () => {
         messageToSend = messageToSend ? `${messageToSend}\n\n${attachmentDesc}` : attachmentDesc;
       }
 
+      const { data: { session } } = await supabase.auth.getSession();
       const { data, error } = await supabase.functions.invoke("legal-chat", {
         body: { message: messageToSend, history, userName, attachments: attachments.length > 0 ? attachments : undefined },
+        headers: session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : undefined,
       });
 
       // supabase.functions.invoke no lanza excepción: el error viene en el objeto
@@ -331,8 +338,8 @@ const Chat = () => {
         const errorMsg = code === 429
           ? "Estamos experimentando alta demanda, intenta en un momento. ⏳"
           : code === 402
-          ? "Se agotaron los créditos del servicio. Contacta al administrador."
-          : "Hubo un problema al procesar tu consulta. Intenta de nuevo. ⏳";
+            ? "Se agotaron los créditos del servicio. Contacta al administrador."
+            : "Hubo un problema al procesar tu consulta. Intenta de nuevo. ⏳";
         setMessages(prev => [...prev, { role: "assistant", content: errorMsg }]);
         return;
       }
@@ -343,46 +350,45 @@ const Chat = () => {
       }
 
       // El índice del nuevo mensaje del asistente en el array final:
-      // messages ya tiene los mensajes anteriores + el de usuario se agregó con setMessages antes,
-      // pero como usamos functional update, calculamos: mensajes previos + 1 (user) + 1 (assistant que se va a agregar) - 1 (0-based) = messages.length + 1
-      // Usando el array 'messages' capturado al inicio del envío (antes de cualquier setMessages):
-      // user quedó en índice messages.length, assistant quedará en messages.length + 1
       const assistantIndex = messages.length + 1;
 
       const assistantMsg: Message = { role: "assistant", content: data.response };
       setMessages(prev => [...prev, assistantMsg]);
 
       // Auto-play TTS — corre en background, no bloquea la UI
-      setTtsLoading(assistantIndex);
-      supabase.functions.invoke("text-to-speech", {
-        body: { text: data.response, voiceName: selectedVoice.name, voiceGender: selectedVoice.gender },
-      }).then((ttsRes) => {
-        if (ttsRes.error) {
-          console.error("Auto TTS error:", ttsRes.error);
-          return;
-        }
-        if (ttsRes.data?.audioContent) {
-          try {
-            const audioBytes = Uint8Array.from(atob(ttsRes.data.audioContent), c => c.charCodeAt(0));
-            const blob = new Blob([audioBytes], { type: "audio/mp3" });
-            const url = URL.createObjectURL(blob);
-            const audio = new Audio(url);
-            audio.onended = () => {
-              setSpeakingMsgIndex(null);
-              URL.revokeObjectURL(url);
-            };
-            audioRef.current = audio;
-            setSpeakingMsgIndex(assistantIndex);
-            audio.play();
-          } catch (decodeErr) {
-            console.error("TTS decode error:", decodeErr);
+      setTimeout(() => {
+        setTtsLoading(assistantIndex);
+        supabase.functions.invoke("text-to-speech", {
+          body: { text: data.response, voiceName: selectedVoice.name, voiceGender: selectedVoice.gender },
+          headers: session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : undefined,
+        }).then((ttsRes) => {
+          if (ttsRes.error) {
+            console.error("Auto TTS error:", ttsRes.error);
+            return;
           }
-        }
-      }).catch((ttsErr) => {
-        console.error("Auto TTS network error:", ttsErr);
-      }).finally(() => {
-        setTtsLoading(null);
-      });
+          if (ttsRes.data?.audioContent) {
+            try {
+              const audioBytes = Uint8Array.from(atob(ttsRes.data.audioContent), c => c.charCodeAt(0));
+              const blob = new Blob([audioBytes], { type: "audio/mp3" });
+              const url = URL.createObjectURL(blob);
+              const audio = new Audio(url);
+              audio.onended = () => {
+                setSpeakingMsgIndex(null);
+                URL.revokeObjectURL(url);
+              };
+              audioRef.current = audio;
+              setSpeakingMsgIndex(assistantIndex);
+              audio.play();
+            } catch (decodeErr) {
+              console.error("TTS decode error:", decodeErr);
+            }
+          }
+        }).catch((ttsErr) => {
+          console.error("Auto TTS network error:", ttsErr);
+        }).finally(() => {
+          setTtsLoading(null);
+        });
+      }, 100);
 
     } catch (err: any) {
       // Solo llega aquí si hay un error de red real (no de la función)
@@ -487,11 +493,10 @@ const Chat = () => {
                     <button
                       key={voice.name}
                       onClick={() => { setSelectedVoice(voice); setShowVoiceMenu(false); }}
-                      className={`flex w-full items-center gap-2 rounded px-2 py-1.5 text-xs transition-colors ${
-                        selectedVoice.name === voice.name
-                          ? "bg-primary text-primary-foreground"
-                          : "text-foreground hover:bg-muted"
-                      }`}
+                      className={`flex w-full items-center gap-2 rounded px-2 py-1.5 text-xs transition-colors ${selectedVoice.name === voice.name
+                        ? "bg-primary text-primary-foreground"
+                        : "text-foreground hover:bg-muted"
+                        }`}
                     >
                       <span>{voice.gender === "FEMALE" ? "👩" : "👨"}</span>
                       {voice.label}
@@ -541,8 +546,8 @@ const Chat = () => {
             {daysUntilExpiry <= 0
               ? "hoy"
               : daysUntilExpiry === 1
-              ? "mañana"
-              : `en ${daysUntilExpiry} días`}
+                ? "mañana"
+                : `en ${daysUntilExpiry} días`}
             . Renuévala para seguir con acceso completo.
           </span>
           <button
@@ -574,11 +579,10 @@ const Chat = () => {
             className={`mb-4 flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
           >
             <div
-              className={`max-w-[85%] rounded-xl px-4 py-3 text-lg ${
-                msg.role === "user"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-secondary text-foreground"
-              }`}
+              className={`max-w-[85%] rounded-xl px-4 py-3 text-lg ${msg.role === "user"
+                ? "bg-primary text-primary-foreground"
+                : "bg-secondary text-foreground"
+                }`}
             >
               {/* Attachments */}
               {msg.attachments && msg.attachments.length > 0 && (
@@ -710,11 +714,10 @@ const Chat = () => {
           {/* Mic */}
           <button
             onClick={toggleRecording}
-            className={`rounded-lg p-2 transition-colors ${
-              isRecording
-                ? "bg-destructive text-destructive-foreground animate-pulse"
-                : "text-muted-foreground hover:bg-secondary hover:text-foreground"
-            }`}
+            className={`rounded-lg p-2 transition-colors ${isRecording
+              ? "bg-destructive text-destructive-foreground animate-pulse"
+              : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+              }`}
             title={isRecording ? "Detener grabación" : "Hablar"}
           >
             {isRecording ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}

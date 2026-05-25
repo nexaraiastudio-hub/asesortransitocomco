@@ -625,12 +625,35 @@ REGLAS CRÍTICAS:
 }
 
 function construirPromptFase3(basePrompt: string, norma: NormativaTema | null, analisis: ClasificacionConsulta, historial: ChatMessage[]): string {
+  const esModoB = analisis.modo === "B";
+  
   // Construir texto de normas específicas
   const normasTexto = norma?.normas?.length 
     ? norma.normas.join(", ") 
     : "Resolución 3777 de 2003";
   
   const metodoLegal = norma?.metodo_legal || "equipo técnico calibrado";
+
+  if (esModoB) {
+    return `${basePrompt}
+
+FASE 3: CONTINGENCIA / CIERRE - INSTRUCCIONES
+
+El oficial procederá con el comparendo y la inmovilización, lo cual es COMPLETAMENTE LEGAL para esta infracción.
+
+ESTRUCTURA DE RESPUESTA:
+1. Reafirma que el procedimiento del oficial está ajustado a la ley y NO constituye abuso de autoridad.
+2. Aconseja al usuario firmar el comparendo y el inventario de la grúa.
+3. Recuerda que no existen fundamentos legales para una impugnación exitosa en este caso específico, pues la conducta es evidente.
+4. Sugiere realizar el pago con descuento (50%) haciendo el curso pedagógico (no menciones el valor de la multa en dinero).
+5. Cierre FIJO EXACTO: "Si tienes alguna otra duda sobre tus derechos, aquí estaré. Recuerda siempre respetar las normas de tránsito."
+
+REGLAS CRÍTICAS:
+- PROHIBIDO MENCIONAR DINERO O VALORES DE MULTAS.
+- NO generes modelos de impugnación.
+- NO sugieras firmar "Bajo Protesta".
+- NO hables de abuso de autoridad ni amenaces al oficial con leyes penales.`;
+  }
   
   return `${basePrompt}
 

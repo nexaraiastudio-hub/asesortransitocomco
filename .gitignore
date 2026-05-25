@@ -19,6 +19,9 @@ build/
 *.env
 supabase/.env
 
+# Scripts de utilidad con posibles credenciales
+sembrar_conocimiento.js
+
 # Mobile (Capacitor/Android/iOS)
 android/
 ios/

@@ -1,0 +1,156 @@
+[
+  {
+    "id": 1,
+    "titulo": "Choques Simples (Ley 2251/22)",
+    "contenido": "En accidentes de solo daños materiales, es obligatorio retirar los vehículos para no bloquear la vía. Se deben tomar fotos/videos como prueba.",
+    "anclaje_legal": "Ley 2251 de 2022",
+    "tags": ["choque", "daños"]
+  },
+  {
+    "id": 2,
+    "titulo": "Registro de Vehículos",
+    "contenido": "La policía puede registrar el vehículo por seguridad, pero no puede desarmar partes ni abrir compartimentos cerrados sin sospecha fundada.",
+    "anclaje_legal": "Art. 158 Ley 1801",
+    "tags": ["requisa", "policía"]
+  },
+  {
+    "id": 3,
+    "titulo": "Fotomultas",
+    "contenido": "Requieren plena identificación del infractor según la Sentencia C-038 de 2020. El dueño no siempre es el responsable.",
+    "anclaje_legal": "Sentencia C-038/20",
+    "tags": ["fotomulta", "nulo"]
+  },
+  {
+    "id": 4,
+    "titulo": "Motos y Casco",
+    "contenido": "La Ley 2435 de 2024 prohíbe la inmovilización si el casco cumple la norma técnica y la falta es subsanable.",
+    "anclaje_legal": "Ley 2435 de 2024",
+    "tags": ["motos", "casco"]
+  },
+  {
+    "id": 5,
+    "titulo": "Documentos RUNT",
+    "contenido": "Los documentos pueden presentarse en formato digital mediante consulta en tiempo real en la plataforma RUNT.",
+    "anclaje_legal": "Circular MinTransporte",
+    "tags": ["licencia", "runt"]
+  },
+  {
+    "id": 6,
+    "titulo": "Inmovilización y Patios",
+    "contenido": "Si la causa de la inmovilización se puede corregir en el sitio, el agente debe permitirlo para evitar el traslado a patios.",
+    "anclaje_legal": "Art. 125 CNT",
+    "tags": ["grúa", "patios"]
+  },
+  {
+    "id": 7,
+    "titulo": "Impugnación de Comparendos",
+    "contenido": "Existen términos de 5 a 11 días para solicitar audiencia de descargos tras un comparendo.",
+    "anclaje_legal": "Art. 135 CNT",
+    "tags": ["audiencia", "impugnar"]
+  },
+  {
+    "id": 8,
+    "titulo": "Vehículos de Carga",
+    "contenido": "Uso obligatorio de remesa y manifiesto. Básculas deben estar acreditadas por la ONAC.",
+    "anclaje_legal": "Decreto 1079/15",
+    "tags": ["carga", "camión"]
+  },
+  {
+    "id": 9,
+    "titulo": "Servicio Público",
+    "contenido": "Se requiere tarjeta de operación y seguros específicos. La informalidad debe ser probada con el pago del servicio.",
+    "anclaje_legal": "Ley 336/96",
+    "tags": ["taxi", "especial"]
+  },
+  {
+    "id": 10,
+    "titulo": "Micromovilidad",
+    "contenido": "Bicicletas y scooters tienen derecho a ocupar un carril. El casco es obligatorio en horarios nocturnos.",
+    "anclaje_legal": "Ley 1811/16",
+    "tags": ["bici", "scooter"]
+  },
+  {
+    "id": 11,
+    "titulo": "Alcoholemia",
+    "contenido": "Protocolo de Medicina Legal exige tiempo de espera y segunda prueba. La negativa acarrea la máxima sanción.",
+    "anclaje_legal": "Ley 1696/13",
+    "tags": ["alcohol", "retén"]
+  },
+  {
+    "id": 12,
+    "titulo": "Calibración de Equipos",
+    "contenido": "Todos los radares y alcohosensores deben tener certificado de calibración vigente para ser prueba válida.",
+    "anclaje_legal": "Ley 1843/17",
+    "tags": ["radar", "onac"]
+  },
+  {
+    "id": 13,
+    "titulo": "Ética y Defensa del Conductor",
+    "contenido": "Mantener respeto, grabar el procedimiento y exigir el debido proceso son derechos fundamentales del conductor.",
+    "anclaje_legal": "Art. 29 CP",
+    "tags": ["abuso", "grabar"]
+  },
+  {
+    "id": 14,
+    "titulo": "Peatones",
+    "contenido": "El peatón tiene prelación en la vía. El sistema seguro prioriza la vida sobre el flujo vehicular.",
+    "anclaje_legal": "Ley 2251/22",
+    "tags": ["peatón", "paso"]
+  },
+  {
+    "id": 15,
+    "titulo": "Caducidad y Prescripción de Multas",
+    "contenido": "Las multas vencen al año si no hay sanción (caducidad) o a los 3-6 años si no se cobran (prescripción).",
+    "anclaje_legal": "Art. 159 CNT",
+    "tags": ["simit", "borrar"]
+  },
+  {
+    "id": 16,
+    "titulo": "Derecho al Silencio",
+    "contenido": "Nadie está obligado a declarar contra sí mismo ni contra sus parientes. El agente no puede interrogarte sobre tu destino, trabajo o vida privada en un retén.",
+    "anclaje_legal": "Artículo 33 Constitución Política",
+    "tags": ["interrogatorio", "preguntas", "retén", "hablar", "silencio", "policía", "guarda", "interrogar"]
+  },
+  {
+    "id": 17,
+    "titulo": "Límites a la Requisa",
+    "contenido": "El registro de vehículos es preventivo y superficial. La policía no puede abrir compartimentos sellados, maletas o desvalijar el carro sin orden judicial o flagrancia.",
+    "anclaje_legal": "Sentencia C-789 de 2006",
+    "tags": ["requisa", "revisar", "baúl", "maleta", "inspección", "registro", "abrir", "carro", "vehículo"]
+  },
+  {
+    "id": 18,
+    "titulo": "Derecho a Grabar",
+    "contenido": "Es legal grabar todo procedimiento policial. El agente no puede impedirlo, borrar el video ni quitarte el celular. La transparencia es un derecho.",
+    "anclaje_legal": "Artículo 21 Ley 1801 de 2016",
+    "tags": ["grabar", "video", "celular", "evidencia", "filmar", "cámara", "procedimiento", "policía"]
+  },
+  {
+    "id": 19,
+    "titulo": "Debido Proceso y Pruebas",
+    "contenido": "Toda multa debe basarse en pruebas técnicas y objetivas. Las apreciaciones visuales subjetivas del agente sin equipo calibrado son nulas.",
+    "anclaje_legal": "Art. 29 Constitución / Art. 161 CNT",
+    "tags": ["prueba", "técnica", "ojo", "ilegal", "nulo", "debido proceso", "subjetivo", "legalidad"]
+  },
+  {
+    "id": 20,
+    "titulo": "Inmovilización y Grúas",
+    "contenido": "Si el conductor llega antes de que la grúa inicie el recorrido, el agente DEBE entregar el vehículo y solo imponer el comparendo sin llevarse el carro.",
+    "anclaje_legal": "Artículo 127 Código Nacional de Tránsito",
+    "tags": ["grúa", "inmovilizar", "parqueadero", "llevarse el carro", "patio", "enganchar"]
+  },
+  {
+    "id": 21,
+    "titulo": "Accidentes con Heridos",
+    "contenido": "En accidentes con heridos o muertos es obligatorio el levantamiento del IPAT por el agente quien actúa como policía judicial. No se mueven los vehículos.",
+    "anclaje_legal": "Artículo 144 y 148 CNT",
+    "tags": ["heridos", "muertos", "ambulancia", "víctimas", "IPAT", "croquis", "accidente grave"]
+  },
+  {
+    "id": 22,
+    "titulo": "SYSTEM_PROMPT",
+    "contenido": "ROL:\r\n  Abogado Penalista y de Tránsito de élite en Colombia. Creado por Nexara IA Studio. Tono: Profesional, asertivo, táctico y protector.\r\n\r\n  REGLAS DE COMPORTAMIENTO:\r\n\r\n  Identidad del Usuario: Saluda siempre usando el nombre: \"{userName}\". PROHIBIDO usar el correo electrónico.\r\n\r\n  Jerarquía Jurídica: Constitución Política > Ley 769 de 2002 (CNT) > Resoluciones > Manual de Señalización.\r\n\r\n  Regla de Oro (Fuentes): Citar obligatoriamente el Artículo, Sentencia o Resolución exacta de la base de datos de conocimiento. Si no existe en la base, indicar que no\r\n   se tiene la fuente para validarlo.\r\n\r\n  No Alucinación: No inventar leyes ni mezclar argumentos técnicos.\r\n\r\n  INSTRUCCIONES DE RESPUESTA:\r\n\r\n  Saludo y Alerta: Saludo personalizado + \"¡ACTIVA TU CÁMARA YA!\".\r\n  Identificación Legal: Código de infracción y procedimiento arbitrario.\r\n  Script de Defensa: Texto entre comillas para el oficial.\r\n  Protocolo de Evidencia: Qué grabar y fotografiar.\r\n  Observación en Comparendo: Texto para observaciones.\r\n  Impugnación: Plazo de 5 días hábiles.",
+    "anclaje_legal": "SYSTEM_PROMPT",
+    "tags": ["system"]
+  }
+]

@@ -1,0 +1,2 @@
+cron: "0 8 * * 1,4"   # lunes y jueves 08:00
+command: "python ./skills/colombia-transit-norms-tracker/check_db.py"

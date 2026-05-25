@@ -11,7 +11,7 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
-  const [phone, setPhone] = useState("");
+
   const [loading, setLoading] = useState(false);
 
   const handleForgotPassword = async (e: React.FormEvent) => {
@@ -52,19 +52,34 @@ const Auth = () => {
           throw error;
         }
 
-        // Check if user is admin → go directly to chat (Chat.tsx handles access control)
+        // Verificar si el usuario es admin → va directo al chat
         if (signInData.user) {
-          const { data: isAdmin } = await supabase.rpc("has_role", {
+          const { data: isAdmin, error: adminError } = await supabase.rpc("has_role", {
             _user_id: signInData.user.id,
             _role: "admin",
           });
-          if (isAdmin) {
+
+          console.log("[Auth] Admin check:", { isAdmin, adminError, userId: signInData.user.id });
+
+          if (isAdmin === true) {
+            console.log("[Auth] Usuario admin detectado → redirigiendo al chat");
+            navigate("/chat");
+            return;
+          }
+
+          // Si el RPC falla, verificar también suscripción activa
+          const { data: hasSub } = await supabase.rpc("has_active_subscription", {
+            _user_id: signInData.user.id,
+          });
+
+          if (hasSub === true) {
+            console.log("[Auth] Usuario con suscripción activa → redirigiendo al chat");
             navigate("/chat");
             return;
           }
         }
 
-        // Regular users go to payment page (Chat.tsx will verify subscription)
+        // Usuarios sin suscripción ni rol admin → pantalla de pago
         navigate("/payment");
       } else {
         const { data, error } = await supabase.auth.signUp({
@@ -81,7 +96,6 @@ const Auth = () => {
               user_id: data.user.id,
               full_name: fullName,
               email,
-              phone,
               source: "registro",
             },
           });
@@ -154,13 +168,7 @@ const Auth = () => {
                   required
                   className="w-full rounded-lg border border-border bg-secondary px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                 />
-                <input
-                  type="tel"
-                  placeholder="Teléfono (ej: 300 123 4567)"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full rounded-lg border border-border bg-secondary px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                />
+
               </>
             )}
             <input
