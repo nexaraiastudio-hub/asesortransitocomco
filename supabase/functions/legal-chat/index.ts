@@ -12,6 +12,9 @@ import {
   construirCasoDesdeHistorial, 
   formatearCasosParaPrompt 
 } from "./memoria_casos.ts";
+import { recuperarNormativa } from "./agentes/agente_leyes.ts";
+import { generarPromptDefensa } from "./agentes/agente_defensa.ts";
+import { generarPromptCumplimiento } from "./agentes/agente_cumplimiento.ts";
 
 // CONFIGURACION Y CONSTANTES
 
@@ -123,8 +126,8 @@ serve(async (req) => {
       );
     }
 
-    // 2. EXTRACCION DE MARCO LEGAL
-    const normativaTema = BASE_NORMATIVA[clasificacion.tema] || null;
+    // 2. EXTRACCION DE MARCO LEGAL (A travs del Agente de Leyes)
+    const normativaTema = recuperarNormativa(clasificacion.tema || "general");
     
     // BÚSQUEDA DINÁMICA EN BASE DE DATOS (RAG)
     let contextoDB = "";
@@ -307,13 +310,13 @@ DATOS DEL CASO:
       promptEspecifico = construirPromptFase1(basePrompt, norma, analisis);
       break;
     case 2:
-      promptEspecifico = construirPromptFase2(basePrompt, norma, analisis);
-      break;
     case "2b":
-      promptEspecifico = construirPromptFase2b(basePrompt, norma, analisis, historial);
-      break;
     case 3:
-      promptEspecifico = construirPromptFase3(basePrompt, norma, analisis, historial);
+      if (analisis.modo === "B") {
+        promptEspecifico = generarPromptCumplimiento(basePrompt, norma || { descripcion: "", normas: [], sancion: "", subsanable: false, preguntas_fase1: [] }, analisis, historial, fase);
+      } else {
+        promptEspecifico = generarPromptDefensa(basePrompt, norma || { descripcion: "", normas: [], sancion: "", subsanable: false, preguntas_fase1: [] }, analisis, historial, fase);
+      }
       break;
     case 4:
       promptEspecifico = construirPromptFase4(basePrompt, norma, analisis, historial);
@@ -391,180 +394,7 @@ REGLAS CRÍTICAS DE INTELIGENCIA:
 - Sé conversacional, racional y directo.`;
 }
 
-function construirPromptFase2(basePrompt: string, norma: NormativaTema | null, analisis: ClasificacionConsulta): string {
-  const esModoB = analisis.modo === "B";
-  
-  // Construir texto de normas específicas
-  const normasTexto = norma?.normas?.length 
-    ? norma.normas.join(", ") 
-    : "Resolución 3777 de 2003, Resolución 3443 de 2008";
-  
-  const metodoLegal = norma?.metodo_legal || "fotómetro o luxómetro calibrado";
-  const metodoInvalido = norma?.metodo_invalido || "apreciación visual, a simple vista";
-const codigoInfraccion = norma?.codigo_infraccion || "[Sujeto a clasificación exacta por el agente en el comparendo]";
-  
-  return `${basePrompt}
-
-FASE 2: ANALISIS + GUION DE VOZ - INSTRUCCIONES
-
-MODO DE OPERACION: ${esModoB ? "B (Asesoría Honesta)" : "A (Defensa Agresiva)"}
-
-NORMAS APLICABLES AL CASO (USA ESTAS EXACTAS):
-- Normas: ${normasTexto}
-- Método legal requerido: ${metodoLegal}
-- Método usado por el oficial (inválido): ${analisis.metodo || "visual/subjetivo"}
-- Código de infracción: ${codigoInfraccion}
-
-ESTRUCTURA DE RESPUESTA (SIGUE ESTE FORMATO EXACTO):
-
-${esModoB ? `
-MODO B - ESTRUCTURA:
-1. Razonamiento jurídico en párrafos naturales (NO títulos ni bullets):
-   - Reconoce la falta con transparencia.
-   - Explica las consecuencias reales (multa, inmovilización).
-   - Si aplica subsanación: cita Art. 125 Ley 769/2002.
-
-2. Guion de voz:
-   Dígale exactamente esto al oficial:
-   
-   "[TEXTO COMPLETO ENTRE COMILLAS PARA LEER AL OFICIAL]"
-
-3. Información de la infracción (en párrafos naturales):
-   - Código de infracción: ${codigoInfraccion}
-   - Si procede inmovilización y bajo qué condiciones.
-   - Descuento por pronto pago si aplica (menciona el porcentaje, pero no el valor en dinero).
-` : `
-MODO A - ESTRUCTURA:
-1. Razonamiento jurídico en párrafos naturales (NO títulos ni bullets):
-   - Analiza el vicio: el oficial usó "${analisis.metodo || "método no especificado"}" (${metodoInvalido}).
-   - Compara contra el método legal requerido: ${metodoLegal}.
-   - Cita EXACTAMENTE estas normas: ${normasTexto}.
-   - Explica por qué el procedimiento carece de fundamento probatorio.
-
-2. Guion de voz:
-   Dígale exactamente esto al oficial:
-   
-   "Señor agente, con todo respeto, la normativa vigente, específicamente la ${normasTexto.split(",")[0] || "Resolución 3777 de 2003"}, establece que ${metodoLegal}. El uso de ${analisis.metodo || "apreciación visual"} no constituye prueba técnica válida. Le solicito formalmente que realice la medición con el instrumento reglamentario o retire el procedimiento. Todo este procedimiento está siendo grabado en video conforme al Artículo 21 de la Ley 1801 de 2016."
-`}
-
-4. Cierre FIJO EXACTO: ${PREGUNTA_CIERRE_FASE2}
-
-REGLAS CRÍTICAS:
-- PROHIBIDO MENCIONAR DINERO O VALORES DE MULTAS: NUNCA menciones cuánto cuesta una multa en pesos, dólares o salarios (ej. NO digas "$500,000" ni "15 SMMLV"). Solo puedes mencionar el código de infracción (ej. B.10).
-- NO incluyas el saludo protocolario (ya se envió en Fase 1).
-- Las comillas del guion deben ser EXACTAS para que el usuario las lea al oficial.
-- NO uses títulos como "RAZONAMIENTO JURÍDICO:" ni "GUION TÉCNICO:".
-- CITA EXACTAMENTE las normas proporcionadas arriba, NO inventes o uses [norma no aplicable].
-- Todo debe fluir en párrafos naturales como en los ejemplos.`;
-}
-
-function construirPromptFase2b(basePrompt: string, norma: NormativaTema | null, analisis: ClasificacionConsulta, historial: ChatMessage[]): string {
-  // Extraer la afirmación incorrecta del último mensaje
-  const ultimoMensaje = historial[historial.length - 1]?.content || "";
-  
-  // Construir texto de normas específicas
-  const normasTexto = norma?.normas?.length 
-    ? norma.normas.join(", ") 
-    : "Resolución 3777 de 2003, Resolución 3443 de 2008";
-  
-  const metodoLegal = norma?.metodo_legal || "fotómetro o luxómetro calibrado";
-  
-  return `${basePrompt}
-
-FASE 2b: REFUTACION - INSTRUCCIONES
-
-El usuario reporta que el oficial dijo algo incorrecto o está aplicando mal la norma.
-
-AFIRMACIÓN DEL OFICIAL (del usuario): "${ultimoMensaje}"
-
-NORMAS APLICABLES AL CASO (USA ESTAS EXACTAS):
-- Normas: ${normasTexto}
-- Método legal requerido: ${metodoLegal}
-
-ESTRUCTURA DE RESPUESTA:
-1. Identifica la afirmación incorrecta del oficial.
-2. Explica por qué es técnicamente incorrecta (cita EXACTAMENTE estas normas: ${normasTexto}).
-3. Guion de refutación:
-   
-   Dígale exactamente esto al oficial:
-   
-   "Señor agente, con todo respeto, la normativa vigente, específicamente la ${normasTexto.split(",")[0] || "Resolución 3777 de 2003"}, establece que ${metodoLegal}. La afirmación de que 'se nota a leguas' o la apreciación visual no constituye prueba técnica válida. Le solicito que realice la medición con el instrumento reglamentario o retire el procedimiento. Este procedimiento está siendo grabado en video conforme al Artículo 21 de la Ley 1801 de 2016."
-
-4. Cierre FIJO EXACTO: ${PREGUNTA_CIERRE_FASE2}
-
-REGLAS CRÍTICAS:
-- CITA EXACTAMENTE las normas proporcionadas arriba, NO inventes o uses [norma no aplicable].
-- Esta NO es Fase 3 (contingencia). El oficial está diciendo algo mal, no está insistiendo en proceder.`;
-}
-
-function construirPromptFase3(basePrompt: string, norma: NormativaTema | null, analisis: ClasificacionConsulta, historial: ChatMessage[]): string {
-  const esModoB = analisis.modo === "B";
-  
-  // Construir texto de normas específicas
-  const normasTexto = norma?.normas?.length 
-    ? norma.normas.join(", ") 
-    : "Resolución 3777 de 2003";
-  
-  const metodoLegal = norma?.metodo_legal || "equipo técnico calibrado";
-
-  if (esModoB) {
-    return `${basePrompt}
-
-FASE 3: CONTINGENCIA / CIERRE - INSTRUCCIONES
-
-El oficial procederá con el comparendo y la inmovilización, lo cual es COMPLETAMENTE LEGAL para esta infracción.
-
-ESTRUCTURA DE RESPUESTA:
-1. Reafirma que el procedimiento del oficial está ajustado a la ley y NO constituye abuso de autoridad.
-2. Aconseja al usuario firmar el comparendo y el inventario de la grúa.
-3. Recuerda que no existen fundamentos legales para una impugnación exitosa en este caso específico, pues la conducta es evidente.
-4. Sugiere realizar el pago con descuento (50%) haciendo el curso pedagógico (no menciones el valor de la multa en dinero).
-5. Cierre FIJO EXACTO: "Si tienes alguna otra duda sobre tus derechos, aquí estaré. Recuerda siempre respetar las normas de tránsito."
-
-REGLAS CRÍTICAS:
-- PROHIBIDO MENCIONAR DINERO O VALORES DE MULTAS.
-- NO generes modelos de impugnación.
-- NO sugieras firmar "Bajo Protesta".
-- NO hables de abuso de autoridad ni amenaces al oficial con leyes penales.`;
-  }
-  
-  return `${basePrompt}
-
-FASE 3: CONTINGENCIA - INSTRUCCIONES
-
-El oficial persiste a pesar de la solicitud legal del usuario. Es momento de escalar.
-
-NORMAS APLICABLES AL CASO (USA ESTAS EXACTAS):
-- Normas: ${normasTexto}
-- Método legal requerido: ${metodoLegal}
-
-ESTRUCTURA DE RESPUESTA:
-
-1. Explicación del abuso (párrafo natural):
-   Explica por qué la persistencia del oficial constituye un abuso de autoridad.
-
-2. Guion escalado:
-   Dígale exactamente esto al señor oficial:
-   
-   "Señor agente, reitero mi solicitud conforme a ${normasTexto}. Su insistencia en proceder sin ${metodoLegal} podría configurar Abuso de Autoridad conforme al Artículo 416 del Código Penal. Le solicito su identificación completa: nombre, placa y entidad. Todo este procedimiento está siendo documentado en video y será presentado ante la Procuraduría General de la Nación y la Secretaría de Tránsito correspondiente."
-
-3. Firma Bajo Protesta:
-   Instrucción: Firme el comparendo escribiendo la palabra BAJO PROTESTA junto a su firma, y en el espacio de observaciones escriba exactamente:
-   
-   "Firmo BAJO PROTESTA. No se utilizó ${metodoLegal} para determinar la infracción. Se usó ${analisis.metodo || "método visual"} sin validez técnica. Procedimiento grabado en video. Me reservo el derecho de impugnación."
-
-4. Instrucciones prácticas (lista numerada):
-   1. Grabe un video del inventario completo del vehículo antes de que se lo lleve la grúa.
-   2. Tome foto del comparendo completo (ambas caras).
-   3. Tome foto de la placa del agente y del vehículo oficial.
-   4. Tome foto del entorno (señalización, estado de la vía).
-   5. Guarde el número del comparendo y anote la hora exacta.
-
-5. Cierre FIJO EXACTO: ${PREGUNTA_CIERRE_CONTINGENCIA}
-
-REGLAS CRÍTICAS:
-- CITA EXACTAMENTE las normas proporcionadas arriba, NO inventes o uses [norma no aplicable].`;
-}
+// FUNCIONES DE AGENTES MOVIDAS A AGENTES/ (agente_defensa.ts, agente_cumplimiento.ts)
 
 function construirPromptFase4(basePrompt: string, norma: NormativaTema | null, analisis: ClasificacionConsulta, historial: ChatMessage[]): string {
   return `${basePrompt}
