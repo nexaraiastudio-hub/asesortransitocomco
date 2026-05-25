@@ -4,6 +4,7 @@ import { BASE_NORMATIVA, NormativaTema } from "./base_normativa.ts";
 import { validarNormasPostGeneracion } from "./validadores.ts";
 import { detectarExitoConRegex, detectarAbusoEnMensaje, detectarSolicitudImpugnacion, detectarAfirmacionOficial } from "./detectores.ts";
 import { ChatMessage, ClasificacionConsulta, FaseOrquestador } from "./types.ts";
+import { clasificarConsulta } from "./clasificador.ts";
 import { TODOS_LOS_EJEMPLOS } from "./agentes/ejemplos_entrenamiento.ts";
 import { 
   detectarExito, 
@@ -76,7 +77,7 @@ serve(async (req) => {
     console.log(`[ORQUESTADOR] Historial: ${historial.length} mensajes`);
 
     // CLASIFICACION INTELIGENTE (necesaria para detección de éxito y guardado)
-    const clasificacion = await clasificarConsulta(ultimoMensaje, historial);
+    const clasificacion = await clasificarConsulta(openai, ultimoMensaje, historial);
     console.log(`[ORQUESTADOR] Tema: ${clasificacion.tema}, Modo: ${clasificacion.modo || "A"}`);
 
     // 1. DETECCION DE EXITO (Fase Cierre)
@@ -170,7 +171,15 @@ serve(async (req) => {
     respuestaFinal = validarNormasPostGeneracion(respuestaFinal, normativaTema);
 
     return new Response(
-      JSON.stringify({ response: respuestaFinal, fase, tema: clasificacion.tema }),
+      JSON.stringify({ 
+        response: respuestaFinal, 
+        fase,
+        tema: clasificacion.tema,
+        modo: clasificacion.modo,
+        arquetipo: (clasificacion as any).arquetipo,
+        clase: clasificacion.clase,
+        autoridad: clasificacion.autoridad
+      }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
 
@@ -183,144 +192,7 @@ serve(async (req) => {
   }
 });
 
-// FUNCIONES DE CLASIFICACION
-
-async function clasificarConsulta(mensaje: string, historial: ChatMessage[]): Promise<ClasificacionConsulta> {
-  const temaPrevio = extraerTemaDeHistorial(historial);
-  const temaPorKeywords = detectarTemaPorKeywords(mensaje);
-  
-  const ejemplosTexto = TODOS_LOS_EJEMPLOS.slice(0, 5).map((ej, i) => {
-    return `Ejemplo ${i + 1}: ${ej.nombre}\nUsuario: "${ej.fase1_usuario}"\nTema detectado: ${ej.nombre.split(" - ")[0].toLowerCase()}`;
-  }).join("\n\n");
-
-  const promptClasificador = `Eres un clasificador experto en transito colombiano.
-Analiza el mensaje y extrae un JSON con la informacion del caso.
-
-TEMAS DISPONIBLES: ${Object.keys(BASE_NORMATIVA).join(", ")}
-
-EJEMPLOS DE CLASIFICACION:
-${ejemplosTexto}
-
-MENSAJE DEL USUARIO: "${mensaje.replace(/"/g, '\\"')}"
-
-CONTEXTO: ${temaPrevio ? `Usuario hablo anteriormente sobre: ${temaPrevio}` : "Primera consulta del usuario"}
-
-Responde SOLO con este JSON exacto:
-{
-  "tema": "tema de la lista o general",
-  "clase": "moto | carro | camioneta | bus | camion | null",
-  "servicio": "particular | publico | escolar | null",
-  "autoridad": "policia_transito | agente_civil | policia_nacional | null",
-  "metodo": "visual | fotometro | profundimetro | radar | alcoholimetro | sonometro | null",
-  "ciudad": "nombre o null",
-  "subsanableEnSitio": true/false,
-  "resumenHechos": "breve descripcion de lo ocurrido",
-  "modo": "A | B | null"
-}
-
-REGLAS PARA MODO:
-- Modo A (Defensa Agresiva): El oficial NO tiene razon, falta equipo tecnico calibrado, o hay vicio en el procedimiento.
-- Modo B (Asesoria Honesta): La falta es real y objetiva, o es subsanable en sitio.
-- Si no hay suficiente informacion, deja modo como null.`;
-
-  try {
-    if (!OPENAI_API_KEY || OPENAI_API_KEY === "sk-fake-key-for-testing") {
-      console.log("[CLASIFICADOR] Usando fallback por falta de API key");
-      return crearClasificacionFallback(mensaje, temaPorKeywords);
-    }
-    
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [{ role: "system", content: promptClasificador }],
-      temperature: 0,
-    });
-
-    const content = completion.choices[0].message.content;
-    console.log("[CLASIFICADOR] Respuesta OpenAI:", content?.substring(0, 200));
-    
-    if (!content || content.trim() === "") {
-      return crearClasificacionFallback(mensaje, temaPorKeywords);
-    }
-    
-    const contentLimpio = content.trim().replace(/^```json\s*/, "").replace(/\s*```$/, "");
-    
-    let resultado;
-    try {
-      resultado = JSON.parse(contentLimpio);
-    } catch (parseError) {
-      console.error("[CLASIFICADOR] Error parseando JSON:", parseError);
-      return crearClasificacionFallback(mensaje, temaPorKeywords);
-    }
-    
-    return {
-      tema: resultado.tema || temaPorKeywords || "general",
-      clase: resultado.clase || null,
-      servicio: resultado.servicio || null,
-      autoridad: resultado.autoridad || null,
-      metodo: resultado.metodo || null,
-      ciudad: resultado.ciudad || null,
-      subsanableEnSitio: resultado.subsanableEnSitio || false,
-      resumenHechos: resultado.resumenHechos || mensaje,
-      modo: resultado.modo || null,
-    };
-  } catch (error) {
-    console.error("[CLASIFICADOR] Error:", error);
-    return crearClasificacionFallback(mensaje, temaPorKeywords);
-  }
-}
-
-function extraerTemaDeHistorial(historial: ChatMessage[]): string | null {
-  for (let i = historial.length - 1; i >= 0; i--) {
-    const msg = historial[i].content.toLowerCase();
-    for (const tema of Object.keys(BASE_NORMATIVA)) {
-      if (msg.includes(tema)) return tema;
-    }
-  }
-  return null;
-}
-
-function detectarTemaPorKeywords(mensaje: string): string | null {
-  const texto = mensaje.toLowerCase();
-  
-  const keywordsPorTema: Record<string, string[]> = {
-    "llantas": ["llanta", "neumatico", "neumatico", "rin", "rueda", "desecho", "desgaste", "banda", "rodado", "labrado"],
-    "polarizados": ["polarizado", "vinilo", "lamina", "lamina", "vidrio", "ventana", "cristal", "oscuro", "tintado", "entintado"],
-    "casco": ["casco", "cabezote", "cabeza", "protector", "motocicleta", "moto", "parrillero"],
-    "cinturon": ["cinturon", "cinturon", "abrochar", "arnes", "seguridad"],
-    "silla_nino": ["silla", "nino", "nino", "infantil", "bebe", "bb", "menor"],
-    "semaforo": ["semaforo", "semaforo", "luz roja", "cruzar", "rojo", "amarillo"],
-    "velocidad": ["velocidad", "rapido", "rapido", "lento", "radar", "cinemometro", "cinemometro"],
-    "embriaguez": ["alcohol", "alcoholemia", "alcohosensor", "embriaguez", "ebrio", "beber", "licor"],
-    "luz_fundida": ["luz", "foco", "bombillo", "funda", "fundida", "quemada"],
-    "placa": ["placa", "matricula", "matricula", "soporte", "tabla"],
-    "escape": ["escape", "ruido", "sonido", "estridente", "mofle", "tubo"],
-    "kit_carretera": ["kit", "carretera", "triangulo", "triangulo", "extintor", "botiquin", "chaleco"],
-    "emisiones": ["emision", "gases", "contaminacion", "humo"],
-    "transporte_escolar": ["escolar", "colegio", "estudiante", "nino", "transporte escolar"],
-  };
-  
-  for (const [tema, keywords] of Object.entries(keywordsPorTema)) {
-    if (keywords.some(kw => texto.includes(kw))) {
-      return tema;
-    }
-  }
-  
-  return null;
-}
-
-function crearClasificacionFallback(mensaje: string, tema: string | null): ClasificacionConsulta {
-  return {
-    tema: tema || "general",
-    clase: null,
-    servicio: null,
-    autoridad: null,
-    metodo: null,
-    ciudad: null,
-    subsanableEnSitio: false,
-    resumenHechos: mensaje,
-    modo: null,
-  };
-}
+// FUNCIONES DE CLASIFICACION (Eliminadas, ahora se importan desde clasificador.ts)
 
 function determinarFase(historial: ChatMessage[], clasificacion: ClasificacionConsulta, ultimoMensaje: string): FaseOrquestador {
   const cantidadMensajes = historial.length;
