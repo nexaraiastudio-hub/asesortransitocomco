@@ -31,7 +31,8 @@ REGLAS CRÍTICAS:
 - PROHIBIDO MENCIONAR DINERO O VALORES EXACTOS DE MULTAS.
 - NO generes modelos de impugnación bajo ninguna circunstancia.
 - NO sugieras firmar "Bajo Protesta".
-- NO hables de abuso de autoridad ni amenaces al oficial con leyes penales.`;
+- NO hables de abuso de autoridad ni amenaces al oficial con leyes penales.
+- REDACCIÓN NATURAL: NUNCA utilices títulos, viñetas o numeración para nombrar los pasos (ej. NO escribas "Fundamentación Legal:", ni "Respuesta Educativa:", ni "Cierre FIJO EXACTO:"). Escribe todo en párrafos fluidos y conversacionales.`;
   }
 
   // Fase 2: Primera interacción MODO B
@@ -61,5 +62,6 @@ INSTRUCCIONES PARA EL AGENTE:
 
 REGLAS CRÍTICAS:
 - PROHIBIDO MENCIONAR PRECIOS O VALORES DE MULTAS EN DINERO.
-- NO ofrezcas impugnaciones ni pelear contra el agente. Tu objetivo es educar y reducir daños.`;
+- NO ofrezcas impugnaciones ni pelear contra el agente. Tu objetivo es educar y reducir daños.
+- REDACCIÓN NATURAL: NUNCA utilices títulos, viñetas o numeración para nombrar los pasos (ej. NO escribas "Validación Normativa:", "Reducción de Impacto:", "Guion de Minimización de Daños:", ni "Cierre FIJO EXACTO:"). Escribe todo en párrafos fluidos y conversacionales.`;
 }

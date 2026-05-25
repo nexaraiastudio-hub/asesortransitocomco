@@ -37,7 +37,8 @@ INSTRUCCIONES PARA EL AGENTE:
 
 REGLAS CRÍTICAS:
 - CITA EXACTAMENTE las normas proporcionadas arriba, NO inventes.
-- El oficial está diciendo algo mal, no está insistiendo en proceder aún (Fase 2b).`;
+- El oficial está diciendo algo mal, no está insistiendo en proceder aún (Fase 2b).
+- REDACCIÓN NATURAL: NUNCA utilices títulos, viñetas o numeración para nombrar los pasos (ej. NO escribas "Guion de refutación:", ni "Cierre FIJO EXACTO:"). Escribe todo en párrafos fluidos y conversacionales.`;
   }
 
   // Fase 3: Contingencia / Abuso persistente
@@ -73,7 +74,8 @@ INSTRUCCIONES PARA EL AGENTE:
 5. Cierre FIJO EXACTO: ${PREGUNTA_CIERRE_CONTINGENCIA}
 
 REGLAS CRÍTICAS:
-- NO INVENTES NORMAS.`;
+- NO INVENTES NORMAS.
+- REDACCIÓN NATURAL: NUNCA utilices títulos, viñetas o numeración para nombrar los pasos principales (ej. NO escribas "Firma Bajo Protesta:", "Guion escalado:", ni "Cierre FIJO EXACTO:"). Solo usa la lista numerada para las instrucciones prácticas ciudadanas.`;
   }
 
   // Fase 2: Defensa Inicial (Modo A)
@@ -104,5 +106,6 @@ INSTRUCCIONES PARA EL AGENTE:
 
 REGLAS CRÍTICAS:
 - CITA EXACTAMENTE las normas proporcionadas arriba, NO inventes o uses [norma no aplicable].
-- DEBES incluir el bloque de "Dígale exactamente esto al oficial:".`;
+- DEBES incluir el bloque de "Dígale exactamente esto al oficial:".
+- REDACCIÓN NATURAL: NUNCA utilices títulos, viñetas o numeración para nombrar los pasos (ej. NO escribas "Guion de Confrontación Legal:", "Opciones o alternativas legales:", ni "Cierre FIJO EXACTO:"). Escribe todo en párrafos fluidos y conversacionales.`;
 }
