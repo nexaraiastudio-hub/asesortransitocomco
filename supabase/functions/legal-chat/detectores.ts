@@ -116,38 +116,46 @@ export function detectarAbusoEnMensaje(historial: ChatMessage[]): boolean {
 /**
  * Detecta si el usuario está pidiendo impugnación
  */
-export function detectarSolicitudImpugnacion(mensaje: string): boolean {
-  const texto = mensaje.toLowerCase();
-  const patronesImpugnacion = [
-    "sí",
-    "si",
-    "quiero",
-    "por favor",
-    "haga el favor",
-    "redacte",
-    "genere",
-    "genere el documento",
-    "redacte el documento",
-    "sí redacte",
-    "si redacte",
-    "sí por favor",
-    "si por favor",
-    "adelante",
-    "proceda",
-    "hágalo",
-    "hagalo",
-    "deseo",
-    "necesito",
-    "sí necesito",
-    "si necesito",
-    "sí quiero",
-    "si quiero"
+export function detectarSolicitudImpugnacion(mensaje: string, historial: ChatMessage[] = []): boolean {
+  const texto = " " + mensaje.toLowerCase() + " ";
+  
+  const patronesExplicitos = [
+    "quiero impugnar",
+    "redacte la impugnacion",
+    "redacte la impugnación",
+    "necesito impugnar",
+    "haga la impugnacion",
+    "haga la impugnación",
+    "genere la impugnacion",
+    "genere la impugnación",
+    "modelo de impugnacion",
+    "modelo de impugnación"
+  ];
+
+  if (patronesExplicitos.some(patron => texto.includes(patron))) {
+    return true;
+  }
+
+  const patronesConfirmacion = [
+    " sí ", " si ", " quiero ", " por favor ", " haga el favor ",
+    " redacte ", " genere ", " adelante ", " proceda ",
+    " hágalo ", " hagalo ", " deseo ", " necesito "
   ];
   
-  // Solo considerar impugnación si el mensaje es corto (respuesta a pregunta)
-  if (mensaje.length > 50) return false;
+  if (mensaje.length <= 50 && patronesConfirmacion.some(patron => texto.includes(patron))) {
+    // Si es una confirmacion corta, SOLO aplica si la IA acaba de ofrecer la impugnación
+    if (historial.length > 0) {
+      const ultimoMensajeIA = historial[historial.length - 1];
+      if (ultimoMensajeIA && ultimoMensajeIA.role === "assistant") {
+        const txtIA = ultimoMensajeIA.content.toLowerCase();
+        if (txtIA.includes("redacte el modelo de impugnación") || txtIA.includes("modelo de impugnación para este caso")) {
+          return true;
+        }
+      }
+    }
+  }
   
-  return patronesImpugnacion.some(patron => texto.includes(patron));
+  return false;
 }
 
 /**

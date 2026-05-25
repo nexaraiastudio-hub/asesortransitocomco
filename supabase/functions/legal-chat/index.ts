@@ -199,7 +199,7 @@ function determinarFase(historial: ChatMessage[], clasificacion: ClasificacionCo
   const mensajesUsuario = historial.filter(m => m.role === "user").length;
   
   // Fase 4: Impugnacion solicitada explicitamente
-  if (detectarSolicitudImpugnacion(ultimoMensaje)) {
+  if (detectarSolicitudImpugnacion(ultimoMensaje, historial)) {
     return 4;
   }
   
