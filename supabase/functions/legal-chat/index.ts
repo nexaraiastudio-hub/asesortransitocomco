@@ -347,10 +347,11 @@ function determinarFase(historial: ChatMessage[], clasificacion: ClasificacionCo
   }
   
   // Fase 2: Defensa - tenemos datos suficientes
-  const tenemosDatosMinimos = clasificacion.clase && clasificacion.autoridad;
+  // V19: Avanzar a Fase 2 en la segunda interaccion para evitar deadlocks 
+  // cuando el clasificador no extrae clase/autoridad del historial.
   const esSegundaInteraccion = mensajesUsuario >= 2;
   
-  if ((tenemosDatosMinimos && esSegundaInteraccion) || mensajesUsuario >= 3) {
+  if (esSegundaInteraccion) {
     return 2;
   }
   

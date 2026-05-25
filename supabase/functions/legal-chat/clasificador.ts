@@ -52,11 +52,12 @@ Determina a cuál de los 3 arquetipos pertenece el caso basándote en los hechos
 - "OFICIAL_CORRECTO": La falta es real y el procedimiento es completamente legal. Ejemplos: SOAT/Licencia vencida en RUNT, embriaguez con alcohosensor, polarizados con luxómetro, llantas con profundímetro, parqueo prohibido (garaje/esquina) donde recién se va a imponer el comparendo, o transitar en andén/ciclorruta con moto (infracción visual válida).
 
 REGLAS:
-- Extrae SOLO lo que el usuario declaro explicitamente
+- Extrae SOLO lo que el usuario declaro explicitamente.
+- IMPORTANTE: Extrae la clase, autoridad y ciudad de TODOS los mensajes del historial. Si el usuario lo mencionó en el primer mensaje, DEBES incluirlo aquí, NO pongas null.
 - Si dice "a simple vista" o "solo miro" o "no uso nada", metodo es "visual"
-- resumenHechos debe incluir datos de TODOS los mensajes del usuario en el historial, no solo el actual
-- Si no hay suficiente informacion para un campo, dejalo null
-- Si no hay suficiente información para determinar el arquetipo, usa "ABUSO" como valor por defecto
+- resumenHechos debe incluir datos de TODOS los mensajes del usuario en el historial.
+- Si no hay suficiente informacion para un campo, dejalo null.
+- Si no hay suficiente información para determinar el arquetipo, usa "ABUSO" como valor por defecto.
 
 SALIDA JSON UNICAMENTE:
 {
