@@ -528,7 +528,7 @@ function construirPromptFase2(basePrompt: string, norma: NormativaTema | null, a
   
   const metodoLegal = norma?.metodo_legal || "fotómetro o luxómetro calibrado";
   const metodoInvalido = norma?.metodo_invalido || "apreciación visual, a simple vista";
-  const codigoInfraccion = norma?.codigo_infraccion || "B.10";
+const codigoInfraccion = norma?.codigo_infraccion || "[Sujeto a clasificación exacta por el agente en el comparendo]";
   
   return `${basePrompt}
 
@@ -558,9 +558,8 @@ MODO B - ESTRUCTURA:
 
 3. Información de la infracción (en párrafos naturales):
    - Código de infracción: ${codigoInfraccion}
-   - Valor aproximado de la multa.
    - Si procede inmovilización y bajo qué condiciones.
-   - Descuento por pronto pago si aplica.
+   - Descuento por pronto pago si aplica (menciona el porcentaje, pero no el valor en dinero).
 ` : `
 MODO A - ESTRUCTURA:
 1. Razonamiento jurídico en párrafos naturales (NO títulos ni bullets):
@@ -578,6 +577,7 @@ MODO A - ESTRUCTURA:
 4. Cierre FIJO EXACTO: ${PREGUNTA_CIERRE_FASE2}
 
 REGLAS CRÍTICAS:
+- PROHIBIDO MENCIONAR DINERO O VALORES DE MULTAS: NUNCA menciones cuánto cuesta una multa en pesos, dólares o salarios (ej. NO digas "$500,000" ni "15 SMMLV"). Solo puedes mencionar el código de infracción (ej. B.10).
 - NO incluyas el saludo protocolario (ya se envió en Fase 1).
 - Las comillas del guion deben ser EXACTAS para que el usuario las lea al oficial.
 - NO uses títulos como "RAZONAMIENTO JURÍDICO:" ni "GUION TÉCNICO:".
