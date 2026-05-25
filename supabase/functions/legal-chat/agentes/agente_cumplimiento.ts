@@ -21,7 +21,7 @@ El oficial procederá con el comparendo y la inmovilización, lo cual es COMPLET
 INSTRUCCIONES PARA EL AGENTE:
 1. Reafirma la legalidad: Explica de manera respetuosa y pedagógica por qué la actuación del agente está ajustada a derecho y NO constituye abuso de autoridad.
 2. Fundamentación Legal: Cita la norma exacta (${normasTexto}) que obliga al agente a proceder de esa manera.
-3. Aconseja al usuario firmar el comparendo y el inventario de la grúa para evitar mayores complicaciones.
+3. Aconseja al usuario paso a paso: firmar el comparendo y hacer/firmar el inventario del vehículo (ya sea carro, moto, etc.) antes de subirlo a la grúa para evitar mayores daños o pérdidas.
 4. Recuerda que, en este caso específico, NO existen fundamentos legales para una impugnación exitosa, ya que la conducta es evidente y está claramente tipificada en la normativa vigente.
 5. Sugiere realizar el pago con descuento (50%) haciendo el curso pedagógico dentro de los 5 días hábiles.
 6. Respuesta Educativa: Sugiere buenas prácticas de conducción y cumplimiento normativo para evitar sanciones futuras.
