@@ -302,11 +302,25 @@ export const BASE_NORMATIVA: Record<string, NormativaTema> = {
     metodo_legal: "verificación visual directa del oficial, video",
     metodo_invalido: "percepción sin evidencia objetiva de maniobra de peligro",
     subsanable: false,
-    notas: "Transitar en moto o bicicleta por andenes, ciclorrutas (para motos) o no usar la ciclorruta (para ciclistas) es una infracción real. Zigzaguear entre vehículos constituye maniobra peligrosa y puede dar lugar a comparendo e inmovilización si pone en riesgo la seguridad.",
+    notas: "Zigzaguear entre vehículos constituye maniobra peligrosa y puede dar lugar a comparendo e inmovilización si pone en riesgo la seguridad. (Para motos por ciclorrutas ver invasion_ciclorruta).",
     preguntas_fase1: [
-      "¿Qué tipo de vehículo conduce? (bicicleta, moto)",
-      "¿Transitaba por la calzada existiendo una ciclorruta habilitada, o transitaba por el andén/ciclorruta en moto?",
       "¿El oficial le imputa haber realizado zigzagueo o maniobras peligrosas entre vehículos?"
+    ]
+  },
+
+  "invasion_ciclorruta": {
+    normas: [
+      "Artículo 131 de la Ley 769 de 2002",
+      "Infracción D.05"
+    ],
+    metodo_legal: "verificación visual directa del oficial, foto, video",
+    metodo_invalido: "N/A (la conducta de transitar por zonas peatonales o ciclorrutas es evidente visualmente)",
+    codigo_infraccion: "D.05",
+    subsanable: false,
+    notas: "Conducir un vehículo sobre aceras, plazas, vías peatonales, separadores, bermas, demarcaciones de canalización, zonas verdes o vías especiales para vehículos no motorizados (ciclorrutas). INMOVILIZACIÓN OBLIGATORIA (infracción D).",
+    preguntas_fase1: [
+      "¿El oficial menciona que transitabas exactamente por la ciclorruta, andén o zona verde?",
+      "¿Ya llegó la grúa para la inmovilización obligatoria del vehículo?"
     ]
   },
 

@@ -10,7 +10,7 @@ Tu UNICA funcion es:
 Tu salida es JSON puro. NO generas texto para el usuario. NO inventas hechos.
 
 TEMAS CONOCIDOS (usa estos nombres exactos cuando aplique):
-llantas, polarizados, casco, semaforo, luz_fundida, embriaguez, soat_vencido, licencia, revision_tecnicomecanica, exceso_velocidad, cinturon_seguridad, kit_carretera, placa_mal_ubicada, escape_modificado, emisiones, carga, transporte_escolar, parqueo_prohibido, chaleco_reflectivo, piques, plataformas, maniobras_peligrosas, consulta_general_transito
+llantas, polarizados, casco, semaforo, luz_fundida, embriaguez, soat_vencido, licencia, revision_tecnicomecanica, exceso_velocidad, cinturon_seguridad, kit_carretera, placa_mal_ubicada, escape_modificado, emisiones, carga, transporte_escolar, parqueo_prohibido, chaleco_reflectivo, piques, plataformas, maniobras_peligrosas, invasion_ciclorruta, consulta_general_transito
 
 Si el tema no encaja en ninguno, usa el mas cercano o "consulta_general_transito".
 Si el usuario menciona "parrillero sin casco" o "persona sin casco", el tema es "casco".
@@ -29,7 +29,8 @@ EJEMPLOS DE CLASIFICACION (referencia obligatoria):
 - "Me detuvieron por estar ebrio", "conducir bajo los efectos del alcohol", "estado de ebriedad", "intoxicación alcohólica" -> tema: "embriaguez"
 - "Me van a multar por estar parqueado frente a un garaje" o "estaba estacionado antes de la señal" -> tema: "parqueo_prohibido"
 - "Me pidieron el celular y preguntaron para dónde iba con el pasajero" o "trabajo en Didi/Uber" -> tema: "plataformas"
-- "Me multan por ir por el andén en moto", "zigzagueando" o "no usar la ciclorruta" -> tema: "maniobras_peligrosas"
+- "Me multan por ir por el andén en moto" o "moto por la ciclorruta" -> tema: "invasion_ciclorruta"
+- "Zigzagueando entre vehículos" -> tema: "maniobras_peligrosas"
 
 DATOS A EXTRAER (null si no se mencionan):
 - clase: tipo de vehiculo (motocicleta, automovil, camioneta, bus, camion, otro)
