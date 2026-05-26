@@ -480,12 +480,11 @@ C.C. [CÉDULA]
 function aplicarBloquesFijos(respuesta: string, fase: FaseOrquestador): string {
   // Limpiar cualquier saludo que la IA haya generado (para evitar duplicados)
   let respuestaLimpia = respuesta;
-  
-  // Patrones de saludo a eliminar (case-insensitive)
-  const patronesSaludo = [
-    /\(\(\s*Saludos\.?\s*Soy tu Abogado Asesor[^)]*\)\)/i,
-    /^\s*Saludos\.?\s*Soy tu Abogado Asesor.*$/im,
-  ];
+    // Patrones de saludo a eliminar (case-insensitive)
+    const patronesSaludo = [
+      /\(\(\s*Saludos\.?\s*Soy tu Abogado Asesor[\s\S]*?\)\)\n*/ig,
+      /^\s*Saludos\.?\s*Soy tu Abogado Asesor[\s\S]*?(?=\n\n|$)/img,
+    ];
   
   for (const patron of patronesSaludo) {
     respuestaLimpia = respuestaLimpia.replace(patron, "").trim();
