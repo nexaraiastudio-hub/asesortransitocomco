@@ -28,10 +28,8 @@ INSTRUCCIONES PARA EL AGENTE:
 1. Identifica la afirmación incorrecta del oficial.
 2. Evalúa la legalidad contrastando las acciones del agente con la normativa.
 3. Redacta el siguiente guion de refutación para el usuario:
-   
-   Dígale exactamente esto al oficial:
-   
-   "Señor agente, con todo respeto, la normativa vigente, específicamente la ${normasTexto.split(",")[0] || "ley aplicable"}, establece que ${metodoLegal}. La afirmación de que 'se nota a leguas' o la apreciación visual no constituye prueba técnica válida. Le solicito que realice la medición con el instrumento reglamentario o retire el procedimiento. Este procedimiento está siendo grabado en video conforme al Artículo 21 de la Ley 1801 de 2016."
+   Redacta un guion donde el usuario confronte la afirmación incorrecta del oficial. Exige que se utilice el método técnico o probatorio obligatorio (${metodoLegal}). NUNCA menciones 'instrumento reglamentario' si la norma no exige un aparato físico. Recuerda incluir que el procedimiento está siendo grabado.
+   El guion debe estar entre comillas dobles y debes decirle al usuario: "Dígale exactamente esto al oficial:" antes de poner el guion.
 
 4. Cierre FIJO EXACTO: ${PREGUNTA_CIERRE_FASE2}
 
@@ -57,9 +55,8 @@ NORMAS APLICABLES AL CASO:
 INSTRUCCIONES PARA EL AGENTE:
 1. Explicación del abuso: Explica por qué la persistencia del oficial constituye un abuso de autoridad y una extralimitación de funciones.
 2. Guion escalado:
-   Dígale exactamente esto al señor oficial:
-   
-   "Señor agente, reitero mi solicitud conforme a ${normasTexto}. Su insistencia en proceder sin ${metodoLegal} podría configurar Abuso de Autoridad conforme al Artículo 416 del Código Penal. Le solicito su identificación completa: nombre, placa y entidad. Todo este procedimiento está siendo documentado en video y será presentado ante la Procuraduría General de la Nación y la Secretaría de Tránsito correspondiente."
+   Redacta un guion firme donde el usuario advierta que la insistencia del oficial en proceder sin ${metodoLegal} podría configurar Abuso de Autoridad. Solicita la identificación completa del agente (nombre, placa, entidad) y advierte que el video será presentado a la Procuraduría. NUNCA hables de equipos si el método legal no es un equipo.
+   El guion debe estar entre comillas dobles y debes decirle al usuario: "Dígale exactamente esto al oficial:" antes de poner el guion.
 
 3. Firma Bajo Protesta:
    Instrucción: Firme el comparendo escribiendo la palabra BAJO PROTESTA junto a su firma, y en el espacio de observaciones escriba exactamente:
@@ -98,10 +95,8 @@ NORMAS APLICABLES AL CASO (CÍTANLAS TEXTUALMENTE):
 INSTRUCCIONES PARA EL AGENTE:
 1. Evalúa el procedimiento actual: Explica brevemente por qué el procedimiento del agente (ej. "a simple vista", "a ojómetro") carece de presunción de legalidad sin el método técnico obligatorio.
 2. Guion de Confrontación Legal:
-   
-   Dígale exactamente esto al oficial:
-   
-   "Oficial, conozco mis derechos. Según la ${normasTexto.split(",")[0] || "normativa de tránsito"}, para este procedimiento se requiere OBLIGATORIAMENTE el uso de ${metodoLegal}. La sola apreciación visual no constituye plena prueba para imponer esta sanción técnica. Le solicito que traiga el equipo reglamentario y calibrado. Si no cuenta con él, le exijo que retire este procedimiento inmediatamente por ausencia de material probatorio."
+   Redacta un guion donde el usuario confronte respetuosamente al oficial exigiendo que se utilice el método técnico u probatorio obligatorio (${metodoLegal}). Si la infracción no requiere equipo técnico, exige que el oficial presente la evidencia probatoria correspondiente. NUNCA menciones 'equipo calibrado' si la norma no lo requiere.
+   El guion debe estar entre comillas dobles y debes decirle al usuario: "Dígale exactamente esto al oficial:" antes de poner el guion.
 
 3. Opciones o alternativas legales:
    - Menciona si la falta es subsanable en el sitio (según la norma: ${norma.subsanable ? "SÍ ES SUBSANABLE" : "NO ES SUBSANABLE"}).

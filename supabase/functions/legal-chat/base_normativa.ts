@@ -416,5 +416,21 @@ export const BASE_NORMATIVA: Record<string, NormativaTema> = {
       "¿La vía estaba claramente señalizada indicando el sentido del tránsito (flechas, señales preventivas o de prohibido girar)?",
       "¿Era una maniobra breve para evadir un obstáculo repentino, o usted transitó deliberadamente en sentido contrario?"
     ]
+  },
+  
+  "celular": {
+    normas: [
+      "Artículo 131 Ley 769 de 2002 (Infracción C.38)"
+    ],
+    metodo_legal: "verificación visual directa del agente en vía, cámaras",
+    metodo_invalido: "N/A",
+    codigo_infraccion: "C.38",
+    subsanable: false,
+    notas: "Usar sistemas móviles de comunicación o teléfonos instalados en los vehículos al momento de conducir, a excepción de accesorios de manos libres. La percepción visual del agente es prueba suficiente. NO da lugar a inmovilización.",
+    preguntas_fase1: [
+      "¿Usted estaba manipulando el celular, hablando, o usando algún dispositivo electrónico mientras el vehículo estaba en movimiento?",
+      "¿El vehículo estaba completamente detenido o estacionado cuando usó el dispositivo?",
+      "¿Estaba utilizando algún sistema de manos libres integrado al vehículo o auricular?"
+    ]
   }
 };

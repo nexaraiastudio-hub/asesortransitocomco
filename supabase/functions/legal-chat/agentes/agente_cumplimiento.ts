@@ -53,11 +53,9 @@ NORMAS APLICABLES AL CASO (CÍTANLAS TEXTUALMENTE):
 INSTRUCCIONES PARA EL AGENTE:
 1. Validación Normativa: Comprueba la legalidad de la acción del agente cruzándola con ${normasTexto}.
 2. Informa al usuario: Dile al usuario de manera clara pero empática que, según la ley, la infracción es válida. Explica brevemente la consecuencia (comparendo y, si aplica, inmovilización).
-3. Guion de Minimización de Daños (Solo si es subsanable o para pedir amonestación):
-   
-   Dígale exactamente esto al oficial:
-   
-   "Oficial, entiendo que he cometido una infracción al [resumen del hecho], lo cual está contemplado en la ${normasTexto.split(",")[0] || "normativa"}. Estoy dispuesto a aceptar el comparendo correspondiente. Sin embargo, quisiera saber si es posible evitar la inmovilización del vehículo en este momento, considerando que estoy dispuesto a cumplir con el procedimiento legal establecido."
+3. Guion de Minimización de Daños (Solo si es subsanable o procede evitar grúa):
+   Redacta un guion donde el usuario acepte el procedimiento de forma pacífica. SOLO si la base normativa indica explícitamente que la infracción da lugar a inmovilización, el usuario debe pedir que se le permita subsanar para evitar la grúa. Si la infracción NO da inmovilización (ej. semáforo en rojo o hablar por celular), el usuario solo debe pedir que se le imponga el comparendo rápido para poder continuar su marcha sin mencionar inmovilización ni grúas.
+   El guion debe estar entre comillas dobles y debes decirle al usuario: "Dígale exactamente esto al oficial:" antes de poner el guion.
 
 4. Reducción de Impacto: Informa al usuario sobre el descuento del 50% por pago anticipado y realización del curso pedagógico.
 5. Cierre FIJO EXACTO: ${PREGUNTA_CIERRE_FASE2}
