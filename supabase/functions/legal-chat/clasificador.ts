@@ -10,7 +10,7 @@ Tu UNICA funcion es:
 Tu salida es JSON puro. NO generas texto para el usuario. NO inventas hechos.
 
 TEMAS CONOCIDOS (usa estos nombres exactos cuando aplique):
-llantas, polarizados, casco, semaforo, luz_fundida, embriaguez, soat_vencido, licencia, revision_tecnicomecanica, exceso_velocidad, cinturon_seguridad, kit_carretera, placa_mal_ubicada, escape_modificado, emisiones, carga, transporte_escolar, parqueo_prohibido, chaleco_reflectivo, piques, plataformas, maniobras_peligrosas, invasion_ciclorruta, consulta_general_transito
+llantas, polarizados, casco, semaforo, luz_fundida, embriaguez, soat_vencido, licencia, revision_tecnicomecanica, exceso_velocidad, cinturon_seguridad, kit_carretera, placa_mal_ubicada, escape_modificado, emisiones, carga, transporte_escolar, parqueo_prohibido, chaleco_reflectivo, piques, plataformas, maniobras_peligrosas, invasion_ciclorruta, pico_y_placa, contravia, consulta_general_transito
 
 Si el tema no encaja en ninguno, usa el mas cercano o "consulta_general_transito".
 Si el usuario menciona "parrillero sin casco" o "persona sin casco", el tema es "casco".
@@ -20,17 +20,15 @@ EJEMPLOS DE CLASIFICACION (referencia obligatoria):
 - "Un policia me detuvo dice que el polarizado no cumple" -> tema: "polarizados"
 - "Me detuvo un agente porque llevo una persona sin casco en la moto" -> tema: "casco"
 - "Un agente me esta diciendo que me pase el semaforo en rojo" -> tema: "semaforo"
-- "Hay un reten y me dice el agente que tengo una luz fundida" -> tema: "luz_fundida"
-- "Me detuvieron porque dicen que no tengo el kit de carretera completo", "falta el botiquín", "kit de primeros auxilios", "botiquín de emergencia" -> tema: "kit_carretera"
+- "Me detuvieron porque dicen que no tengo el kit de carretera completo", "falta el botiquín" -> tema: "kit_carretera"
 - "El agente dice que mi placa esta mal puesta y quiere multarme" -> tema: "placa_mal_ubicada"
-- "Me pararon porque dicen que mi escape hace mucho ruido" -> tema: "escape_modificado"
 - "Me multaron por no llevar el cinturon puesto" -> tema: "cinturon_seguridad"
-- "Me detuvieron diciendo que estaba haciendo piques en la calle" -> tema: "piques"
-- "Me detuvieron por estar ebrio", "conducir bajo los efectos del alcohol", "estado de ebriedad", "intoxicación alcohólica" -> tema: "embriaguez"
-- "Me van a multar por estar parqueado frente a un garaje" o "estaba estacionado antes de la señal" -> tema: "parqueo_prohibido"
+- "Me detuvieron por estar ebrio", "conducir bajo los efectos del alcohol" -> tema: "embriaguez"
+- "Me van a multar por estar parqueado frente a un garaje" -> tema: "parqueo_prohibido"
 - "Me pidieron el celular y preguntaron para dónde iba con el pasajero" o "trabajo en Didi/Uber" -> tema: "plataformas"
 - "Me multan por ir por el andén en moto" o "moto por la ciclorruta" -> tema: "invasion_ciclorruta"
-- "Zigzagueando entre vehículos" -> tema: "maniobras_peligrosas"
+- "Me dicen que tengo pico y placa", "transitando en horario restringido" -> tema: "pico_y_placa"
+- "Iba en contravía", "sentido contrario" -> tema: "contravia"
 
 DATOS A EXTRAER (null si no se mencionan):
 - clase: tipo de vehiculo (motocicleta, automovil, camioneta, bus, camion, otro)

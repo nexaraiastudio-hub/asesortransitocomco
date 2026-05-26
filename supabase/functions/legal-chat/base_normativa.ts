@@ -337,5 +337,84 @@ export const BASE_NORMATIVA: Record<string, NormativaTema> = {
       "¿A qué hora ocurrió la detención?",
       "¿Tiene un chaleco reflectivo a la mano o la posibilidad de comprar/conseguir uno en el sitio?"
     ]
+  },
+  
+  "soat_vencido": {
+    normas: [
+      "Artículo 42 Ley 769 de 2002",
+      "Infracción D.02"
+    ],
+    metodo_legal: "consulta en RUNT o documento físico/digital válido",
+    metodo_invalido: "N/A",
+    codigo_infraccion: "D.02",
+    subsanable: false,
+    notas: "Conducir sin portar el SOAT vigente. Genera inmovilización inmediata (Infracción D.02). No aplica descuento si el documento aportado resulta ser falso.",
+    preguntas_fase1: [
+      "¿El SOAT está vencido, o usted no lo porta, o el oficial alega que es falso?",
+      "¿El oficial verificó el estado del SOAT en el RUNT?"
+    ]
+  },
+  
+  "revision_tecnicomecanica": {
+    normas: [
+      "Artículo 50 y 52 Ley 769 de 2002",
+      "Infracción C.35"
+    ],
+    metodo_legal: "consulta en RUNT o certificado físico vigente",
+    metodo_invalido: "N/A",
+    codigo_infraccion: "C.35",
+    subsanable: false,
+    notas: "No realizar la revisión técnico-mecánica y de emisiones contaminantes en los plazos establecidos. Inmovilización inmediata.",
+    preguntas_fase1: [
+      "¿La revisión técnico-mecánica está efectivamente vencida?",
+      "¿De qué año es el modelo de su vehículo? (Esto determina si ya le correspondía realizar la primera revisión)"
+    ]
+  },
+  
+  "licencia": {
+    normas: [
+      "Artículos 17 y 131 Ley 769 de 2002",
+      "Artículo 125 Ley 769 de 2002 (Subsanabilidad)"
+    ],
+    metodo_legal: "verificación en RUNT o documento físico/digital",
+    metodo_invalido: "N/A",
+    codigo_infraccion: "B.01, C.01, D.01",
+    subsanable: true,
+    notas: "Si olvidó la licencia (B.01) puede subsanar inmovilización en 60 minutos si alguien se la lleva. Si la licencia está vencida o no tiene la categoría (C.01), puede evitar la grúa consiguiendo a un conductor con licencia válida en menos de 60 minutos.",
+    preguntas_fase1: [
+      "¿Usted tiene licencia pero se le quedó, está vencida, o definitivamente no tiene licencia para la categoría de ese vehículo?",
+      "¿Tiene a alguien con licencia válida que pueda llegar al sitio en menos de 60 minutos para llevarse el vehículo?"
+    ]
+  },
+  
+  "pico_y_placa": {
+    normas: [
+      "Artículo 131 Ley 769 de 2002 (Infracción C.14)",
+      "Decretos locales de movilidad"
+    ],
+    metodo_legal: "verificación visual u horaria directa, cámara fotomulta",
+    metodo_invalido: "N/A",
+    codigo_infraccion: "C.14",
+    subsanable: false,
+    notas: "Transitar por sitios restringidos o en horas prohibidas (Pico y Placa). Comparendo e inmovilización obligatoria, salvo excepciones explícitas en el decreto local.",
+    preguntas_fase1: [
+      "¿Qué tipo de vehículo conduce y cuál es el último número de su placa?",
+      "¿Su vehículo se encuentra amparado bajo alguna de las excepciones de restricción de su ciudad (ej. permiso especial, vehículo eléctrico, esquema de seguridad)?"
+    ]
+  },
+  
+  "contravia": {
+    normas: [
+      "Artículo 131 Ley 769 de 2002 (Infracción D.03)"
+    ],
+    metodo_legal: "verificación visual, fotos, cámaras",
+    metodo_invalido: "N/A",
+    codigo_infraccion: "D.03",
+    subsanable: false,
+    notas: "Transitar en sentido contrario al estipulado para la vía, calzada o carril. Comparendo e inmovilización obligatoria y directa.",
+    preguntas_fase1: [
+      "¿La vía estaba claramente señalizada indicando el sentido del tránsito (flechas, señales preventivas o de prohibido girar)?",
+      "¿Era una maniobra breve para evadir un obstáculo repentino, o usted transitó deliberadamente en sentido contrario?"
+    ]
   }
 };
