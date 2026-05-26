@@ -16,16 +16,16 @@ Si el tema no encaja en ninguno, usa el mas cercano o "consulta_general_transito
 Si el usuario menciona "parrillero sin casco" o "persona sin casco", el tema es "casco".
 
 EJEMPLOS DE CLASIFICACION (referencia obligatoria):
-- "Me detuvieron por el labrado de las llantas" -> tema: "llantas"
+- "Me detuvieron por el labrado de las llantas", "neumáticos lisos" -> tema: "llantas"
 - "Un policia me detuvo dice que el polarizado no cumple" -> tema: "polarizados"
 - "Me detuvo un agente porque llevo una persona sin casco en la moto" -> tema: "casco"
 - "Un agente me esta diciendo que me pase el semaforo en rojo" -> tema: "semaforo"
-- "Me detuvieron porque dicen que no tengo el kit de carretera completo", "falta el botiquín" -> tema: "kit_carretera"
+- "Me detuvieron porque dicen que no tengo el kit de carretera completo", "falta el botiquín", "elementos de primeros auxilios", "extintor", "dispositivo para apagar fuego" -> tema: "kit_carretera"
 - "El agente dice que mi placa esta mal puesta y quiere multarme" -> tema: "placa_mal_ubicada"
 - "Me multaron por no llevar el cinturon puesto" -> tema: "cinturon_seguridad"
-- "Me detuvieron por estar ebrio", "conducir bajo los efectos del alcohol" -> tema: "embriaguez"
+- "Me detuvieron por estar ebrio", "conducir bajo los efectos del alcohol", "borracho", "alcoholemia", "estado de embriaguez" -> tema: "embriaguez"
 - "Me van a multar por estar parqueado frente a un garaje" -> tema: "parqueo_prohibido"
-- "Me pidieron el celular y preguntaron para dónde iba con el pasajero" o "trabajo en Didi/Uber" -> tema: "plataformas"
+- "Me pidieron el celular y preguntaron para dónde iba con el pasajero" o "trabajo en Didi, Uber, Cabify, Picap, inDrive" -> tema: "plataformas"
 - "Me multan por ir por el andén en moto" o "moto por la ciclorruta" -> tema: "invasion_ciclorruta"
 - "Me dicen que tengo pico y placa", "transitando en horario restringido" -> tema: "pico_y_placa"
 - "Iba en contravía", "sentido contrario" -> tema: "contravia"
