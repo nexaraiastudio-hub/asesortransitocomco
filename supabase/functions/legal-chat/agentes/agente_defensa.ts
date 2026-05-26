@@ -37,8 +37,10 @@ INSTRUCCIONES PARA EL AGENTE:
 
 REGLAS CRÍTICAS:
 - CITA EXACTAMENTE las normas proporcionadas arriba, NO inventes.
+- REGLA DE ORO DE PLAZOS: El término legal para impugnar un comparendo en vía es de máximo CINCO (5) DÍAS HÁBILES. NUNCA digas 11 días.
+- REGLA DE ORO DE INMOVILIZACIÓN: NO menciones inmovilización a menos que la base normativa indique que la infracción da lugar a inmovilización.
 - El oficial está diciendo algo mal, no está insistiendo en proceder aún (Fase 2b).
-- REDACCIÓN NATURAL: NUNCA utilices títulos, viñetas o numeración para nombrar los pasos (ej. NO escribas "Guion de refutación:", ni "Cierre FIJO EXACTO:"). Escribe todo en párrafos fluidos y conversacionales.`;
+- REDACCIÓN NATURAL: NUNCA utilices títulos, viñetas o numeración para nombrar los pasos. Escribe todo en párrafos fluidos y conversacionales.`;
   }
 
   // Fase 3: Contingencia / Abuso persistente
@@ -75,6 +77,8 @@ INSTRUCCIONES PARA EL AGENTE:
 
 REGLAS CRÍTICAS:
 - NO INVENTES NORMAS.
+- REGLA DE ORO DE PLAZOS: El término legal para impugnar un comparendo en vía es de máximo CINCO (5) DÍAS HÁBILES. NUNCA digas 11 días.
+- REGLA DE ORO DE INMOVILIZACIÓN: NO menciones inmovilización ni inventario si la infracción NO da lugar a inmovilización.
 - REDACCIÓN NATURAL: NUNCA utilices títulos, viñetas o numeración para nombrar los pasos principales (ej. NO escribas "Firma Bajo Protesta:", "Guion escalado:", ni "Cierre FIJO EXACTO:"). Solo usa la lista numerada para las instrucciones prácticas ciudadanas.`;
   }
 
@@ -97,7 +101,7 @@ INSTRUCCIONES PARA EL AGENTE:
    
    Dígale exactamente esto al oficial:
    
-   "Oficial, conozco mis derechos. Según la ${normasTexto.split(",")[0] || "normativa de tránsito"}, para este procedimiento se requiere OBLIGATORIAMENTE el uso de ${metodoLegal}. La sola apreciación visual no constituye plena prueba según la jurisprudencia de la Corte Constitucional (Sentencia C-038 de 2020). Le solicito que traiga el equipo reglamentario y calibrado. Si no cuenta con él, le exijo que retire este procedimiento inmediatamente por ausencia de material probatorio."
+   "Oficial, conozco mis derechos. Según la ${normasTexto.split(",")[0] || "normativa de tránsito"}, para este procedimiento se requiere OBLIGATORIAMENTE el uso de ${metodoLegal}. La sola apreciación visual no constituye plena prueba para imponer esta sanción técnica. Le solicito que traiga el equipo reglamentario y calibrado. Si no cuenta con él, le exijo que retire este procedimiento inmediatamente por ausencia de material probatorio."
 
 3. Opciones o alternativas legales:
    - Menciona si la falta es subsanable en el sitio (según la norma: ${norma.subsanable ? "SÍ ES SUBSANABLE" : "NO ES SUBSANABLE"}).
@@ -106,6 +110,8 @@ INSTRUCCIONES PARA EL AGENTE:
 
 REGLAS CRÍTICAS:
 - CITA EXACTAMENTE las normas proporcionadas arriba, NO inventes o uses [norma no aplicable].
+- REGLA DE ORO DE PLAZOS: El término legal para impugnar un comparendo en vía es de máximo CINCO (5) DÍAS HÁBILES. NUNCA digas 11 días.
+- REGLA DE ORO DE INMOVILIZACIÓN: NO menciones inmovilización a menos que la base normativa indique explícitamente que la infracción da lugar a inmovilización.
 - DEBES incluir el bloque de "Dígale exactamente esto al oficial:".
 - REDACCIÓN NATURAL: NUNCA utilices títulos, viñetas o numeración para nombrar los pasos (ej. NO escribas "Guion de Confrontación Legal:", "Opciones o alternativas legales:", ni "Cierre FIJO EXACTO:"). Escribe todo en párrafos fluidos y conversacionales.`;
 }

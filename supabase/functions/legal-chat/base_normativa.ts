@@ -125,16 +125,16 @@ export const BASE_NORMATIVA: Record<string, NormativaTema> = {
   "semaforo": {
     normas: [
       "Artículo 131 Ley 769 de 2002",
-      "Artículo 29 Constitución Política",
-      "Sentencia C-038 de 2020"
+      "Artículo 29 Constitución Política"
     ],
-    metodo_legal: "fotomulta, video, cámara de seguridad",
-    metodo_invalido: "percepción visual del agente, 'me pareció', 'lo vi pasar'",
+    metodo_legal: "fotomulta (cámara) o percepción visual directa del agente en vía",
+    metodo_invalido: "N/A (el agente en vía SÍ es testigo directo válido)",
+    codigo_infraccion: "D.04",
     subsanable: false,
-    notas: "Sin prueba técnica, la percepción visual no constituye prueba suficiente",
+    notas: "Infracción D.04. NO da lugar a inmovilización. El agente en vía solo impone la orden de comparendo y el vehículo puede seguir su marcha. La Sentencia C-038 de 2020 aplica ÚNICAMENTE para fotomultas fijas, no para operativos presenciales en vía.",
     preguntas_fase1: [
       "¿En qué ciudad se encuentra y en qué intersección ocurrió?",
-      "¿El oficial tiene alguna prueba técnica de la infracción? (cámara de fotomulta, video, fotografía) ¿O dice que lo vio directamente?",
+      "¿La infracción se la está imponiendo un agente en la calle o le llegó una fotomulta?",
       "¿En qué fase se encontraba el semáforo cuando usted pasó? (rojo firme, cambiando de amarillo a rojo, intermitente)",
       "¿Qué tipo de vehículo conduce?",
       "¿Había alguna circunstancia especial? (emergencia, semáforo dañado, congestión, desvío de tránsito)"
