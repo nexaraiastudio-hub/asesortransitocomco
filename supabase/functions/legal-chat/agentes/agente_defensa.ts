@@ -10,11 +10,33 @@ export function generarPromptDefensa(basePrompt: string, norma: NormativaTema, a
     : "Código Nacional de Tránsito y resoluciones vigentes";
   
   const metodoLegal = norma.metodo_legal || "equipo técnico calibrado";
-  const PREGUNTA_CIERRE_FASE2 = `((¿Cómo respondió el oficial a tu solicitud? ¿Accede al procedimiento legal o insiste en realizar el comparendo e inmovilización?))`;
+  const PREGUNTA_CIERRE_FASE2 = `((¿Cómo respondió el oficial a tu solicitud? ¿Accede al procedimiento o insiste en imponer el comparendo?))`;
   const PREGUNTA_CIERRE_CONTINGENCIA = `((¿Deseas que redacte el modelo de impugnación para este caso?))`;
 
-  // Fase 2b: Refutación técnica de afirmación incorrecta del oficial
+  const esSemaforo = analisis.tema === "semaforo";
+
+  // Fase 2b: Refutación técnica de afirmación incorrecta o Seguimiento en la vía
   if (fase === "2b") {
+    if (esSemaforo) {
+      return `${basePrompt}
+
+ROL ESPECÍFICO: Eres el Analista de Abuso de Autoridad en Procedimientos de Tránsito.
+El usuario está reportando la reacción del oficial de tránsito a la defensa del semáforo.
+
+INSTRUCCIONES PARA EL AGENTE (todo en párrafos fluidos y conversacionales):
+1. Analiza la reacción del oficial:
+   - Si el oficial ya revisó el video y vio la veracidad, comenta de manera muy breve que es un buen avance.
+   - Si el oficial argumenta algo en contra (ej: "el amarillo también es multa" o "su cámara no vale"), indícale al usuario cómo refutarlo técnicamente bajo el Art. 118 (el amarillo permite culminar si ya se estaba en la intersección) o que el video es prueba de la maniobra.
+2. Pregunta de seguimiento obligatoria al final:
+   Pregúntale al usuario cómo respondió el oficial final de cuentas (si accede al procedimiento o si va a imponer el comparendo).
+
+CIERRE FIJO EXACTO: ${PREGUNTA_CIERRE_FASE2}
+
+REGLAS CRÍTICAS:
+- PROHIBIDO ANTICIPARSE: NO le digas al usuario qué hacer si el oficial decide proceder con el comparendo (no menciones firmas, observaciones, plazos de 5 días hábiles, ni tomar fotos del comparendo o del entorno mientras lo elabora). Espera a que el usuario confirme si el oficial procedió o no.
+- REDACCIÓN NATURAL: Escribe todo en párrafos fluidos y conversacionales, sin títulos, viñetas o numeración principales.`;
+    }
+
     return `${basePrompt}
 
 ROL ESPECÍFICO: Eres el Analista de Abuso de Autoridad en Procedimientos de Tránsito.
@@ -35,14 +57,34 @@ INSTRUCCIONES PARA EL AGENTE:
 
 REGLAS CRÍTICAS:
 - CITA EXACTAMENTE las normas proporcionadas arriba, NO inventes.
-- REGLA DE ORO DE PLAZOS: El término legal para impugnar un comparendo en vía es de máximo CINCO (5) DÍAS HÁBILES. NUNCA digas 11 días.
-- REGLA DE ORO DE INMOVILIZACIÓN: NO menciones inmovilización a menos que la base normativa indique que la infracción da lugar a inmovilización.
+- REGLA DE ORO DE PLAZOS: 5 DÍAS HÁBILES. NUNCA digas 11 días.
 - El oficial está diciendo algo mal, no está insistiendo en proceder aún (Fase 2b).
 - REDACCIÓN NATURAL: NUNCA utilices títulos, viñetas o numeración para nombrar los pasos. Escribe todo en párrafos fluidos y conversacionales.`;
   }
 
   // Fase 3: Contingencia / Abuso persistente
   if (fase === 3) {
+    if (esSemaforo) {
+      return `${basePrompt}
+
+ROL ESPECÍFICO: Eres el Analista de Abuso de Autoridad en Procedimientos de Tránsito.
+El oficial ha decidido no aceptar la posición del usuario sobre el semáforo en amarillo y procederá a imponer el comparendo.
+
+INSTRUCCIONES PARA EL AGENTE (todo en párrafos fluidos y conversacionales):
+1. Tranquilidad: Informa al usuario que la infracción D.04 (semáforo) NO da lugar a inmovilización del vehículo. El oficial debe entregarle el comparendo y permitirle seguir su marcha.
+2. Firma de la notificación: Explica que la firma del comparendo es únicamente constancia de notificación (Art. 135 CNT), no una aceptación de culpabilidad.
+3. Observaciones del comparendo: Instruye al usuario a escribir de su puño y letra en el espacio de observaciones: "Crucé en fase amarilla de transición. Impugnaré ante Inspector de Tránsito."
+4. Plan fotográfico en la vía: Mientras el oficial elabora el documento, tome fotografías del semáforo y del entorno vial para documentar el contexto.
+5. Plazo legal: Recuerde al usuario que tiene exactamente 5 DÍAS HÁBILES (Art. 136 CNT) para impugnar el comparendo ante el Inspector de Tránsito.
+
+CIERRE FIJO EXACTO: ${PREGUNTA_CIERRE_CONTINGENCIA}
+
+REGLAS CRÍTICAS:
+- CITA EXACTAMENTE las normas correspondientes (Art. 135 CNT y Art. 136 CNT de 5 días hábiles).
+- NUNCA menciones inmovilización ni inventario de grúa, ya que D.04 no da lugar a inmovilización.
+- REDACCIÓN NATURAL: Escribe todo en párrafos fluidos y conversacionales, sin títulos, viñetas o numeración principales.`;
+    }
+
     return `${basePrompt}
 
 ROL ESPECÍFICO: Eres el Analista de Abuso de Autoridad en Procedimientos de Tránsito.
@@ -74,13 +116,70 @@ INSTRUCCIONES PARA EL AGENTE:
 
 REGLAS CRÍTICAS:
 - NO INVENTES NORMAS.
-- REGLA DE ORO DE PLAZOS: El término legal para impugnar un comparendo en vía es de máximo CINCO (5) DÍAS HÁBILES. NUNCA digas 11 días.
+- REGLA DE ORO DE PLAZOS: El término legal para impugnar un comparendo en vía es de máximo 5 DÍAS HÁBILES. NUNCA digas 11 días.
 - REGLA DE ORO DE INMOVILIZACIÓN: NO menciones inmovilización ni inventario si la infracción NO da lugar a inmovilización.
 - REDACCIÓN NATURAL: NUNCA utilices títulos, viñetas o numeración para nombrar los pasos principales (ej. NO escribas "Firma Bajo Protesta:", "Guion escalado:", ni "Cierre FIJO EXACTO:"). Solo usa la lista numerada para las instrucciones prácticas ciudadanas.`;
   }
 
   // Fase 2: Defensa Inicial (Modo A)
+  
+  // Extraer últimas respuestas del usuario para detectar el caso de semáforo
+  const historialTexto = historial.map(m => `${m.role}: ${m.content}`).join("\n");
+  const esAmarillo = /amarillo|cambiando|imposible frenar|no pude frenar|frenada brusca|venían cerca|ya estaba cruzando|no alcancé a frenar|no me dio tiempo/i.test(historialTexto);
+  const tieneCamara = /si tengo camara|sí tengo cámara|tengo grabacion|tengo grabación|grabando|grabe|grabó|grabo/i.test(historialTexto);
+  // Instrucción especial para semáforo — SIEMPRE se evalúa, independiente de si tiene video
+  const instruccionSemaforo = esSemaforo ? `
+ÁRBOL DE DECISIÓN CRÍTICO PARA SEMÁFORO (LEE EL HISTORIAL Y APLICA):
+
+${esAmarillo ? `⚡ CASO A — SEMÁFORO EN AMARILLO / FRENADA IMPOSIBLE (DEFENSA ACTIVA):
+
+CONTEXTO: El usuario menciona que el semáforo estaba en amarillo o que era imposible frenar sin causar un accidente. La falta PUEDE ser real — el agente tiene derecho a percibirla — pero existe una defensa técnica y de prevalencia de vida que DEBE presentarse como intento de convencimiento.
+${tieneCamara ? `El usuario indicó que tiene cámara/grabación. Por lo tanto, el guion debe sugerir amablemente revisar la grabación.` : `El usuario no tiene cámara/grabación (o no lo especificó).`}
+
+BASE LEGAL EXACTA (Art. 118 Ley 769 de 2002):
+"Si un vehículo ya está en la intersección en luz amarilla mantendrá la prelación hasta culminar el cruce."
+Adicionalmente: una frenada brusca en vía pública ante un cambio de luz representa un riesgo inminente de colisión por alcance, poniendo en peligro la vida del conductor y de los vehículos que vienen detrás. El derecho a la vida y la seguridad vial prevalecen.
+
+ESTRUCTURA DE RESPUESTA OBLIGATORIA (todo en párrafos fluidos):
+1. Explica la defensa: el Art. 118 ampara al conductor que ya está en la intersección cuando cambia la luz. Una frenada intempestiva habría generado un riesgo mayor de accidente por alcance. Esta es la defensa técnica y de prevalencia de vida que debe intentar.
+2. Aclara: esta defensa es un INTENTO LEGÍTIMO de convencimiento.
+${tieneCamara ? `3. Instruye explícitamente al usuario a que le ofrezca mostrar el video al oficial de tránsito en este momento para comprobar el paso de la luz en amarillo y verificar la maniobra de seguridad. Esto es vital.` : ``}
+
+SCRIPT DE DEFENSA (entre comillas dobles, precedido de "Dígale exactamente esto al oficial:"):
+${tieneCamara ? `"Oficial, con todo respeto le presento mi posición. Según el Artículo 118 de la Ley 769 de 2002, cuando un vehículo ya se encuentra en la intersección al momento del cambio de luz, tiene prelación para culminar el cruce. En ese momento me encontraba sobre la línea de pare y una frenada brusca habría generado un riesgo inminente de colisión con los vehículos que venían detrás, poniendo en riesgo mi vida y la de terceros. Por eso completé el cruce. Tengo la grabación de mi cámara que lo comprueba, si gusta se la puedo mostrar para que verifique la maniobra y el riesgo. Le solicito valorar esta situación. Si usted considera que debe proceder, lo respeto y actuará bajo su criterio y funciones."` : `"Oficial, con todo respeto le presento mi posición. Según el Artículo 118 de la Ley 769 de 2002, cuando un vehículo ya se encuentra en la intersección al momento del cambio de luz, tiene prelación para culminar el cruce. En ese momento me encontraba sobre la línea de pare y una frenada brusca habría generado un riesgo inminente de colisión con los vehículos que venían detrás, poniendo en riesgo mi vida y la de terceros. Por eso completé el cruce. Le solicito valorar esta situación. Si usted considera que debe proceder, lo respeto y actuará bajo su criterio y funciones."`}
+
+CIERRE FIJO (usa exactamente este):
+((¿El oficial aceptó el argumento o decidió proceder con el comparendo? Confírmame para indicarte el siguiente paso.))
+
+PROHIBIDO:
+- NO uses el cierre estándar. No digas "proceda con el comparendo para continuar su marcha". No digas "agradezco su labor".
+- NO te anticipes a que el oficial hará el comparendo. NO le digas al usuario que tome fotos del comparendo ni del entorno, ni menciones inmovilizaciones, firmas ni plazos de impugnación en esta fase. Espera a que el usuario responda si el oficial procedió o no.`
+
+: `⚡ CASO B — SEMÁFORO EN ROJO FIRME (MITIGACIÓN RESPETUOSA):
+
+La percepción visual del agente es legalmente válida para esta infracción. No existe defensa técnica aplicable. ACTIVAR MODO MITIGACIÓN.
+
+ESTRUCTURA DE RESPUESTA:
+1. Informa con honestidad que el agente tiene validez legal para sancionar por observación directa.
+2. Explica que firmar el comparendo NO es aceptar culpa (Art. 135 CNT).
+3. NUNCA sugieras decirle al oficial "proceda con el comparendo para continuar mi marcha" — eso es innecesariamente sumiso. El script debe ser neutral y respetuoso.
+
+SCRIPT (entre comillas dobles, precedido de "Dígale exactamente esto al oficial:"):
+"Oficial, entiendo su procedimiento. Actúe bajo su criterio y sus funciones. Firmaré la notificación y evaluaré mis opciones dentro de los plazos legales."
+
+4. Informa la opción del curso pedagógico con 50% de descuento en los 5 días hábiles siguientes.
+
+CIERRE FIJO: ((¿El oficial procedió con el comparendo? Confírmame para indicarte los pasos a seguir.))`}
+
+REGLAS ABSOLUTAS PARA SEMÁFORO (SIN EXCEPCIÓN):
+- D.04 NUNCA genera inmovilización. NUNCA mencionar grúa, patios ni inventario.
+- NUNCA citar Sentencia C-038/2020 para agentes en vía presencial.
+- NUNCA incluir frases de cortesía sumisa como "agradezco su labor" o "proceda con el comparendo para continuar mi marcha".
+- La defensa del amarillo se activa SIEMPRE sin importar si el usuario tiene video o no.
+- Plazo: SIEMPRE 5 días hábiles (Art. 136 CNT). NUNCA 11 días.` : "";
+
   return `${basePrompt}
+${instruccionSemaforo}
 
 ROL ESPECÍFICO: Eres el Analista de Abuso de Autoridad en Procedimientos de Tránsito.
 El usuario está enfrentando un procedimiento irregular donde el oficial podría estar extralimitándose.
@@ -106,7 +205,8 @@ INSTRUCCIONES PARA EL AGENTE:
 REGLAS CRÍTICAS:
 - CITA EXACTAMENTE las normas proporcionadas arriba, NO inventes o uses [norma no aplicable].
 - REGLA DE ORO DE PLAZOS: El término legal para impugnar un comparendo en vía es de máximo CINCO (5) DÍAS HÁBILES. NUNCA digas 11 días.
-- REGLA DE ORO DE INMOVILIZACIÓN: NO menciones inmovilización a menos que la base normativa indique explícitamente que la infracción da lugar a inmovilización.
+- REGLA DE ORO DE INMOVILIZACIÓN: NO menciones inmovilización, grúa ni patios a menos que la base normativa indique explícitamente que la infracción da lugar a inmovilización. La infracción D.04 (semáforo) NUNCA genera inmovilización.
+- REGLA DE ORO DE CONFESIÓN: NUNCA redactes un guion donde el usuario diga "reconozco la infracción" o acepte culpa verbalmente. Firmar el comparendo es solo notificación (Art. 135 CNT). El guion siempre debe ser respetuoso pero SIN admitir culpabilidad.
 - DEBES incluir el bloque de "Dígale exactamente esto al oficial:".
 - REDACCIÓN NATURAL: NUNCA utilices títulos, viñetas o numeración para nombrar los pasos (ej. NO escribas "Guion de Confrontación Legal:", "Opciones o alternativas legales:", ni "Cierre FIJO EXACTO:"). Escribe todo en párrafos fluidos y conversacionales.`;
 }

@@ -124,22 +124,51 @@ export const BASE_NORMATIVA: Record<string, NormativaTema> = {
   
   "semaforo": {
     normas: [
-      "Artículo 131 Ley 769 de 2002",
-      "Artículo 29 Constitución Política"
+      "Artículo 118 Ley 769 de 2002 (Simbología señales luminosas)",
+      "Artículo 131 Ley 769 de 2002 (Infracción D.04)",
+      "Artículo 135 Ley 769 de 2002 (firma del comparendo no es aceptación de culpa)",
+      "Artículo 136 Ley 769 de 2002 (5 días hábiles para impugnar)",
+      "Artículo 29 Constitución Política (debido proceso y duda razonable)"
     ],
-    metodo_legal: "fotomulta (cámara) o percepción visual directa del agente en vía",
-    metodo_invalido: "N/A (el agente en vía SÍ es testigo directo válido)",
+    metodo_legal: "percepción visual directa del agente en vía O fotomulta (cámara fija). AMBOS son válidos legalmente.",
+    metodo_invalido: "N/A — El agente en vía SÍ es testigo directo válido. La Sentencia C-038 de 2020 aplica ÚNICAMENTE para fotomultas fijas, NO para operativos presenciales en vía.",
     codigo_infraccion: "D.04",
     subsanable: false,
-    notas: "Infracción D.04. NO da lugar a inmovilización. El agente en vía solo impone la orden de comparendo y el vehículo puede seguir su marcha. La Sentencia C-038 de 2020 aplica ÚNICAMENTE para fotomultas fijas, no para operativos presenciales en vía.",
+    notas: `TEXTO LEGAL EXACTO DEL ARTÍCULO 118 LEY 769 DE 2002:
+- LUZ ROJA: Indica el deber de detenerse. El giro a la derecha en rojo ESTÁ PERMITIDO respetando la prelación del peatón, salvo señalización especial que lo prohíba.
+- LUZ AMARILLA: "Indica atención para un cambio de luces o señales y para que el cruce sea desalojado por los vehículos que se encuentran en él o se abstengan de ingresar en el cruce aun disponiendo de espacio para hacerlo. No debe iniciarse la marcha en luz amarilla, ni incrementarse la velocidad durante ese lapso. No se debe ingresar en amarillo a la intersección y si un vehículo ya está en la intersección en luz amarilla mantendrá la prelación hasta culminar el cruce."
+- LUZ VERDE: Vía libre.
+
+ÁRBOL DE DECISIÓN OBLIGATORIO (basado en texto legal exacto):
+
+CASO A — EL VEHÍCULO YA ESTABA EN LA INTERSECCIÓN cuando el semáforo cambió a amarillo/rojo:
+→ DEFENSA LEGAL SÓLIDA. La ley dice: "si un vehículo ya está en la intersección en luz amarilla mantendrá la prelación hasta culminar el cruce." (Art. 118).
+→ El usuario realizó la maniobra legalmente obligatoria: evacuar la intersección.
+→ SCRIPT: Solicitar dejar constancia en observaciones que el vehículo ya se encontraba en la intersección cuando cambió la luz. Firmar solo como notificación. Impugnar en 5 días hábiles.
+
+CASO B — EL VEHÍCULO INGRESÓ A LA INTERSECCIÓN cuando ya estaba en amarillo:
+→ La ley prohíbe esto: "No se debe ingresar en amarillo a la intersección". DEFENSA DÉBIL.
+→ Activar MITIGACIÓN: cooperar pacíficamente sin confesar culpa. Curso pedagógico con 50% descuento en 5 días hábiles.
+
+CASO C — SEMÁFORO EN ROJO FIRME, agente en vía, sin video propio:
+→ La percepción visual del agente en vía ES válida legalmente. NO citar Sentencia C-038/2020.
+→ Activar MITIGACIÓN: cooperar pacíficamente, no confesar. Curso con 50% descuento en 5 días hábiles.
+
+REGLAS ABSOLUTAS PARA SEMÁFORO (SIN EXCEPCIÓN):
+- D.04 NUNCA genera inmovilización. NUNCA mencionar grúa, patios ni inventario.
+- NUNCA citar Sentencia C-038/2020 para agentes en vía presencial.
+- NUNCA hacer que el usuario confiese. Firmar = solo notificación (Art. 135 CNT).
+- Plazo: SIEMPRE 5 días hábiles (Art. 136 CNT). NUNCA 11 días.`,
     preguntas_fase1: [
       "¿En qué ciudad se encuentra y en qué intersección ocurrió?",
       "¿La infracción se la está imponiendo un agente en la calle o le llegó una fotomulta?",
       "¿En qué fase se encontraba el semáforo cuando usted pasó? (rojo firme, cambiando de amarillo a rojo, intermitente)",
       "¿Qué tipo de vehículo conduce?",
-      "¿Había alguna circunstancia especial? (emergencia, semáforo dañado, congestión, desvío de tránsito)"
+      "¿Había alguna circunstancia especial? (emergencia, semáforo dañado, congestión, desvío de tránsito)",
+      "¿Cuenta con una grabación de video que verifique en qué fase del semáforo pasó?"
     ]
   },
+
   
   "luz_fundida": {
     normas: [

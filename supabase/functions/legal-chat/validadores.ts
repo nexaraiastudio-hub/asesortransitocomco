@@ -33,16 +33,24 @@ export function validarNormasPostGeneracion(
       anio ? `${tipo} ${numero} de ${anio}` : null
     ].filter(Boolean);
     
-    // Verificar si es una norma permitida
+    // Verificar si es una norma permitida (normalizando abreviaciones de Art/Artículo, Res/Resolución)
     const esPermitida = norma.normas.some(permitida => {
-      const pLower = permitida.toLowerCase();
-      return representacionesNorma.some(r => r && pLower.includes(r.toLowerCase()));
+      const pLower = permitida.toLowerCase()
+        .replace(/artículo|articulo|art\./g, "art")
+        .replace(/resolución|resolucion|res\./g, "res");
+      return representacionesNorma.some(r => {
+        if (!r) return false;
+        const rNorm = r.toLowerCase()
+          .replace(/artículo|articulo|art\./g, "art")
+          .replace(/resolución|resolucion|res\./g, "res");
+        return pLower.includes(rNorm);
+      });
     });
     
     // Normas generales SIEMPRE permitidas
     const esNormaGeneral = 
       (tipo.includes("ley") && (numero === "769" || numero === "1801")) ||
-      (tipo.includes("art") && (numero === "29" || numero === "20" || numero === "21" || numero === "82" || numero === "125" || numero === "131" || numero === "416")) ||
+      (tipo.includes("art") && (numero === "29" || numero === "20" || numero === "21" || numero === "82" || numero === "118" || numero === "125" || numero === "131" || numero === "135" || numero === "136" || numero === "416")) ||
       (tipo.includes("sentencia") && numero.includes("038")) ||
       (tipo.includes("sentencia") && numero.includes("799")) ||
       (tipo.includes("código") || tipo.includes("codigo")) ||

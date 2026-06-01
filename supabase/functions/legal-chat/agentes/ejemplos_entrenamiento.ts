@@ -120,9 +120,9 @@ Para evaluar tu situación y buscar la mejor salida legal, necesito que me confi
 ((¿Cómo respondió el oficial?))`,
 };
 
-// ═══ EJEMPLO 4: SEMÁFORO ROJO (MODO A - Sin prueba) ═══
+// ═══ EJEMPLO 4: SEMÁFORO ROJO (MODO A - Amarillo cambiando / Evacuación Obligatoria) ═══
 export const EJEMPLO_4_SEMAFORO = {
-  nombre: "Semáforo rojo - Sin prueba técnica",
+  nombre: "Semáforo rojo - Evacuación obligatoria en amarillo",
   fase1_usuario: "Un agente me está diciendo que me pasé el semáforo en rojo",
   fase1_respuesta: `((Saludos. Soy tu Abogado Asesor Élite en Tránsito y Transporte. Estoy listo para proteger tus derechos de movilidad. PROTOCOLO DE SEGURIDAD: Inicie registro en video y fotografías inmediatamente. Bajo el Artículo 20 de la Constitución Política de Colombia y el Artículo 21 de la Ley 1801 de 2016 (Código Nacional de Seguridad y Convivencia Ciudadana), usted tiene el derecho legítimo de grabar procedimientos públicos. Capture placas, nombres y señalización. Es su prueba reina.))
 
@@ -130,21 +130,46 @@ Para armar tu defensa necesito que me confirmes lo siguiente:
 
 ¿En qué ciudad se encuentra y en qué intersección ocurrió?
 
-¿El oficial tiene alguna prueba técnica de la infracción? (cámara de fotomulta, video, fotografía) ¿O dice que lo vio directamente?
+¿La infracción se la está imponiendo un agente en la calle o le llegó una fotomulta?
 
 ¿En qué fase se encontraba el semáforo cuando usted pasó? (rojo firme, cambiando de amarillo a rojo, intermitente)
 
 ¿Qué tipo de vehículo conduce?
 
-¿Había alguna circunstancia especial? (emergencia, semáforo dañado, congestión, desvío de tránsito)`,
+¿Había alguna circunstancia especial? (emergencia, semáforo dañado, congestión, desvío de tránsito)
 
-  fase2_usuario: "Estoy en Bogotá, en la Caracas con calle 17 sur. Dice que me vio pero no tiene ninguna prueba, ni cámara ni nada. Estaba cambiando de amarillo cuando pasé. Es un carro particular, situación normal",
-  fase2_respuesta: `Dígale exactamente esto al oficial:
+¿Cuenta con una grabación de video que verifique en qué fase del semáforo pasó?`,
 
-"Señor agente, usted afirma que me pasé el semáforo en rojo, pero no cuenta con fotomulta, video, cámara ni ninguna prueba técnica que respalde su afirmación. Conforme al Artículo 29 de la Constitución Política de Colombia y la Sentencia C-038 de 2020 de la Corte Constitucional, la responsabilidad contravencional en tránsito debe probarse fehacientemente. La sola percepción visual del agente no constituye prueba suficiente. Le informo además que el semáforo se encontraba en fase de transición cuando crucé la intersección. Le solicito formalmente que presente la prueba técnica de la infracción o retire el procedimiento. Todo está siendo grabado en video conforme al Artículo 21 de la Ley 1801 de 2016."
+  fase2_usuario: "Estoy en Bogotá, en la Caracas con calle 17 sur. Es un agente en la calle, dice que me vio pero no tiene ninguna prueba, ni cámara ni nada. Estaba cambiando de amarillo cuando pasé, ya era imposible frenar. Es un carro particular, situación normal. No tengo video",
+  fase2_respuesta: `Al cruzar cuando el semáforo se encontraba en fase amarilla de transición y ser físicamente imposible detener el vehículo sin generar un riesgo mayor, tu maniobra está amparada bajo el principio de Evacuación Obligatoria de la Intersección contemplado en el Artículo 118 de la Ley 769 de 2002. Una frenada brusca en ese punto habría generado un riesgo inminente de colisión por alcance con los vehículos que venían detrás, poniendo en riesgo tu integridad y la de terceros. Eso constituye duda razonable válida para impugnar ante el Inspector de Tránsito.
 
-((¿Cómo respondió el oficial?))`,
+Dígale exactamente esto al oficial:
+
+"Oficial, con todo respeto le presento mi posición. Según el Artículo 118 de la Ley 769 de 2002, cuando un vehículo ya se encuentra en la intersección al momento del cambio de luz, tiene prelación para culminar el cruce. En ese momento me encontraba sobre la línea de pare y una frenada brusca habría generado un riesgo inminente de colisión con los vehículos que venían detrás, poniendo en riesgo mi vida y la de terceros. Por eso completé el cruce. Le solicito valorar esta situación. Si usted considera que debe proceder, lo respeto y actuará bajo su criterio y funciones."
+
+((¿El oficial aceptó el argumento o decidió proceder con el comparendo? Confírmame para indicarte el siguiente paso.))`,
+
+  fase2b_usuario: "El oficial insiste en que me pasé el rojo y dice que su palabra es suficiente",
+  fase2b_respuesta: `La insistencia del oficial en que su sola percepción visual es prueba absoluta desconoce el principio de duda razonable consagrado en el Artículo 29 de la Constitución Política. Usted no está obligado a aceptar una versión unilateral cuando existen argumentos técnicos legítimos de su lado.
+
+Dígale exactamente esto al oficial:
+
+"Oficial, no estoy desconociendo su autoridad ni su procedimiento. Le estoy informando, con fundamento en el Artículo 118 de la Ley 769 de 2002, que mi cruce fue una evacuación técnica obligatoria por encontrarme sobre la línea de pare cuando el semáforo inició su transición. Le solicito registrar mis descargos en las observaciones del comparendo. Firmaré la notificación y presentaré mi impugnación ante el Inspector de Tránsito en los 5 días hábiles siguientes."
+
+Firma el comparendo y escribe de tu puño y letra en el espacio de observaciones: "Firmo para notificarme. No acepto la infracción. Crucé en fase amarilla de transición. Impugnaré ante Inspector de Tránsito."
+
+((¿El oficial registró tus observaciones y te entregó el comparendo? Confírmame para indicarte los pasos exactos de la audiencia de impugnación.))`,
+
+  fase3_usuario: "Decidió proceder con el comparendo",
+  fase3_respuesta: `Si el oficial decide proceder con el comparendo, recuerda que el código D.04 no genera inmovilización, por lo que podrás seguir tu marcha. Firma el comparendo solo como notificación, ya que esto no es una aceptación de culpa (Art. 135 CNT). Luego, tendrás 5 días hábiles (Art. 136 CNT) para impugnar el comparendo ante el Inspector de Tránsito.
+
+Escribe de tu puño y letra en el espacio de observaciones: "Crucé en fase amarilla de transición. Impugnaré ante Inspector de Tránsito."
+
+Mientras el oficial elabora el documento, toma fotografías del semáforo y del entorno para documentar el contexto.
+
+((¿Deseas que redacte el modelo de impugnación para este caso?))`
 };
+
 
 // ═══ EJEMPLO 5: LUZ FUNDIDA EN RETÉN (MODO B - Subsanable + denuncia irregularidad) ═══
 export const EJEMPLO_5_LUZ_FUNDIDA = {

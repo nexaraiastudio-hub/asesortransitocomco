@@ -39,7 +39,7 @@ const BLOQUE_SALUDO_PROTOCOL = `((Saludos. Soy tu Abogado Asesor Élite en Trán
 
 const PREGUNTA_CONTROL_TRIAJE = `((Pregunta de Control: Con esta información puedo armar tu estrategia legal. Necesito que me confirmes los datos solicitados. Responde y activo tu defensa.))`;
 
-const PREGUNTA_CIERRE_FASE2 = `((¿Cómo respondió el oficial a tu solicitud? ¿Accede al procedimiento legal o insiste en realizar el comparendo e inmovilización?))`;
+const PREGUNTA_CIERRE_FASE2 = `((¿Cómo respondió el oficial a tu solicitud? ¿Accede al procedimiento o insiste en imponer el comparendo?))`;
 
 const PREGUNTA_CIERRE_CONTINGENCIA = `((¿Deseas que redacte el modelo de impugnación para este caso?))`;
 
@@ -216,8 +216,8 @@ function determinarFase(historial: ChatMessage[], clasificacion: ClasificacionCo
     return 3;
   }
   
-  // Fase 2b: Refutacion - oficial dice algo incorrecto (NO es insistencia)
-  if (detectarAfirmacionOficial(ultimoMensaje) && hayDefensaPrevia) {
+  // Fase 2b: Refutacion o Seguimiento en la vía (si ya hubo defensa previa)
+  if (hayDefensaPrevia) {
     return "2b";
   }
   
@@ -365,9 +365,10 @@ DATOS DEL CASO:
 function construirPromptFase1(basePrompt: string, norma: NormativaTema | null, analisis: ClasificacionConsulta): string {
   const preguntas = norma?.preguntas_fase1 || [
     "¿En qué ciudad o municipio de Colombia ocurrió la detención? (Fundamental para aplicar normativas locales como las de Bogotá)",
-    "¿Qué tipo de vehículo conduce? (moto, carro, camioneta, bus, camión)",
-    "¿A qué autoridad pertenece el oficial que lo detuvo? (Policía de Tránsito, Agente Civil de Tránsito, Policía Nacional)",
-    "¿Qué método utilizó el oficial para determinar la presunta infracción?"
+    "¿En qué intersección ocurrió la infracción?",
+    "¿En qué fase del semáforo estaba al pasar?",
+    "¿Había alguna circunstancia especial, como una emergencia o un semáforo dañado?",
+    "¿Cuenta con una grabación de video que verifique en qué fase del semáforo paso?"
   ];
 
   // Si la pregunta de ciudad no está (porque vino de BASE_NORMATIVA), la inyectamos al principio
@@ -478,50 +479,45 @@ C.C. [CÉDULA]
 }
 
 function aplicarBloquesFijos(respuesta: string, fase: FaseOrquestador): string {
-  // Limpiar cualquier saludo que la IA haya generado (para evitar duplicados)
   let respuestaLimpia = respuesta;
-    // Patrones de saludo a eliminar (case-insensitive)
-    const patronesSaludo = [
-      /\(\(\s*Saludos\.?\s*Soy tu Abogado Asesor[\s\S]*?\)\)\n*/ig,
-      /^\s*Saludos\.?\s*Soy tu Abogado Asesor[\s\S]*?(?=\n\n|$)/img,
-    ];
-  
+
+  // 1. Eliminar saludos generados por la IA
+  const patronesSaludo = [
+    /\(\(\s*Saludos\.?\s*Soy tu Abogado Asesor[\s\S]*?\)\)\n*/ig,
+    /^\s*Saludos\.?\s*Soy tu Abogado Asesor[\s\S]*?(?=\n\n|$)/img,
+  ];
   for (const patron of patronesSaludo) {
     respuestaLimpia = respuestaLimpia.replace(patron, "").trim();
   }
-  
-  // Limpiar líneas vacías al inicio
+
+  // 2. SIEMPRE eliminar "Pregunta de Control" de la respuesta (la IA no debe generarla)
+  respuestaLimpia = respuestaLimpia.replace(/\(\(\s*Pregunta de Control[\s\S]*?\)\)\s*/ig, "").trim();
+  respuestaLimpia = respuestaLimpia.replace(/Pregunta de Control:[\s\S]*?(?=\n\n|$)/img, "").trim();
+
+  // 3. Limpiar líneas vacías al inicio
   respuestaLimpia = respuestaLimpia.replace(/^\s*\n+/, "");
-  
-  // Limpiar pregunta de control duplicada si la IA la generó
-  const tienePreguntaControl = respuestaLimpia.includes("Pregunta de Control") || 
-                                respuestaLimpia.includes("((Pregunta de Control");
 
   switch (fase) {
     case 1:
-      // FASE 1: Saludo fijo + respuesta limpia + Pregunta de Control
-      if (tienePreguntaControl) {
-        // La IA ya generó la pregunta de control, no duplicar
-        return `${BLOQUE_SALUDO_PROTOCOL}\n\n${respuestaLimpia}`;
-      }
-      return `${BLOQUE_SALUDO_PROTOCOL}\n\n${respuestaLimpia}\n\n${PREGUNTA_CONTROL_TRIAJE}`;
-    
+      // FASE 1: Saludo fijo + respuesta limpia (sin Pregunta de Control)
+      return `${BLOQUE_SALUDO_PROTOCOL}\n\n${respuestaLimpia}`;
+
     case 2:
     case "2b":
-      // FASE 2 y 2b: Solo respuesta (sin saludo, ya se envió en Fase 1)
+      // FASE 2 y 2b: Solo respuesta (sin saludo)
       return respuestaLimpia;
-    
+
     case 3:
       // FASE 3: Respuesta (sin saludo)
       return respuestaLimpia;
-    
+
     case 4:
       // FASE 4: Documento de impugnación (sin saludo)
       return respuestaLimpia;
-    
+
     case "cierre":
       return respuestaLimpia;
-    
+
     default:
       return respuestaLimpia;
   }
@@ -532,14 +528,7 @@ function generarRespuestaFallback(fase: FaseOrquestador, norma: NormativaTema | 
   
   switch (fase) {
     case 1:
-      return `${BLOQUE_SALUDO_PROTOCOL}
-
-Para poder asesorarte adecuadamente sobre tu caso de ${tema}, necesito que me proporciones algunos datos:
-
-1. ¿En qué ciudad o municipio de Colombia ocurrió la detención?
-${norma ? norma.preguntas_fase1.map((p, i) => `${i + 2}. ${p}`).join("\n") : "2. ¿Qué tipo de vehículo conduce?\n3. ¿Qué método usó el oficial?"}
-
-${PREGUNTA_CONTROL_TRIAJE}`;
+      return `${BLOQUE_SALUDO_PROTOCOL}\r\n\r\nPara poder asesorarte adecuadamente sobre tu caso de ${tema}, necesito que me proporciones algunos datos:\r\n\r\n1. ¿En qué ciudad o municipio de Colombia ocurrió la detención?\r\n2. ¿En qué intersección ocurrió la infracción?\r\n3. ¿En qué fase del semáforo estaba al pasar?\r\n4. ¿Había alguna circunstancia especial, como una emergencia o un semáforo dañado?\r\n5. ¿Cuenta con una grabación de video que verifique en qué fase del semáforo paso?`;
 
     case 2:
       return `Dígale exactamente esto al oficial:
@@ -566,22 +555,14 @@ ${PREGUNTA_CIERRE_CONTINGENCIA}`;
 }
 
 function generarRespuestaCierre(): string {
-  return `((Saludos. Soy tu Abogado Asesor Elite en Transito y Transporte.))
+  return `✅ PROCEDIMIENTO RESUELTO FAVORABLEMENTE
 
-✅ PROCEDIMIENTO RESUELTO FAVORABLEMENTE
+¡Excelente noticia! El oficial ha decidido no continuar con el procedimiento. Sus derechos de movilidad han sido protegidos con éxito.
 
-¡Excelente noticia! El oficial ha reconocido la falta de fundamentación técnica y ha decidido no continuar con el procedimiento. Sus derechos fueron protegidos exitosamente.
-
-Resumen de lo logrado:
-• Se exigió el uso del equipo técnico reglamentario.
-• Se citó la normativa vigente correctamente.
-• El oficial reconoció que la apreciación visual no es válida.
-• Se evitó el comparendo y la inmovilización.
-
-Recomendaciones finales:
-1. Verifique sus documentos: licencia, SOAT, tarjeta de propiedad.
-2. Conducción Preventiva: cumpla con la normativa técnica para evitar futuras detenciones.
-3. Guarde el video: es su prueba reina. Guárdelo en al menos 2 dispositivos.
+Recomendaciones de seguridad y cierre:
+1. Verifique sus documentos: Si le entregó documentos al oficial (licencia de conducción, SOAT, tarjeta de propiedad, etc.), asegúrese de que se los hayan devuelto todos y que estén completos y en buen estado antes de reiniciar la marcha.
+2. Conducción Preventiva: Respete las normas de tránsito para evitar inconvenientes en la vía.
+3. Guarde sus grabaciones: Si registró el procedimiento en video o fotos, guarde una copia segura en su dispositivo o en la nube como respaldo de la actuación.
 
 ((¿Necesita asesoría en otro tema de tránsito o transporte?))`;
 }
