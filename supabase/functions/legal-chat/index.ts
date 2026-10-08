@@ -1,568 +1,216 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { OpenAI } from "https://esm.sh/openai@4.28.0";
-import { BASE_NORMATIVA, NormativaTema } from "./base_normativa.ts";
-import { validarNormasPostGeneracion } from "./validadores.ts";
-import { detectarExitoConRegex, detectarAbusoEnMensaje, detectarSolicitudImpugnacion, detectarAfirmacionOficial } from "./detectores.ts";
-import { ChatMessage, ClasificacionConsulta, FaseOrquestador } from "./types.ts";
-import { clasificarConsulta } from "./clasificador.ts";
-import { TODOS_LOS_EJEMPLOS } from "./agentes/ejemplos_entrenamiento.ts";
-import { 
-  detectarExito, 
-  extraerResultado, 
-  construirCasoDesdeHistorial, 
-  formatearCasosParaPrompt 
-} from "./memoria_casos.ts";
-import { recuperarNormativa } from "./agentes/agente_leyes.ts";
-import { generarPromptDefensa } from "./agentes/agente_defensa.ts";
-import { generarPromptCumplimiento } from "./agentes/agente_cumplimiento.ts";
+﻿import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+// FORCE REBUILD 2026-09-02
+import OpenAI from "https://deno.land/x/openai@v4.69.0/mod.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.46.1";
+import { nodo1_Analista } from "./agentes/nodo1_analista.ts";
+import { nodo2_Investigador } from "./agentes/nodo2_investigador.ts";
+import { nodo3_JuristaUniversal } from "./agentes/nodo3_jurista_universal.ts";
+import { nodo4_Ensamblador } from "./agentes/nodo4_ensamblador.ts";
+import { nodo5_Redactor } from "./agentes/nodo5_redactor.ts";
+import type { ChatMessage } from "./types.ts";
 
-// CONFIGURACION Y CONSTANTES
+// ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â CIERRE NORMATIVO (Requerido por skill) ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â
+const CIERRE_NORMATIVA = `ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿Algo mÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡s en que pueda colaborarte?`;
 
-const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-
-if (!OPENAI_API_KEY) {
-  console.error("[CONFIG] ERROR: OPENAI_API_KEY no esta configurada");
+// ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â DETECTAR MODO NORMATIVA ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â
+function esConsultaNormativa(tema: string, fase: number, mensaje: string, userContext?: string): boolean {
+  // Si NO es fase 1, no es consulta normativa pura
+  if (fase !== 1) return false;
+  
+  // Si el usuario seleccionÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³ explÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­citamente "normativas" en el selector post-login, FORZAR modo normativa
+  if (userContext === "normativas") return true;
+  
+  // Si el usuario seleccionÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³ una opciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n situacional, NO es normativa
+  if (userContext === "situaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n en vÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­a pÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âºblica, con policÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­a o agente de trÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡nsito" || 
+      userContext === "accidente o choque") return false;
+  
+  // Detectar si es una situaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n con autoridad (situacional, NO normativa)
+  const mensajeLower = mensaje.toLowerCase();
+  const indicadoresSituacionales = [
+    "me detuvieron", "me detuvo", "me pararon", "me paro",
+    "un agente", "un policÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­a", "el agente", "el policÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­a",
+    "me multaron", "me van a multar", "comparendo",
+    "inmoviliz", "grÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âºa", "grua",
+    "me dijo", "me dice", "el oficial",
+    "me pidieron", "me piden",
+    "en la vÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­a", "en la calle", "en el puesto",
+    "me retuvieron", "me revisaron"
+  ];
+  
+  // Si el mensaje contiene indicadores de situaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n real con autoridad, NO es normativa
+  const esSituacional = indicadoresSituacionales.some(ind => mensajeLower.includes(ind));
+  if (esSituacional) return false;
+  
+  // Temas que PUEDEN ser normativa (consulta pura)
+  const temasNormativa = [
+    "consulta_general_transito",
+    "polarizados",
+    "llantas",
+    "casco",
+    "semaforo",
+    "luces",
+    "kit_carretera",
+    "soat_vencido",
+    "licencia",
+    "revision_tecnicomecanica",
+    "velocidad",
+    "embriaguez",
+    "cinturon_seguridad"
+  ];
+  
+  return temasNormativa.includes(tema);
 }
-
-const openai = new OpenAI({ apiKey: OPENAI_API_KEY || "sk-fake-key-for-testing" });
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// BLOQUES FIJOS DEL SKILL V15.2
-
-const BLOQUE_SALUDO_PROTOCOL = `((Saludos. Soy tu Abogado Asesor Élite en Tránsito y Transporte. Estoy listo para proteger tus derechos de movilidad. PROTOCOLO DE SEGURIDAD: Inicie registro en video y fotografías inmediatamente. Bajo el Artículo 20 de la Constitución Política de Colombia y el Artículo 21 de la Ley 1801 de 2016 (Código Nacional de Seguridad y Convivencia Ciudadana), usted tiene el derecho legítimo de grabar procedimientos públicos. Toma fotos, videos, placas, nombres y señalización. Es su prueba reina.))`;
-
-const PREGUNTA_CONTROL_TRIAJE = `((Pregunta de Control: Con esta información puedo armar tu estrategia legal. Necesito que me confirmes los datos solicitados. Responde y activo tu defensa.))`;
-
-const PREGUNTA_CIERRE_FASE2 = `((¿Cómo respondió el oficial a tu solicitud? ¿Accede al procedimiento o insiste en imponer el comparendo?))`;
-
-const PREGUNTA_CIERRE_CONTINGENCIA = `((¿Deseas que redacte el modelo de impugnación para este caso?))`;
-
-// SERVIDOR PRINCIPAL
-
-serve(async (req) => {
+Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  const tiempoInicio = performance.now();
+
   try {
+    const openaiApiKey = Deno.env.get("OPENAI_API_KEY");
+    if (!openaiApiKey) throw new Error("OPENAI_API_KEY faltante en Supabase Secrets");
+
     const bodyText = await req.text();
-    console.log("[ORQUESTADOR] Body recibido:", bodyText);
-    
-    let body;
+    let body: any = {};
     try {
       body = JSON.parse(bodyText);
-    } catch (parseError) {
-      console.error("[ORQUESTADOR] Error parseando JSON:", parseError);
-      throw new Error(`JSON invalido: ${parseError.message}`);
-    }
-    
-    // Soportar ambos formatos: { messages } o { message, history }
-    let historial: ChatMessage[];
-    let ultimoMensaje: string;
-    
-    if (body.messages && Array.isArray(body.messages)) {
-      historial = body.messages;
-      ultimoMensaje = historial[historial.length - 1]?.content || "";
-    } else if (body.message && body.history) {
-      historial = [...body.history, { role: "user", content: body.message }];
-      ultimoMensaje = body.message;
-    } else {
-      throw new Error("Formato invalido: se espera 'messages' o 'message' + 'history'");
+    } catch (_) {
+      throw new Error("JSON invÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido recibido en la solicitud.");
     }
 
-    console.log(`[ORQUESTADOR] Mensaje: "${ultimoMensaje.substring(0, 50)}..."`);
-    console.log(`[ORQUESTADOR] Historial: ${historial.length} mensajes`);
+    let message: string = body.message || "";
+    let history: ChatMessage[] = body.history || [];
+    let userContext: string | undefined = body.context;
 
-    // CLASIFICACION INTELIGENTE (necesaria para detección de éxito y guardado)
-    const clasificacion = await clasificarConsulta(openai, ultimoMensaje, historial);
-    console.log(`[ORQUESTADOR] Tema: ${clasificacion.tema}, Modo: ${clasificacion.modo || "A"}`);
-
-    // 1. DETECCION DE EXITO (Fase Cierre)
-    if (detectarExito(ultimoMensaje) && historial.length > 2) {
-      console.log("[ORQUESTADOR] FASE CIERRE - EXITO DETECTADO");
-      
-      // Guardar caso exitoso para aprendizaje
-      try {
-        const caso = construirCasoDesdeHistorial(
-          clasificacion.tema || "general",
-          clasificacion.modo === "B" ? "FALTA_INMOVILIZACION_ILEGAL" : "ABUSO",
-          historial,
-          "cierre"
-        );
-        
-        if (caso && SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
-          const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
-          const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-          
-          const { error } = await supabaseAdmin
-            .from("casos_exitosos")
-            .insert({
-              ...caso,
-              resultado: extraerResultado(ultimoMensaje),
-              aprobado: false,
-              usos: 0,
-            });
-          
-          if (error) {
-            console.error("[MEMORIA] Error guardando caso:", error);
-          } else {
-            console.log("[MEMORIA] Caso exitoso guardado para revisión");
-          }
-        }
-      } catch (err) {
-        console.error("[MEMORIA] Error en guardado:", err);
-      }
-      
-      const respuestaCierre = generarRespuestaCierre();
-      return new Response(
-        JSON.stringify({ response: respuestaCierre, fase: "cierre" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    if (!message && Array.isArray(body.messages) && body.messages.length > 0) {
+      history = body.messages.slice(0, -1);
+      message = body.messages[body.messages.length - 1].content || "";
     }
 
-    // 2. EXTRACCION DE MARCO LEGAL (A travs del Agente de Leyes)
-    const normativaTema = recuperarNormativa(clasificacion.tema || "general");
-    
-    // BÚSQUEDA DINÁMICA EN BASE DE DATOS (RAG)
-    let contextoDB = "";
-    if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY && OPENAI_API_KEY && OPENAI_API_KEY !== "sk-fake-key-for-testing") {
-      try {
-        const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
-        const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-        
-        const embeddingRes = await openai.embeddings.create({
-          model: "text-embedding-ada-002",
-          input: ultimoMensaje,
-        });
-        const embedding = embeddingRes.data[0].embedding;
-        
-        const { data: resultadosDB, error: errDB } = await supabaseAdmin.rpc("buscar_conocimiento", {
-          query_embedding: embedding,
-          match_threshold: 0.3,
-          match_count: 3
-        });
-        
-        if (!errDB && resultadosDB && resultadosDB.length > 0) {
-          contextoDB = resultadosDB.map((r: any) => `## ${r.titulo} (${r.anclaje_legal || ''})\n${r.contenido}`).join("\n\n");
-          console.log(`[ORQUESTADOR] Contexto DB recuperado: ${resultadosDB.length} normas`);
-        }
-      } catch (err) {
-        console.error("[ORQUESTADOR] Error en búsqueda RAG:", err);
-      }
+    if (!message || message.trim() === "") {
+      throw new Error("El mensaje no puede estar vacÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­o.");
     }
-    
-    // 3. DETERMINACION DE FASE
-    const fase = determinarFase(historial, clasificacion, ultimoMensaje);
-    console.log(`[ORQUESTADOR] FASE ${fase}`);
 
-    // 5. GENERACION DE RESPUESTA SEGUN SKILL V15.2
-    let respuestaFinal = await generarRespuestaPorFase(
-      historial,
-      fase,
-      normativaTema,
-      clasificacion,
-      contextoDB
+    
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "No autorizado" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } }
     );
 
-    // 6. VALIDACION POST-GENERACION
-    respuestaFinal = validarNormasPostGeneracion(respuestaFinal, normativaTema);
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: "AutenticaciÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³n invÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡lida" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
-    return new Response(
-      JSON.stringify({ 
-        response: respuestaFinal, 
-        fase,
-        tema: clasificacion.tema,
-        modo: clasificacion.modo,
-        arquetipo: (clasificacion as any).arquetipo,
-        clase: clasificacion.clase,
-        autoridad: clasificacion.autoridad
-      }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    // --- FASE 3: VERIFICACIÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œN SERVER-SIDE DE CRÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â°DITOS ---
+    const { data: hasCredits, error: creditsError } = await supabase.rpc("consume_credit");
+    
+    if (creditsError) {
+      console.error("[HIVE-LAW] Error verificando crÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â©ditos:", creditsError);
+      return new Response(JSON.stringify({ error: "Error interno al verificar autorizaciÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³n" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    
+    if (!hasCredits) {
+      console.log("\n[HIVE-LAW] Bloqueo 402 - CrÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â©ditos agotados para: " + user.id);
+      return new Response(JSON.stringify({ error: "Se agotaron los crÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â©ditos del servicio. Contacta al administrador." }), {
+        status: 402,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const openai = new OpenAI({ apiKey: openaiApiKey });
+
+    console.log(`\n[HIVE-LAW V18] MSG RECIBIDO (Longitud: ${message.length}) - USUARIO: ${user.id}`);
+
+    console.log(`[HIVE-LAW] Navegando Grafo Legal...`);
+    // ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â NODO 1: NAVEGADOR DE NODOS (ANALISTA V18) ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â
+    const analisis = await nodo1_Analista(openai, message, history);
+    console.log(`[HIVE-LAW] Nodo Actual: ${analisis.nodoActual} | Tema: ${analisis.tema}`);
+
+    if (analisis.tema === "fuera_de_dominio") {
+      console.log(`[HIVE-LAW] Bloqueo de Dominio. Consulta no relacionada con trÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡nsito.`);
+      const respuestaFueraDeDominio = "ESTA APP ES SOLO PARA CONSULTAS DE SITUACIONES DE TRANSITO Y TRANSPORTE.";
+      return new Response(JSON.stringify({ reply: respuestaFueraDeDominio }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+
+    // ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â NODO 2 + 3: Jurista (Mantiene la lÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³gica tÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©cnica) ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â
+    let veredicto = null;
+    if (analisis.nodoActual && !analisis.nodoActual.includes("inicio")) {
+      console.log(`[HIVE-LAW] Investigando normativa tÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©cnica...`);
+      const evidencia = await nodo2_Investigador(openai, supabase, analisis);
+      console.log(`[HIVE-LAW] Generando veredicto jurÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­dico...`);
+      veredicto = await nodo3_JuristaUniversal(openai, analisis, evidencia, message);
+    }
+
+    // ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â NODO 4: ENSAMBLADOR (Simplificado en V18) ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â
+    const ensamblador = await nodo4_Ensamblador(analisis, veredicto);
+
+    // ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â NODO 5: REDACTOR (RENDERIZADOR V18) ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â
+    console.log(`[HIVE-LAW] Renderizando respuesta final del Nodo...`);
+    const respuestaFinal = await nodo5_Redactor(openai, message, history, analisis, veredicto, ensamblador, userContext);
+
+    const tiempoTotal = Math.round(performance.now() - tiempoInicio);
+    console.log(`[V18.6] ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦ Nodo Completado en ${tiempoTotal}ms`);
+
+    // ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â AGREGAR CIERRE NORMATIVO SI APLICA ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â
+    let respuestaFinalConCierre = respuestaFinal;
+    if (esConsultaNormativa(analisis.tema, analisis.fase, message, userContext)) {
+      // Verificar que no tenga ya el cierre
+      if (!respuestaFinalConCierre.includes(CIERRE_NORMATIVA)) {
+        respuestaFinalConCierre = `${respuestaFinalConCierre.trim()}\n\n${CIERRE_NORMATIVA}`;
+      }
+    }
+
+    return new Response(JSON.stringify({
+      response: respuestaFinalConCierre,
+      timestamp: new Date().toISOString(),
+    }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
 
   } catch (error) {
-    console.error("[ERROR]", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorStack = error instanceof Error ? error.stack : "No stack";
+    console.error(`ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ ERROR CRÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂTICO HIVE-LAW: ${errorMessage}\nStack: ${errorStack}`);
+    
     return new Response(
-      JSON.stringify({ error: "Error procesando la consulta", details: error.message }),
+      JSON.stringify({
+        error: "Hubo un error procesando tu consulta legal.",
+        details: errorMessage,
+        stack: errorStack
+      }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 });
 
-// FUNCIONES DE CLASIFICACION (Eliminadas, ahora se importan desde clasificador.ts)
 
-function determinarFase(historial: ChatMessage[], clasificacion: ClasificacionConsulta, ultimoMensaje: string): FaseOrquestador {
-  const cantidadMensajes = historial.length;
-  const mensajesUsuario = historial.filter(m => m.role === "user").length;
-  
-  // Fase 4: Impugnacion solicitada explicitamente
-  if (detectarSolicitudImpugnacion(ultimoMensaje, historial)) {
-    return 4;
-  }
-  
-  // Fase 3: Contingencia - oficial persiste (solo si ya hubo defensa previa)
-  const hayDefensaPrevia = historial.some(m => 
-    m.role === "assistant" && 
-    (m.content.includes('"') || m.content.includes("Dígale exactamente"))
-  );
-  
-  if (detectarAbusoEnMensaje(historial) && hayDefensaPrevia) {
-    return 3;
-  }
-  
-  // Fase 2b: Refutacion o Seguimiento en la vía (si ya hubo defensa previa)
-  if (hayDefensaPrevia) {
-    return "2b";
-  }
-  
-  // Fase 2: Defensa - tenemos datos suficientes
-  // V19: Avanzar a Fase 2 en la segunda interaccion para evitar deadlocks 
-  // cuando el clasificador no extrae clase/autoridad del historial.
-  const esSegundaInteraccion = mensajesUsuario >= 2;
-  
-  if (esSegundaInteraccion) {
-    return 2;
-  }
-  
-  // Fase 1: Triaje - primera interaccion o faltan datos
-  return 1;
-}
 
-// GENERACION DE RESPUESTAS POR FASE - SIGUIENDO SKILL V15.2
 
-async function generarRespuestaPorFase(
-  historial: ChatMessage[], 
-  fase: FaseOrquestador, 
-  norma: NormativaTema | null, 
-  analisis: ClasificacionConsulta,
-  contextoDB: string = ""
-): Promise<string> {
-  
-  // Seleccionar ejemplos relevantes para el contexto
-  const ejemplosRelevantes = TODOS_LOS_EJEMPLOS.filter(ej => 
-    ej.nombre.toLowerCase().includes(analisis.tema) || 
-    analisis.tema.includes(ej.nombre.toLowerCase().split(" ")[0])
-  ).slice(0, 3);
-  
-  const ejemplosTexto = ejemplosRelevantes.length > 0 
-    ? ejemplosRelevantes.map(ej => `
-=== EJEMPLO: ${ej.nombre} ===
-FASE 1 - Usuario: "${ej.fase1_usuario}"
-FASE 1 - Respuesta:\n${ej.fase1_respuesta}
 
-FASE 2 - Usuario: "${ej.fase2_usuario}"
-FASE 2 - Respuesta:\n${ej.fase2_respuesta}
-${'fase2b_usuario' in ej ? `
-FASE 2b - Usuario: "${(ej as any).fase2b_usuario}"
-FASE 2b - Respuesta:\n${(ej as any).fase2b_respuesta}
-` : ''}
-${'fase3_usuario' in ej ? `
-FASE 3 - Usuario: "${(ej as any).fase3_usuario}"
-FASE 3 - Respuesta:\n${(ej as any).fase3_respuesta}
-` : ''}
-`).join("\n---\n")
-    : "No hay ejemplos específicos para este tema. Usa el formato estándar del SKILL.";
 
-  const basePrompt = `Eres HIVE-LAW, un Abogado Asesor Élite en Tránsito y Transporte de Colombia.
-
-REGLAS FUNDAMENTALES:
-1. TONO: Profesional, autoritario, técnico. Sin muletillas de asistente virtual.
-2. FORMATO: Sigue EXACTAMENTE la estructura de los ejemplos proporcionados.
-3. BLOQUES FIJOS: Los textos entre (( )) son literales. Reprodúcelos exactamente.
-4. NO INVENTES LEYES: Solo cita normas que estén en la base de datos proporcionada.
-5. DOBLE MODO:
-   - Modo A (Defensa Agresiva): Oficial sin razón, falta equipo técnico, vicio en procedimiento.
-   - Modo B (Asesoría Honesta): Falta real, subsanable, o indefendible.
-
-EJEMPLOS DE REFERENCIA (IMITA ESTE ESTILO EXACTO):
-${ejemplosTexto}
-
-MARCO LEGAL DEL CASO ACTUAL:
-- Tema: ${analisis.tema}
-- Normas aplicables predefinidas: ${norma?.normas.join(", ") || "Consultar base legal"}
-- Método legal requerido: ${norma?.metodo_legal || "No especificado"}
-- Método inválido: ${norma?.metodo_invalido || "No especificado"}
-- Código de infracción: ${norma?.codigo_infraccion || "N/A"}
-- Subsanable: ${norma?.subsanable ? "Sí" : "No"}
-
-${contextoDB ? `MARCO LEGAL ADICIONAL (EXTRAÍDO DE LA BASE DE DATOS PARA ESTE CASO ESPECÍFICO):
-${contextoDB}
-
-**INSTRUCCIÓN:** Utiliza estas normas adicionales extraídas de la base de datos si el tema no está completamente cubierto por las normas predefinidas, pero MANTÉN SIEMPRE el tono, el nivel de asertividad y el esqueleto de respuesta de los ejemplos.` : ""}
-
-DATOS DEL CASO:
-- Vehículo: ${analisis.clase || "No especificado"} (${analisis.servicio || "servicio no especificado"})
-- Autoridad: ${analisis.autoridad || "No especificada"}
-- Método usado por oficial: ${analisis.metodo || "No especificado"}
-- Modo detectado: ${analisis.modo || "Por determinar"}
-`;
-
-  let promptEspecifico = "";
-  
-  switch (fase) {
-    case 1:
-      promptEspecifico = construirPromptFase1(basePrompt, norma, analisis);
-      break;
-    case 2:
-    case "2b":
-    case 3:
-      if (analisis.modo === "B") {
-        promptEspecifico = generarPromptCumplimiento(basePrompt, norma || { descripcion: "", normas: [], sancion: "", subsanable: false, preguntas_fase1: [] }, analisis, historial, fase);
-      } else {
-        promptEspecifico = generarPromptDefensa(basePrompt, norma || { descripcion: "", normas: [], sancion: "", subsanable: false, preguntas_fase1: [] }, analisis, historial, fase);
-      }
-      break;
-    case 4:
-      promptEspecifico = construirPromptFase4(basePrompt, norma, analisis, historial);
-      break;
-    default:
-      promptEspecifico = construirPromptFase1(basePrompt, norma, analisis);
-  }
-
-  try {
-    if (!OPENAI_API_KEY || OPENAI_API_KEY === "sk-fake-key-for-testing") {
-      return generarRespuestaFallback(fase, norma, analisis);
-    }
-
-    // LOGGING: Verificar qué norma se está usando
-    console.log("[GENERADOR] Fase:", fase);
-    console.log("[GENERADOR] Norma:", norma ? JSON.stringify(norma.normas) : "NULL");
-    console.log("[GENERADOR] Tema:", analisis.tema);
-    
-    // LOGGING: Ver prompt completo
-    console.log("[GENERADOR] Prompt enviado a OpenAI (primeros 1000 chars):", promptEspecifico.substring(0, 1000));
-
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        { role: "system", content: promptEspecifico },
-        ...historial.slice(-4)
-      ],
-      temperature: 0.2,
-    });
-
-    let respuesta = completion.choices[0].message.content || "Error generando respuesta";
-    
-    // LOGGING: Ver respuesta de OpenAI
-    console.log("[GENERADOR] Respuesta OpenAI (primeros 500 chars):", respuesta.substring(0, 500));
-    
-    // Aplicar bloques fijos según la fase
-    respuesta = aplicarBloquesFijos(respuesta, fase);
-    
-    return respuesta;
-  } catch (error) {
-    console.error("[GENERADOR] Error:", error);
-    return generarRespuestaFallback(fase, norma, analisis);
-  }
-}
-
-function construirPromptFase1(basePrompt: string, norma: NormativaTema | null, analisis: ClasificacionConsulta): string {
-  const preguntas = norma?.preguntas_fase1 || [
-    "¿En qué ciudad o municipio de Colombia ocurrió la detención? (Fundamental para aplicar normativas locales como las de Bogotá)",
-    "¿En qué intersección ocurrió la infracción?",
-    "¿En qué fase del semáforo estaba al pasar?",
-    "¿Había alguna circunstancia especial, como una emergencia o un semáforo dañado?",
-    "¿Cuenta con una grabación de video que verifique en qué fase del semáforo paso?"
-  ];
-
-  // Si la pregunta de ciudad no está (porque vino de BASE_NORMATIVA), la inyectamos al principio
-  if (!preguntas[0].toLowerCase().includes("ciudad")) {
-    preguntas.unshift("¿En qué ciudad o municipio de Colombia ocurrió la detención? (Fundamental para aplicar normativas locales como las de Bogotá)");
-  }
-
-  return `${basePrompt}
-
-FASE 1: TRIAJE - INSTRUCCIONES
-
-ESTRUCTURA DE RESPUESTA:
-1. Texto conversacional natural explicando que necesitas información para armar la defensa (demuestra que leíste lo que te dijo el usuario).
-2. De la siguiente lista de verificación, haz ÚNICAMENTE las preguntas cuya respuesta AÚN NO CONOCES:
-${preguntas.map(p => `   ${p}`).join("\n")}
-
-REGLAS CRÍTICAS DE INTELIGENCIA:
-- NO SEAS ROBÓTICO. Si el usuario ya te dijo el vehículo (ej. moto), NO le preguntes qué vehículo conduce. Si ya te dijo quién lo detuvo (ej. agente de tránsito), NO se lo preguntes de nuevo.
-- Solo haz las preguntas de la lista que falten por responder. Si solo falta la ciudad, pregunta solo la ciudad.
-- NO incluyas el saludo inicial ((Saludos...)) - eso se agrega automáticamente.
-- NO uses bullets ni numeración para las preguntas.
-- NO generes el guion de defensa todavía.
-- NO agregues la "Pregunta de Control" al final - eso se agrega automáticamente.
-- Sé conversacional, racional y directo.`;
-}
-
-// FUNCIONES DE AGENTES MOVIDAS A AGENTES/ (agente_defensa.ts, agente_cumplimiento.ts)
-
-function construirPromptFase4(basePrompt: string, norma: NormativaTema | null, analisis: ClasificacionConsulta, historial: ChatMessage[]): string {
-  return `${basePrompt}
-
-FASE 4: IMPUGNACION - INSTRUCCIONES
-
-Genera el documento formal de impugnación con esta estructura EXACTA:
-
----
-
-Ciudad y fecha: [Ciudad], [Fecha]
-
-Señor(a)
-Inspector(a) de Tránsito y Transporte de [Ciudad]
-[Dirección de la Secretaría de Tránsito si se conoce]
-
-**ASUNTO: Impugnación del comparendo No. [NÚMERO] - ${analisis.metodo === "visual" || analisis.metodo === null ? "Nulidad por ausencia de prueba técnica" : "Nulidad por violación al debido proceso"}**
-
-Respetado(a) Inspector(a):
-
-Yo, **[NOMBRE COMPLETO]**, identificado(a) con cédula de ciudadanía No. **[CÉDULA]**, domiciliado(a) en **[DIRECCIÓN]**, teléfono **[TELÉFONO]**, correo electrónico **[CORREO]**, me dirijo a su despacho dentro del término legal para IMPUGNAR el comparendo que a continuación relaciono:
-
-**I. DATOS DEL COMPARENDO**
-- Número del comparendo: [NÚMERO]
-- Fecha del comparendo: [FECHA]
-- Hora: [HORA]
-- Lugar: [LUGAR]
-- Placas del vehículo: [PLACAS]
-- Código de infracción impuesta: ${norma?.codigo_infraccion || "[CÓDIGO]"}
-- Agente que impuso el comparendo: [NOMBRE/PLACA DEL AGENTE]
-
-**II. HECHOS**
-
-[Narrativa cronológica adaptada al caso:
-1. Circunstancias de la detención.
-2. Qué informó el oficial y qué solicitó el usuario.
-3. ${analisis.metodo === "visual" ? "Se determinó la infracción por apreciación visual sin instrumento técnico calibrado." : "Método utilizado por el oficial."}
-4. Si se solicitó subsanación y fue negada.
-5. Irregularidades documentadas.]
-
-**III. FUNDAMENTOS DE DERECHO**
-
-- **Artículo 29 de la Constitución Política de Colombia:** Debido proceso y presunción de inocencia.
-${norma?.normas[0] ? `- **${norma.normas[0]}**: Requisitos técnicos para el procedimiento.` : ""}
-- **Sentencia C-038 de 2020 (Corte Constitucional):** La responsabilidad contravencional debe probarse fehacientemente.
-${norma?.subsanable ? `- **Artículo 125 de la Ley 769 de 2002:** Derecho a subsanar en sitio.` : ""}
-
-**IV. PRUEBAS**
-
-Solicito se tengan como pruebas:
-1. Video del procedimiento grabado en el lugar de los hechos.
-2. Fotografías del vehículo, comparendo y agente.
-3. Copia del comparendo con la anotación BAJO PROTESTA.
-4. Captura de pantalla de esta conversación de asesoría legal.
-
-**V. SOLICITUDES**
-
-Con fundamento en los hechos y normas expuestos, solicito:
-a) Se declare la NULIDAD del comparendo por ${analisis.metodo === "visual" ? "ausencia de prueba técnica" : "violación al debido proceso"}.
-b) Se ordene la exoneración de los costos de grúa y parqueadero (si aplica).
-c) Se archive el proceso contravencional.
-
-**VI. NOTIFICACIONES**
-
-Recibo notificaciones en: [DIRECCIÓN], teléfono [TELÉFONO], correo [CORREO].
-
-Cordialmente,
-
-**[NOMBRE COMPLETO]**
-C.C. [CÉDULA]
-[Ciudad], [Fecha]
-
----
-
-**Recordatorios Post-Impugnación:**
-1. Tiene **5 días hábiles** desde la notificación del comparendo para presentar la impugnación.
-2. Guarde el video completo en al menos 2 dispositivos.
-3. Guarde captura de pantalla de esta conversación como soporte.
-4. Lleve copia física y digital de la impugnación.
-5. Solicite radicado o sello de recibido al momento de entregar.`;
-}
-
-function aplicarBloquesFijos(respuesta: string, fase: FaseOrquestador): string {
-  let respuestaLimpia = respuesta;
-
-  // 1. Eliminar saludos generados por la IA
-  const patronesSaludo = [
-    /\(\(\s*Saludos\.?\s*Soy tu Abogado Asesor[\s\S]*?\)\)\n*/ig,
-    /^\s*Saludos\.?\s*Soy tu Abogado Asesor[\s\S]*?(?=\n\n|$)/img,
-  ];
-  for (const patron of patronesSaludo) {
-    respuestaLimpia = respuestaLimpia.replace(patron, "").trim();
-  }
-
-  // 2. SIEMPRE eliminar "Pregunta de Control" de la respuesta (la IA no debe generarla)
-  respuestaLimpia = respuestaLimpia.replace(/\(\(\s*Pregunta de Control[\s\S]*?\)\)\s*/ig, "").trim();
-  respuestaLimpia = respuestaLimpia.replace(/Pregunta de Control:[\s\S]*?(?=\n\n|$)/img, "").trim();
-
-  // 3. Limpiar líneas vacías al inicio
-  respuestaLimpia = respuestaLimpia.replace(/^\s*\n+/, "");
-
-  switch (fase) {
-    case 1:
-      // FASE 1: Saludo fijo + respuesta limpia (sin Pregunta de Control)
-      return `${BLOQUE_SALUDO_PROTOCOL}\n\n${respuestaLimpia}`;
-
-    case 2:
-    case "2b":
-      // FASE 2 y 2b: Solo respuesta (sin saludo)
-      return respuestaLimpia;
-
-    case 3:
-      // FASE 3: Respuesta (sin saludo)
-      return respuestaLimpia;
-
-    case 4:
-      // FASE 4: Documento de impugnación (sin saludo)
-      return respuestaLimpia;
-
-    case "cierre":
-      return respuestaLimpia;
-
-    default:
-      return respuestaLimpia;
-  }
-}
-
-function generarRespuestaFallback(fase: FaseOrquestador, norma: NormativaTema | null, analisis: ClasificacionConsulta): string {
-  const tema = norma ? Object.keys(BASE_NORMATIVA).find(k => BASE_NORMATIVA[k] === norma) || "general" : "general";
-  
-  switch (fase) {
-    case 1:
-      return `${BLOQUE_SALUDO_PROTOCOL}\r\n\r\nPara poder asesorarte adecuadamente sobre tu caso de ${tema}, necesito que me proporciones algunos datos:\r\n\r\n1. ¿En qué ciudad o municipio de Colombia ocurrió la detención?\r\n2. ¿En qué intersección ocurrió la infracción?\r\n3. ¿En qué fase del semáforo estaba al pasar?\r\n4. ¿Había alguna circunstancia especial, como una emergencia o un semáforo dañado?\r\n5. ¿Cuenta con una grabación de video que verifique en qué fase del semáforo paso?`;
-
-    case 2:
-      return `Dígale exactamente esto al oficial:
-
-"Señor agente, solicito que se me informe el método técnico utilizado para determinar la presunta infracción. Según ${norma?.normas[0] || "la normativa"}, el procedimiento requiere ${norma?.metodo_legal || "equipo calibrado"}. Solicito ver el certificado de calibración del dispositivo. Todo está siendo grabado en video conforme al Artículo 21 de la Ley 1801 de 2016."
-
-${PREGUNTA_CIERRE_FASE2}`;
-
-    case 3:
-      return `Dígale exactamente esto al señor oficial:
-
-"Señor agente, reitero mi solicitud conforme a la normativa vigente. Su insistencia en proceder sin ${norma?.metodo_legal || "prueba técnica"} podría configurar Abuso de Autoridad conforme al Artículo 416 del Código Penal. Solicito su identificación completa: nombre, placa y entidad. Todo está siendo documentado en video."
-
-Firme el comparendo escribiendo BAJO PROTESTA junto a su firma, y en observaciones escriba: "Firmo BAJO PROTESTA. No se utilizó ${norma?.metodo_legal || "equipo calibrado"}. Procedimiento grabado en video."
-
-${PREGUNTA_CIERRE_CONTINGENCIA}`;
-
-    case 4:
-      return `Documento de impugnación generado. Complete los datos entre corchetes y presente ante la Secretaría de Tránsito dentro de los 5 días hábiles.`;
-
-    default:
-      return "Error generando respuesta. Por favor, intenta de nuevo.";
-  }
-}
-
-function generarRespuestaCierre(): string {
-  return `✅ PROCEDIMIENTO RESUELTO FAVORABLEMENTE
-
-¡Excelente noticia! El oficial ha decidido no continuar con el procedimiento. Sus derechos de movilidad han sido protegidos con éxito.
-
-Recomendaciones de seguridad y cierre:
-1. Verifique sus documentos: Si le entregó documentos al oficial (licencia de conducción, SOAT, tarjeta de propiedad, etc.), asegúrese de que se los hayan devuelto todos y que estén completos y en buen estado antes de reiniciar la marcha.
-2. Conducción Preventiva: Respete las normas de tránsito para evitar inconvenientes en la vía.
-3. Guarde sus grabaciones: Si registró el procedimiento en video o fotos, guarde una copia segura en su dispositivo o en la nube como respaldo de la actuación.
-
-((¿Necesita asesoría en otro tema de tránsito o transporte?))`;
-}

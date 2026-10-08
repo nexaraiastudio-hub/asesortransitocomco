@@ -81,7 +81,7 @@ serve(async (req) => {
         .substring(0, 10000);
 
       // Generar embedding
-      const embResponse = await fetch("https://api.openai.com/v1/embeddings", {
+      const embResponse = await fetch("https://openrouter.ai/api/v1/embeddings", {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${openaiKey}`,

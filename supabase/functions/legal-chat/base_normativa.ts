@@ -89,7 +89,7 @@ export const BASE_NORMATIVA: Record<string, NormativaTema> = {
   
   "cinturon_especial": {
     normas: [
-      "Resolución 668 de 2018",
+      // ELIMINADO: Resolución 668 de 2018 NO EXISTE en transporte - era una cita falsa
       "Ley 769 de 2002, Artículo 82"
     ],
     metodo_legal: "N/A - verificación de ficha técnica",
@@ -461,5 +461,51 @@ REGLAS ABSOLUTAS PARA SEMÁFORO (SIN EXCEPCIÓN):
       "¿El vehículo estaba completamente detenido o estacionado cuando usó el dispositivo?",
       "¿Estaba utilizando algún sistema de manos libres integrado al vehículo o auricular?"
     ]
-  }
+  },
+
+  "choque": {
+    normas: [
+      "Artículo 126 Ley 769 de 2002 (CNT) - Deber de prueba y movimiento obligatorio",
+      "Artículo 115 Ley 769 de 2002 (CNT) - Deber de auxiliar y mover",
+      "Artículo 131 Ley 769 de 2002 (CNT) - Procedimiento en accidentes",
+      "Artículo 29 Constitución Política - Debido proceso",
+      "Decreto 1079 de 2015 Art. 2.2.4.2.23 - Conciliación directa accidentes solo daños"
+    ],
+    metodo_legal: "N/A - deber de prueba documentado + movimiento a zona segura",
+    metodo_invalido: "negativa a mover sin considerar Art. 126 CNT",
+    codigo_infraccion: "C.01 (obstrucción improcedente si cumplió Art. 126)",
+    subsanable: true,
+    notas: "Art. 126 CNT: PRIMERO probar (fotos, videos, datos, testigos), LUEGO mover a zona segura. No hay obstrucción si se restablece flujo. Conciliación directa (Decreto 1079 Art 2.2.4.2.23): acta privada firmada por ambos conductores + SIMIT 5 días = archivo por falta objeto. Si agente insiste: firma BAJO PROTESTA + recurso reposición 2 días + queja Procuraduría.",
+    preguntas_fase1: [
+      "¿En qué ciudad o municipio de Colombia ocurrió el choque?",
+      "¿Fue en vía principal, secundaria o zona residencial?",
+      "¿Hubo SOLO daños materiales ('de latas') o hay lesionados?",
+      "¿Ya intercambiaron datos con el otro conductor (nombres, cédulas, placas, seguros, teléfonos)?",
+      "¿Tomaron fotos y videos de la posición original de los vehículos, daños y señalización ANTES de moverlos?",
+      "¿Hay testigos presenciales? ¿Tomaron sus datos?",
+      "¿El agente de tránsito ya está en el lugar? ¿Qué le ha dicho exactamente?"
+    ]
+  },
+
+  "consulta_general_transito": {
+    normas: [
+      "Ley 769 de 2002 - Código Nacional de Tránsito Terrestre",
+      "Decreto 1079 de 2015 - Decreto Único Reglamentario Sector Transporte",
+      "Ley 1801 de 2016 - Código Nacional de Policía y Convivencia",
+      "Ley 2450 de 2025 - Ley contra el Ruido",
+      "Resoluciones Ministerio de Transporte (3777/2003, 3443/2008, 3027/2010, 4100/2004, etc.)",
+      "NTC (Normas Técnicas Colombianas) aplicables",
+      "Jurisprudencia Corte Constitucional y Consejo de Estado"
+    ],
+    metodo_legal: "Consulta informativa - respuesta basada en normativa vigente",
+    metodo_invalido: "N/A",
+    subsanable: false,
+    notas: "Tema para consultas puramente informativas sobre normativa, reglamentos, procedimientos, derechos y obligaciones de tránsito sin infracción específica en curso. Respuestas solo con leyes y derechos, sin mencionar policías/agentes/operativos/inmovilizaciones.",
+    preguntas_fase1: [
+      "¿Sobre qué tema específico de tránsito o transporte necesitas información? (ej: licencias, SOAT, pico y placa, polarizados, semáforos, ciclorrutas, transporte público, etc.)",
+      "¿En qué ciudad o municipio de Colombia te interesa la normativa? (algunas ciudades tienen decretos locales)",
+      "¿La consulta es para un vehículo particular, público, oficial, escolar, diplomático?",
+      "¿Necesitas conocer requisitos, procedimientos, sanciones, derechos o jurisprudencia?"
+    ]
+  },
 };

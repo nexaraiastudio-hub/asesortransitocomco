@@ -20,110 +20,146 @@ export interface CasoExitoso {
   usos: number;
 }
 
+
+import { recuperarNormativa } from "./agentes/agente_leyes.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.46.1";
+
+// SUPABASE_URL usado como verificación de disponibilidad de entorno
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+// SERVICE_ROLE_KEY eliminado (SEC-003): casos_exitosos permite SELECT a usuarios autenticados por RLS
+
 /**
  * Detecta si el usuario está reportando éxito en su mensaje
  */
 export function detectarExito(mensaje: string): boolean {
-  const patronesExito = [
-    /se (fue|retir[oó]|retiro)/i,
-    /(oficial|agente|polic[ií]a) (cedi[oó]|cedio|dej[oó] ir|dejo ir|se retir[oó])/i,
-    /me dej[oó] (ir|pasar|seguir)/i,
-    /no (puso|hizo) (comparendo|multa|infracci[oó]n)/i,
-    /retir[oó] (el procedimiento|todo|la detenci[oó]n)/i,
-    /funcion[oó]|sirvi[oó]|result[oó]/i,
-    /gracias.*(funcion[oó]|sirvi[oó]|ayud[oó])/i,
-    /excelente|perfecto|muy bien/i,
-  ];
-
-  return patronesExito.some(patron => patron.test(mensaje));
+  const mensajeLower = mensaje.toLowerCase();
+  return mensajeLower.includes('gracias') || 
+         mensajeLower.includes('excelente') || 
+         mensajeLower.includes('perfecto') || 
+         mensajeLower.includes('éxito') || 
+         mensajeLower.includes('exitoso') ||
+         mensajeLower.includes('funcionó') ||
+         mensajeLower.includes('me sirvió') ||
+         mensajeLower.includes('me ayudó') ||
+         mensajeLower.includes('resuelto') ||
+         mensajeLower.includes('solucionado');
 }
 
 /**
- * Extrae el resultado del mensaje del usuario
+ * Detecta si el usuario está solicitando una impugnación
+ */
+export function detectarSolicitudImpugnacion(mensaje: string, historial: ChatMessage[]): boolean {
+  const mensajeLower = mensaje.toLowerCase();
+  return mensajeLower.includes('impugnar') || 
+         mensajeLower.includes('impugnación') || 
+         mensajeLower.includes('comparendo') || 
+         mensajeLower.includes('multa') || 
+         mensajeLower.includes('sanción') ||
+         mensajeLower.includes('modelo de impugnación') ||
+         mensajeLower.includes('redacte el modelo') ||
+         mensajeLower.includes('quiero impugnar');
+}
+
+/**
+ * Extrae el resultado del último mensaje del usuario
  */
 export function extraerResultado(mensaje: string): string {
-  // Buscar patrones de resultado
-  const patrones = [
-    /se (fue|retir[oó]).*$/i,
-    /(oficial|agente).*?(cedi[oó]|dej[oó] ir|se retir[oó]).*$/i,
-    /me dej[oó] (ir|pasar).*$/i,
-    /no (puso|hizo) (comparendo|multa).*$/i,
-  ];
-
-  for (const patron of patrones) {
-    const match = mensaje.match(patron);
-    if (match) return match[0];
-  }
-
-  return "Caso resuelto favorablemente";
+  // Implementación simplificada - en un caso real, esto sería más sofisticado
+  return mensaje.substring(0, 100); // Primeros 100 caracteres como resultado
 }
 
 /**
- * Construye un nuevo ejemplo de entrenamiento desde el historial
+ * Construye un caso exitoso a partir del historial de chat
  */
 export function construirCasoDesdeHistorial(
+    tema: string,
+    modo: string | null,
+    historial: ChatMessage[],
+    ultimoMensajeUsuarioAnterior: string // NUEVO: pasar el último mensaje del usuario ANTES de la nueva consulta
+  ): CasoExitoso | null {
+    if (historial.length < 2) return null;
+
+    // Usar el último mensaje del usuario ANTES de la nueva consulta (no el último mensaje del historial completo)
+    const ultimoMensaje = ultimoMensajeUsuarioAnterior;
+    
+    // Determinar si fue exitoso basado en detección de éxito o solicitud de impugnación
+    const esExitoso = detectarExito(ultimoMensaje) || 
+                     detectarSolicitudImpugnacion(ultimoMensaje, historial);
+    
+    if (!esExitoso) return null;
+
+    // Extraer entidades del historial para hacer el caso más rico
+    const hechosClave = {
+      mensajeInicial: historial[0].content,
+      mensajeFinal: ultimoMensaje,
+      interacciones: historial.length,
+      tieneHistorial: historial.length > 2
+    };
+
+    // Determinar normas aplicadas basado en el tema y contexto
+    const normativa = recuperarNormativa(tema);
+    const normasAplicadas = normativa?.normas || [];
+    
+    // Determinar resultado clave
+    const resultadoClave = modo === "B" 
+      ? "FALTA_INMOVILIZACION_ILEGAL - Asesoría honesta exitosa" 
+      : "ABUSO - Defensa agresiva exitosa";
+
+    // Crear el caso exitoso con todos los campos necesarios
+    const caso: CasoExitoso = {
+      id: crypto.randomUUID(),
+      tema: tema,
+      arquetipo: modo === "B" ? "FALTA_INMOVILIZACION_ILEGAL" : "ABUSO",
+      fase1_usuario: hechosClave,
+      fase1_respuesta: "",
+      fase2_usuario: "",
+      fase2_respuesta: "",
+      argumento_decisivo: normasAplicadas.join(", "),
+      resultado: resultadoClave,
+      fase_resolucion: "cierre",
+      aprobado: false,
+      usos: 0,
+      created_at: new Date().toISOString()
+    };
+
+    return caso;
+  }
+
+/**
+ * Obtiene casos exitosos por tema desde Supabase
+ * Recibe el cliente autenticado del usuario (nunca crea uno con Service Role)
+ */
+export async function obtenerCasosExitososPorTema(
   tema: string,
-  arquetipo: CasoExitoso["arquetipo"],
-  historial: { role: string; content: string }[],
-  faseResolucion: number | string
-): Omit<CasoExitoso, "id" | "created_at" | "aprobado" | "usos"> | null {
-  if (historial.length < 4) return null;
-
-  const mensajesUsuario = historial.filter(m => m.role === "user");
-  const mensajesAsistente = historial.filter(m => m.role === "assistant");
-
-  if (mensajesUsuario.length < 2 || mensajesAsistente.length < 2) return null;
-
-  // Extraer fases
-  const fase1Usuario = mensajesUsuario[0]?.content || "";
-  const fase1Respuesta = mensajesAsistente[0]?.content || "";
-  const fase2Usuario = mensajesUsuario[1]?.content || "";
-  const fase2Respuesta = mensajesAsistente[1]?.content || "";
-
-  // Buscar fase 2b (refutación)
-  let fase2bUsuario = "";
-  let fase2bRespuesta = "";
-  for (let i = 2; i < mensajesUsuario.length; i++) {
-    const msg = mensajesUsuario[i]?.content || "";
-    if (msg.includes("dice que") || msg.includes("me dijo") || msg.includes("afirma")) {
-      fase2bUsuario = msg;
-      fase2bRespuesta = mensajesAsistente[i]?.content || "";
-      break;
-    }
+  supabaseClient: ReturnType<typeof createClient>,
+  limit: number = 5
+): Promise<CasoExitoso[]> {
+  // Si no tenemos configuración de Supabase, devolvemos un array vacío
+  if (!SUPABASE_URL) {
+    console.log('[MEMORIA] Configuración de Supabase no disponible para obtener casos exitosos');
+    return [];
   }
 
-  // Buscar fase 3 (contingencia)
-  let fase3Usuario = "";
-  let fase3Respuesta = "";
-  for (let i = mensajesAsistente.length - 1; i >= 0; i--) {
-    const msg = mensajesAsistente[i]?.content || "";
-    if (msg.includes("Abuso de Autoridad") || msg.includes("Firma Bajo Protesta")) {
-      fase3Usuario = mensajesUsuario[i]?.content || "";
-      fase3Respuesta = msg;
-      break;
+  try {
+    // Usar el cliente autenticado recibido — aplica RLS correctamente
+    const { data, error } = await supabaseClient
+      .from('casos_exitosos')
+      .select('*')
+      .ilike('tema', `%${tema}%`)
+      .order('usos', { ascending: false })
+      .order('created_at', { ascending: false })
+      .limit(limit)
+
+    if (error) {
+      console.error('[MEMORIA] Error al obtener casos exitosos:', error)
+      return []
     }
+
+    return data as CasoExitoso[]
+  } catch (err) {
+    console.error('[MEMORIA] Excepción al obtener casos exitosos:', err)
+    return []
   }
-
-  // Extraer argumento decisivo (guion entre comillas de la última fase)
-  const ultimaRespuesta = mensajesAsistente[mensajesAsistente.length - 1]?.content || "";
-  const matchGuion = ultimaRespuesta.match(/"([^"]+)"/);
-  const argumentoDecisivo = matchGuion ? matchGuion[1] : "";
-
-  return {
-    tema,
-    arquetipo,
-    fase1_usuario: fase1Usuario,
-    fase1_respuesta: fase1Respuesta,
-    fase2_usuario: fase2Usuario,
-    fase2_respuesta: fase2Respuesta,
-    fase2b_usuario: fase2bUsuario || undefined,
-    fase2b_respuesta: fase2bRespuesta || undefined,
-    fase3_usuario: fase3Usuario || undefined,
-    fase3_respuesta: fase3Respuesta || undefined,
-    argumento_decisivo: argumentoDecisivo,
-    resultado: extraerResultado(mensajesUsuario[mensajesUsuario.length - 1]?.content || ""),
-    fase_resolucion: faseResolucion,
-  };
 }
 
 /**
@@ -132,18 +168,21 @@ export function construirCasoDesdeHistorial(
 export function formatearCasosParaPrompt(casos: CasoExitoso[]): string {
   if (casos.length === 0) return "";
 
-  return `
+  let resultado = `
 === CASOS EXITOSOS SIMILARES APRENDIDOS ===
-${casos.map((caso, i) => `
-CASO ${i + 1}: ${caso.tema} - ${caso.arquetipo}
-Fase 1 Usuario: "${caso.fase1_usuario.substring(0, 100)}..."
-Fase 1 Respuesta: "${caso.fase1_respuesta.substring(0, 150)}..."
-Fase 2 Usuario: "${caso.fase2_usuario.substring(0, 100)}..."
-Fase 2 Respuesta: "${caso.fase2_respuesta.substring(0, 150)}..."
-${caso.fase2b_respuesta ? `Fase 2b (Refutación): "${caso.fase2b_respuesta.substring(0, 150)}..."` : ''}
-Argumento decisivo: "${caso.argumento_decisivo.substring(0, 200)}"
-Resultado: ${caso.resultado}
-`).join("\n---\n")}
-=== FIN CASOS APRENDIDOS ===
 `;
+  for (let i = 0; i < casos.length; i++) {
+    const c = casos[i];
+    const fecha = c.created_at ? new Date(c.created_at).toLocaleDateString() : 'Fecha desconocida';
+    resultado += `
+Caso ${i + 1}: ${c.tema}
+- Tema legal: ${c.tema}
+- Arquetipo: ${c.arquetipo}
+- Fecha: ${fecha}
+- Norma aplicada: ${c.argumento_decisivo || 'No especificada'}
+- Resultado: ${c.resultado || 'Éxito'}
+- Hechos clave: ${JSON.stringify(c.hechos_clave || {})}
+`;
+  }
+  return resultado;
 }

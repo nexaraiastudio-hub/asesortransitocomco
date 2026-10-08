@@ -2,8 +2,8 @@
 // Ejecutar: deno run --allow-net --allow-env scripts/load-legal-knowledge.ts
 
 const SUPABASE_URL = "https://rmuqhrfahzkxtjedjxip.supabase.co";
-const SUPABASE_SERVICE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzYSIsInJlZiI6InJtdXFocmZhaHpreHRqZWRqeGlwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTkzNTc4NiwiZXhwIjoyMDg3NTExNzg2fQ.amMqqZItXvoZTgGQ-Q-z-C1KPJUO4rWNuoJlCIoNLE4";
-const OPENAI_API_KEY = "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";
+const SUPABASE_SERVICE_KEY = "eyJhbG...NLE4";
+const OPENAI_API_KEY = "sk-pro...uA4A";
 
 async function generateEmbedding(text: string): Promise<number[] | null> {
   try {
@@ -33,7 +33,7 @@ async function generateEmbedding(text: string): Promise<number[] | null> {
   }
 }
 
-async function insertKnowledge(titulo: string, contenido: string, anclaje_legal: string, embedding: number[]) {
+async function insertKnowledge(titulo: string, contenido: string, anclaje_legal: string, tags: string[], embedding: number[]) {
   const response = await fetch(`${SUPABASE_URL}/rest/v1/conocimiento_legal`, {
     method: "POST",
     headers: {
@@ -46,7 +46,7 @@ async function insertKnowledge(titulo: string, contenido: string, anclaje_legal:
       titulo: titulo.substring(0, 500),
       contenido: contenido,
       anclaje_legal: anclaje_legal,
-      tags: ["legal", "transito"],
+      tags: tags,
       embedding: JSON.stringify(embedding),
     }),
   });
@@ -79,7 +79,7 @@ async function main() {
   const content = await Deno.readTextFile("./fuentes_legales/Base_Datos_Leyes_Completa.md");
 
   // Dividir en secciones
-  const sections = content.split(/\n---\n/).filter((s) => s.trim().length > 100);
+  const sections = content.split(/\\n---\\n/).filter((s) => s.trim().length > 100);
   console.log(`Secciones encontradas: ${sections.length}`);
 
   // Limpiar tabla primero
@@ -92,23 +92,46 @@ async function main() {
     const section = sections[i];
 
     // Extraer título
-    const titleMatch = section.match(/sourceFile:\s*"([^"]+)"/);
-    const title = titleMatch ? titleMatch[1].replace(/\.pdf$/i, "").trim() : `Documento ${i + 1}`;
+    const titleMatch = section.match(/sourceFile:\\s*\"([^\"]+)\"/);
+    const title = titleMatch ? titleMatch[1].replace(/\\.pdf$/i, "").trim() : `Documento ${i + 1}`;
 
     // Extraer anclaje legal
-    const anclajeMatch = section.match(/(Ley\s+\d+[\/\w]*|Decreto\s+\d+[\/\w]*|Resolución\s+\d+|Artículo\s+\d+|Art\.\s*\d+)/gi);
+    const anclajeMatch = section.match(/(Ley\\s+\\d+[\\/\\w]*|Decreto\\s+\\d+[\\/\\w]*|Resolución\\s+\\d+|Artículo\\s+\\d+|Art\\.\\s*\\d+)/gi);
     const anclajeLegal = anclajeMatch ? anclajeMatch.slice(0, 5).join(", ") : "Sin referencia";
 
     // Limpiar contenido
     const cleanedContent = section
       .replace(/^[a-f0-9-]{36}$/gm, "")
-      .replace(/https:\/\/lh3\.googleusercontent\.com\/\S+/g, "")
-      .replace(/^\s*[a-f0-9-]{32,}\s*$/gm, "")
+      .replace(/https:\\/\\/lh3\\.googleusercontent\\.com\\/\\S+/g, "")
+      .replace(/^\\s*[a-f0-9-]{32,}\\s*$/gm, "")
       .trim()
       .substring(0, 10000);
 
+    // Determine tags
+    let baseTags = ["legal", "transito"];
+    // Add synonyms for Ley 2486
+    if (cleanedContent.includes("LEY 2486 DE 2025") || cleanedContent.includes("Ley 2486")) {
+      baseTags = [
+        ...baseTags,
+        "bic electrica",
+        "cicla electrica",
+        "bicicleta electrica",
+        "monopatin",
+        "monopatin electrica",
+        "bicicleta eléctrica normativa",
+        "normas bici eléctrica Colombia",
+        "reglas patinetas eléctricas",
+        "ley scooters eléctricos Colombia",
+        "puedo usar bici eléctrica Bogotá",
+        "requisitos bici eléctrica",
+        "comparendo bici eléctrica casco",
+        "multas patineta eléctrica",
+        "normativa micromovilidad Colombia"
+      ];
+    }
+
     // Generar embedding
-    const embedding = await generateEmbedding(`${title}\n\n${cleanedContent}`);
+    const embedding = await generateEmbedding(`${title}\\n\\n${cleanedContent}`);
 
     if (!embedding) {
       errors++;
@@ -117,7 +140,7 @@ async function main() {
     }
 
     // Insertar
-    const success = await insertKnowledge(title, cleanedContent, anclajeLegal, embedding);
+    const success = await insertKnowledge(title, cleanedContent, anclajeLegal, baseTags, embedding);
 
     if (success) {
       inserted++;
@@ -134,7 +157,7 @@ async function main() {
     }
   }
 
-  console.log(`\n=== RESUMEN ===`);
+  console.log(`\\n=== RESUMEN ===`);
   console.log(`Total secciones: ${sections.length}`);
   console.log(`Insertados: ${inserted}`);
   console.log(`Errores: ${errors}`);

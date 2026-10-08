@@ -1,8 +1,8 @@
--- ── USUARIOS DE CONFIANZA — acceso directo sin pasarela de pagos ─────────────
--- nexaraiastudio@gmail.com  → rol admin  (administrador)
--- bermudezcarlose1977@gmail.com → rol admin (usuario de pruebas con acceso completo)
+-- â”€â”€ USUARIOS DE CONFIANZA â€” acceso directo sin pasarela de pagos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+-- nexaraiastudio@gmail.com  â†’ rol admin  (administrador)
+-- bermudezcarlose1977@gmail.com â†’ rol admin (usuario de pruebas con acceso completo)
 
--- 1. Función reutilizable que asigna el rol admin a un usuario por email exacto
+-- 1. FunciÃ³n reutilizable que asigna el rol admin a un usuario por email exacto
 CREATE OR REPLACE FUNCTION public.assign_trusted_user_role(p_email text)
 RETURNS void
 LANGUAGE plpgsql
@@ -27,7 +27,7 @@ BEGIN
 END;
 $$;
 
--- 2. Trigger que asigna automáticamente el rol admin cuando se registra
+-- 2. Trigger que asigna automÃ¡ticamente el rol admin cuando se registra
 --    uno de los correos de confianza
 CREATE OR REPLACE FUNCTION public.handle_trusted_user_signup()
 RETURNS trigger
@@ -48,7 +48,7 @@ BEGIN
 END;
 $$;
 
--- 3. Trigger sobre auth.users (se dispara DESPUÉS del trigger handle_new_user
+-- 3. Trigger sobre auth.users (se dispara DESPUÃ‰S del trigger handle_new_user
 --    para que el perfil ya exista)
 DROP TRIGGER IF EXISTS on_trusted_user_signup ON auth.users;
 CREATE TRIGGER on_trusted_user_signup
@@ -56,6 +56,6 @@ CREATE TRIGGER on_trusted_user_signup
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_trusted_user_signup();
 
--- 4. Aplicar a usuarios que YA estén registrados en el sistema
+-- 4. Aplicar a usuarios que YA estÃ©n registrados en el sistema
 SELECT public.assign_trusted_user_role('nexaraiastudio@gmail.com');
 SELECT public.assign_trusted_user_role('bermudezcarlose1977@gmail.com');

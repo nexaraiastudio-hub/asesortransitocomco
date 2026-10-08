@@ -90,7 +90,7 @@ CREATE POLICY "Users can view their own lead"
   FOR SELECT
   USING (auth.uid() = user_id);
 
--- Actualizar función has_active_subscription para manejar mejor los casos
+-- Actualizar funciÃ³n has_active_subscription para manejar mejor los casos
 CREATE OR REPLACE FUNCTION public.has_active_subscription(_user_id uuid)
 RETURNS boolean
 LANGUAGE plpgsql
@@ -107,7 +107,7 @@ BEGIN
     RETURN true;
   END IF;
 
-  -- Verificar suscripción activa
+  -- Verificar suscripciÃ³n activa
   RETURN EXISTS (
     SELECT 1 FROM public.subscriptions
     WHERE user_id = _user_id

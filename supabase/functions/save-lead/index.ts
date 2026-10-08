@@ -38,7 +38,17 @@ serve(async (req) => {
       });
     }
 
-    const { full_name, email, phone, source } = await req.json();
+    // Safely parse JSON body
+    let bodyData;
+    try {
+      bodyData = await req.json();
+    } catch (e) {
+      return new Response(JSON.stringify({ error: "Invalid JSON payload" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const { full_name, email, phone, source } = bodyData;
 
     // Validate email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

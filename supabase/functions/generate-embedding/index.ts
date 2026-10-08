@@ -66,7 +66,7 @@ serve(async (req) => {
     // ── 3. Generar embedding con OpenAI (para insert y update) ─────────────
     const generateEmbedding = async (titulo: string, contenido: string): Promise<number[] | null> => {
       const textToEmbed = `${titulo}\n\n${contenido}`;
-      const embResponse = await fetch("https://api.openai.com/v1/embeddings", {
+      const embResponse = await fetch("https://openrouter.ai/api/v1/embeddings", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${openaiKey}`,

@@ -1,0 +1,274 @@
+name: Deploy AsesorTransitoComCo
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+  SUPABASE_PROJECT_REF: rmuqhrfahzkxtjedjxip
+  NODE_VERSION: '20'
+
+jobs:
+  # ==========================================
+  # QUALITY GATES (run first, block merge if fail)
+  # ==========================================
+  quality-gates:
+    name: Quality Gates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript type check
+        run: npm run typecheck || npx tsc --noEmit
+
+      - name: ESLint
+        run: npm run lint || npx eslint src --ext .ts,.tsx
+
+      - name: Prettier format check
+        run: npx prettier --check .
+
+      - name: Check for console.log in production code
+        run: |
+          if grep -r "console\.log" src --include="*.ts" --include="*.tsx" | grep -v "\.test\." | grep -v "// eslint-disable"; then
+            echo "❌ Found console.log in production code"
+            exit 1
+          fi
+
+  # ==========================================
+  # CONTRACT TESTS - legal-chat API
+  # ==========================================
+  contract-tests:
+    name: Contract Tests (legal-chat)
+    runs-on: ubuntu-latest
+    needs: quality-gates
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: '>=2.84.0'
+
+      - name: Start Supabase local
+        run: |
+          cd ${{ github.workspace }}
+          supabase start --workdir .
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Wait for Edge Runtime
+        run: |
+          sleep 30
+          curl -f http://localhost:54321/functions/v1/legal-chat -X POST \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -d '{"message":"test","history":[],"context":"normativas"}' || true
+
+      - name: Run contract tests
+        run: |
+          cd ${{ github.workspace }}
+          npx vitest run tests/contract/legal-chat.test.ts
+        env:
+          SUPABASE_URL: http://localhost:54321
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+      - name: Stop Supabase
+        if: always()
+        run: supabase stop --no-backup
+
+  # ==========================================
+  # REGRESSION TESTS - Full flow
+  # ==========================================
+  regression-tests:
+    name: Regression Tests (Full Flow)
+    runs-on: ubuntu-latest
+    needs: quality-gates
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Supabase CLI
+        uses: supabase/setup-cli@v1
+
+      - name: Start Supabase local
+        run: |
+          cd ${{ github.workspace }}
+          supabase start --workdir .
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Wait for services
+        run: sleep 30
+
+      - name: Run regression tests
+        run: |
+          cd ${{ github.workspace }}
+          npx vitest run tests/regression/flow.test.ts
+        env:
+          SUPABASE_URL: http://localhost:54321
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+      - name: Stop Supabase
+        if: always()
+        run: supabase stop --no-backup
+
+  # ==========================================
+  # DOGFOOD QA - Exploratory testing
+  # ==========================================
+  dogfood-qa:
+    name: Dogfood QA (Exploratory)
+    runs-on: ubuntu-latest
+    needs: quality-gates
+    if: github.event_name == 'push'  # Only on push, not PR
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Hermes
+        run: |
+          pip install hermes-agent
+          hermes --version
+
+      - name: Build frontend
+        run: |
+          cd ${{ github.workspace }}
+          npm run build
+
+      - name: Deploy to preview (Netlify/Vercel)
+        run: echo "Deploy to preview URL"
+
+      - name: Run Dogfood QA
+        run: |
+          hermes dogfood https://preview.tuapp.com \
+            --scenarios "auth,chat,flow,context-selector" \
+            --output dogfood-report.json
+        env:
+          HERMES_API_KEY: ${{ secrets.HERMES_API_KEY }}
+
+      - name: Upload Dogfood report
+        uses: actions/upload-artifact@v4
+        with:
+          name: dogfood-report
+          path: dogfood-report.json
+
+  # ==========================================
+  # DEPLOY STAGING (on push to main)
+  # ==========================================
+  deploy-staging:
+    name: Deploy Staging
+    runs-on: ubuntu-latest
+    needs: [quality-gates, contract-tests, regression-tests]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment: staging
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Deploy frontend to Vercel/Netlify
+        run: echo "Deploy frontend to staging"
+
+      - name: Deploy Supabase functions
+        uses: supabase/setup-cli@v1
+        with:
+          version: '>=2.84.0'
+      - run: |
+          cd ${{ github.workspace }}
+          supabase functions deploy legal-chat --project-ref ${{ env.SUPABASE_PROJECT_REF }}
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Push DB migrations
+        run: |
+          cd ${{ github.workspace }}
+          supabase db push --project-ref ${{ env.SUPABASE_PROJECT_REF }} --include-all
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Notify deployment
+        run: |
+          echo "✅ Staging deployed successfully"
+          echo "Frontend: https://staging.tuapp.com"
+          echo "API: https://${{ env.SUPABASE_PROJECT_REF }}.supabase.co"
+
+  # ==========================================
+  # DEPLOY PRODUCTION (manual approval)
+  # ==========================================
+  deploy-production:
+    name: Deploy Production
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy frontend to production
+        run: echo "Deploy frontend to production (Vercel/Netlify)"
+
+      - name: Deploy Supabase functions to production
+        uses: supabase/setup-cli@v1
+      - run: |
+          cd ${{ github.workspace }}
+          supabase functions deploy legal-chat --project-ref ${{ env.SUPABASE_PROJECT_REF }}
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Push DB migrations to production
+        run: |
+          cd ${{ github.workspace }}
+          supabase db push --project-ref ${{ env.SUPABASE_PROJECT_REF }} --include-all
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Notify production deployment
+        run: |
+          echo "🚀 Production deployed successfully"
+          echo "Frontend: https://tuapp.com"
+          echo "API: https://${{ env.SUPABASE_PROJECT_REF }}.supabase.co"

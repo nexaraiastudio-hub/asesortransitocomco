@@ -3,7 +3,7 @@
 -- is treated as end-of-day.
 -- The period_end is already stored as 04:59:59 UTC (23:59:59 COL), so the existing
 -- comparison (current_period_end > now()) naturally grants access until midnight Colombia time.
--- No DB change needed for that — the edge function fix handles it.
+-- No DB change needed for that â€” the edge function fix handles it.
 
 -- However, we also want to ensure any OLD subscriptions (stored with midnight UTC) still work.
 -- We update has_active_subscription to compare against end of day UTC+5 offset:

@@ -12,10 +12,7 @@ serve(async (req) => {
 
   try {
     const apiKey = Deno.env.get('GOOGLE_CLOUD_TTS_API_KEY');
-    if (!apiKey) {
-      throw new Error('GOOGLE_CLOUD_TTS_API_KEY is not configured');
-    }
-
+    
     const { text, voiceName, voiceGender } = await req.json();
     if (!text || typeof text !== 'string') {
       throw new Error('Text is required');
@@ -40,6 +37,20 @@ serve(async (req) => {
 
     // Truncate to ~5000 chars to stay within API limits
     const truncatedText = cleanText.substring(0, 5000);
+
+    // If no Google Cloud API key, return a flag to use browser TTS
+    if (!apiKey) {
+      console.log('GOOGLE_CLOUD_TTS_API_KEY not configured, returning useBrowserTTS flag');
+      return new Response(
+        JSON.stringify({ 
+          useBrowserTTS: true,
+          text: truncatedText,
+          voiceName: voiceName || 'es-ES',
+          voiceGender: voiceGender || 'female'
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     const selectedVoiceName = voiceName || 'es-US-Standard-A';
     const selectedGender = voiceGender || 'FEMALE';
@@ -80,9 +91,14 @@ serve(async (req) => {
     );
   } catch (error) {
     console.error('TTS Error:', error);
+    // Fallback: return useBrowserTTS flag on any error
     return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ 
+        useBrowserTTS: true,
+        text: text.substring(0, 5000),
+        error: error.message 
+      }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });

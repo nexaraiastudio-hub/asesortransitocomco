@@ -1,5 +1,5 @@
 -- FIX: has_role usando text para evitar dependencia del enum app_role
--- Si el tipo app_role no existe aún, esto garantiza que la función funcione igual.
+-- Si el tipo app_role no existe aÃºn, esto garantiza que la funciÃ³n funcione igual.
 
 CREATE OR REPLACE FUNCTION public.has_role(_user_id uuid, _role text)
 RETURNS boolean

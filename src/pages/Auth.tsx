@@ -52,35 +52,9 @@ const Auth = () => {
           throw error;
         }
 
-        // Verificar si el usuario es admin → va directo al chat
-        if (signInData.user) {
-          const { data: isAdmin, error: adminError } = await supabase.rpc("has_role", {
-            _user_id: signInData.user.id,
-            _role: "admin",
-          });
-
-          console.log("[Auth] Admin check:", { isAdmin, adminError, userId: signInData.user.id });
-
-          if (isAdmin === true) {
-            console.log("[Auth] Usuario admin detectado → redirigiendo al chat");
-            navigate("/chat");
-            return;
-          }
-
-          // Si el RPC falla, verificar también suscripción activa
-          const { data: hasSub } = await supabase.rpc("has_active_subscription", {
-            _user_id: signInData.user.id,
-          });
-
-          if (hasSub === true) {
-            console.log("[Auth] Usuario con suscripción activa → redirigiendo al chat");
-            navigate("/chat");
-            return;
-          }
-        }
-
-        // Usuarios sin suscripción ni rol admin → pantalla de pago
-        navigate("/payment");
+        // Después de login exitoso, siempre ir al selector de contexto
+        // El componente Chat aplicará las reglas de acceso posteriormente
+        navigate("/context");
       } else {
         const { data, error } = await supabase.auth.signUp({
           email,
@@ -89,16 +63,27 @@ const Auth = () => {
         });
         if (error) throw error;
 
-        // Save lead via backend function (bypasses RLS during signup)
+        // Guardar lead mediante la función del backend (evita RLS durante el registro)
         if (data.user) {
-          await supabase.functions.invoke("save-lead", {
-            body: {
-              user_id: data.user.id,
-              full_name: fullName,
-              email,
-              source: "registro",
-            },
-          });
+            // Guardar lead mediante la función del backend (evita RLS durante el registro)
+            const { error: funcError } = await supabase.functions.invoke("save-lead", {
+              body: {
+                user_id: data.user.id,
+                full_name: fullName,
+                email,
+                source: "registro",
+              },
+            });
+            if (funcError) {
+              const message = funcError.message || "Error al guardar el lead";
+              toast({
+                title: "Error",
+                description: message,
+                variant: "destructive",
+              });
+              setLoading(false);
+              return;
+            }
         }
 
         toast({

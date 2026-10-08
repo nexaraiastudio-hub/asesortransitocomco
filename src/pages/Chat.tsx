@@ -280,7 +280,7 @@ const Chat = () => {
         continue;
       }
 
-      // Use signed URL (1 hour) — bucket is now private
+      // Use signed URL (1 hour) → bucket is now private
       const { data: urlData, error: urlError } = await supabase.storage
         .from("chat-attachments")
         .createSignedUrl(filePath, 3600);
@@ -327,19 +327,25 @@ const Chat = () => {
       }
 
       const { data: { session } } = await supabase.auth.getSession();
-      const { data, error } = await supabase.functions.invoke("legal-chat", {
-        body: { message: messageToSend, history, userName, attachments: attachments.length > 0 ? attachments : undefined },
-        headers: session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : undefined,
-      });
+      let data, error;
+      try {
+        const res = await fetch("http://localhost:8000/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}) },
+          body: JSON.stringify({ message: messageToSend, history, userName, attachments: attachments.length > 0 ? attachments : undefined })
+        });
+        if (!res.ok) { error = { status: res.status, message: await res.text() }; }
+        else { data = await res.json(); }
+      } catch(e) { error = e; }
 
       // supabase.functions.invoke no lanza excepción: el error viene en el objeto
       if (error) {
         const code = (error as any)?.status || (error as any)?.context?.status;
         const errorMsg = code === 429
-          ? "Estamos experimentando alta demanda, intenta en un momento. ⏳"
+          ? "Estamos experimentando alta demanda, intenta en un momento. 🙏"
           : code === 402
             ? "Se agotaron los créditos del servicio. Contacta al administrador."
-            : "Hubo un problema al procesar tu consulta. Intenta de nuevo. ⏳";
+            : "Hubo un problema al procesar tu consulta. Intenta de nuevo. 🙏";
         setMessages(prev => [...prev, { role: "assistant", content: errorMsg }]);
         return;
       }
@@ -355,7 +361,7 @@ const Chat = () => {
       const assistantMsg: Message = { role: "assistant", content: data.response };
       setMessages(prev => [...prev, assistantMsg]);
 
-      // Auto-play TTS — corre en background, no bloquea la UI
+      // Auto-play TTS → corre en background, no bloquea la UI
       setTimeout(() => {
         setTtsLoading(assistantIndex);
         supabase.functions.invoke("text-to-speech", {
@@ -392,7 +398,7 @@ const Chat = () => {
 
     } catch (err: any) {
       // Solo llega aquí si hay un error de red real (no de la función)
-      const errorMsg = "No se pudo conectar con el servidor. Verifica tu conexión. ⏳";
+      const errorMsg = "No se pudo conectar con el servidor. Verifica tu conexión. 📡";
       setMessages(prev => [...prev, { role: "assistant", content: errorMsg }]);
     } finally {
       setLoading(false);
@@ -426,7 +432,7 @@ const Chat = () => {
       const restored = await restorePurchases();
       if (restored) {
         await supabase.functions.invoke("grant-premium", {});
-        toast({ title: "✅ Compras restauradas", description: "Tu suscripción Premium ha sido reactivada." });
+        toast({ title: "🔄 Compras restauradas", description: "Tu suscripción Premium ha sido reactivada." });
         window.location.reload();
       } else {
         toast({ title: "Sin compras previas", description: "No se encontraron compras anteriores para restaurar." });
@@ -498,7 +504,7 @@ const Chat = () => {
                         : "text-foreground hover:bg-muted"
                         }`}
                     >
-                      <span>{voice.gender === "FEMALE" ? "👩" : "👨"}</span>
+                      <span>{voice.gender === "FEMALE" ? "🎵" : "🔊"}</span>
                       {voice.label}
                     </button>
                   ))}
@@ -656,10 +662,10 @@ const Chat = () => {
                   <img src={att.url} alt={att.name} className="h-16 w-16 rounded object-cover" />
                 )}
                 {att.type === "video" && (
-                  <div className="flex h-16 w-16 items-center justify-center rounded bg-muted text-xs text-muted-foreground">🎬</div>
+                  <div className="flex h-16 w-16 items-center justify-center rounded bg-muted text-xs text-muted-foreground">📄</div>
                 )}
                 {att.type === "audio" && (
-                  <div className="flex h-16 w-16 items-center justify-center rounded bg-muted text-xs text-muted-foreground">🎵</div>
+                  <div className="flex h-16 w-16 items-center justify-center rounded bg-muted text-xs text-muted-foreground">📄</div>
                 )}
                 <button
                   onClick={() => removeAttachment(i)}
@@ -743,7 +749,7 @@ const Chat = () => {
           </button>
         </div>
         <p className="mt-1.5 text-center text-[10px] text-muted-foreground/60">
-          ⚖️ Asesoría informativa, no constituye defensa legal.
+          ⚠️ Asesoría informativa, no constituye defensa legal.
         </p>
       </div>
     </div>

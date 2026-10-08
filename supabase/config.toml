@@ -1,5 +1,25 @@
 project_id = "rmuqhrfahzkxtjedjxip"
 
+[api]
+enabled = true
+port = 8080
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+
+[db]
+port = 55002
+shadow_port = 55000
+major_version = 15
+
+[studio]
+enabled = true
+port = 55003
+api_url = "http://127.0.0.1:8080"
+
+[inbucket]
+enabled = true
+port = 55004
+
 [functions.load-knowledge]
 verify_jwt = false
 
@@ -13,10 +33,17 @@ verify_jwt = true
 verify_jwt = true
 
 [functions.legal-chat]
-verify_jwt = false
+verify_jwt = true
 
 [functions.bulk-load-legal]
 verify_jwt = false
 
 [functions.text-to-speech]
+verify_jwt = true
+
+[analytics]
+enabled = false
+
+[functions.revenuecat-webhook]
 verify_jwt = false
+

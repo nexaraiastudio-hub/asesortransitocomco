@@ -1,5 +1,5 @@
 
--- 1. Habilitar la extensión de vectores
+-- 1. Habilitar la extensiÃ³n de vectores
 create extension if not exists vector;
 
 -- 2. Crear la tabla de conocimiento legal experto
@@ -15,7 +15,7 @@ create table public.conocimiento_legal (
 -- 3. Habilitar RLS
 alter table public.conocimiento_legal enable row level security;
 
--- 4. Políticas RLS
+-- 4. PolÃ­ticas RLS
 create policy "Authenticated users can read conocimiento_legal"
   on public.conocimiento_legal for select
   using (true);
@@ -32,10 +32,10 @@ create policy "Admins can delete conocimiento_legal"
   on public.conocimiento_legal for delete
   using (has_role(auth.uid(), 'admin'::app_role));
 
--- 5. Índice para búsqueda por vectores (IVFFlat)
+-- 5. Ãndice para bÃºsqueda por vectores (IVFFlat)
 create index on public.conocimiento_legal using ivfflat (embedding vector_cosine_ops) with (lists = 10);
 
--- 6. Función de búsqueda semántica
+-- 6. FunciÃ³n de bÃºsqueda semÃ¡ntica
 create or replace function public.buscar_conocimiento(
   query_embedding vector(1536),
   match_threshold float,
