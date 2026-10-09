@@ -327,6 +327,7 @@ const Chat = () => {
       }
 
       const { data: { session } } = await supabase.auth.getSession();
+      let data, error;
       try {
         const res = await supabase.functions.invoke('legal-chat', {
           body: { message: messageToSend, history, userName, attachments: attachments.length > 0 ? attachments : undefined },
@@ -394,6 +395,7 @@ const Chat = () => {
       }, 100);
 
     } catch (err: any) {
+      console.error('OUTER CATCH ERROR:', err);
       // Solo llega aquí si hay un error de red real (no de la función)
       const errorMsg = "No se pudo conectar con el servidor. Verifica tu conexión. 📡";
       setMessages(prev => [...prev, { role: "assistant", content: errorMsg }]);
@@ -754,5 +756,7 @@ const Chat = () => {
 };
 
 export default Chat;
+
+
 
 
