@@ -75,14 +75,7 @@ const Auth = () => {
               },
             });
             if (funcError) {
-              const message = funcError.message || "Error al guardar el lead";
-              toast({
-                title: "Error",
-                description: message,
-                variant: "destructive",
-              });
-              setLoading(false);
-              return;
+              console.warn("No se pudo guardar el lead en este momento (posible falta de sesión por confirmación de email):", funcError);
             }
         }
 

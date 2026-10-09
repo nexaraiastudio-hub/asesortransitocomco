@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+﻿import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 
 interface Message {
@@ -39,7 +39,7 @@ export function useLegalChat() {
           ? 'Estamos experimentando alta demanda, intenta en un momento. ⏳'
           : code === 402
             ? 'Se agotaron los créditos del servicio. Contacta al administrador.'
-            : 'Hubo un problema al procesar tu consulta. Intenta de nuevo. ⏳'
+            : 'Error de conexión con HIVE-LAW (Código $code). Detalle: ${error.message}'
         throw new Error(errorMsg)
       }
 
@@ -78,3 +78,4 @@ export function useGrantPremium() {
     }
   })
 }
+

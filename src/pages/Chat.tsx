@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+﻿import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Capacitor } from "@capacitor/core";
 import { supabase } from "@/integrations/supabase/client";
@@ -327,30 +327,26 @@ const Chat = () => {
       }
 
       const { data: { session } } = await supabase.auth.getSession();
-      let data, error;
       try {
-        const res = await fetch("http://localhost:8000/", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}) },
-          body: JSON.stringify({ message: messageToSend, history, userName, attachments: attachments.length > 0 ? attachments : undefined })
+        const res = await supabase.functions.invoke('legal-chat', {
+          body: { message: messageToSend, history, userName, attachments: attachments.length > 0 ? attachments : undefined },
+          headers: session?.access_token ? { Authorization: 'Bearer '+session.access_token } : undefined,
         });
-        if (!res.ok) { error = { status: res.status, message: await res.text() }; }
-        else { data = await res.json(); }
+        data = res.data;
+        error = res.error;
       } catch(e) { error = e; }
 
-      // supabase.functions.invoke no lanza excepción: el error viene en el objeto
       if (error) {
+        console.error('DETAILED CHAT ERROR:', error);
         const code = (error as any)?.status || (error as any)?.context?.status;
         const errorMsg = code === 429
-          ? "Estamos experimentando alta demanda, intenta en un momento. 🙏"
+          ? 'Estamos experimentando alta demanda, intenta en un momento.'
           : code === 402
-            ? "Se agotaron los créditos del servicio. Contacta al administrador."
-            : "Hubo un problema al procesar tu consulta. Intenta de nuevo. 🙏";
-        setMessages(prev => [...prev, { role: "assistant", content: errorMsg }]);
+            ? 'Se agotaron los créditos de la app. Por favor, recarga tu saldo en la plataforma.'
+            : 'Error de conexión con HIVE-LAW (Código '+code+'). Mensaje: '+(error.message || 'Falla interna');
+        setMessages(prev => [...prev, { role: 'assistant', content: errorMsg }]);
         return;
       }
-
-      if (!data?.response) {
         setMessages(prev => [...prev, { role: "assistant", content: "No recibí respuesta. Intenta de nuevo." }]);
         return;
       }
@@ -757,3 +753,4 @@ const Chat = () => {
 };
 
 export default Chat;
+
