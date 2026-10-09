@@ -347,6 +347,7 @@ const Chat = () => {
         setMessages(prev => [...prev, { role: 'assistant', content: errorMsg }]);
         return;
       }
+      if (!data?.response) {
         setMessages(prev => [...prev, { role: "assistant", content: "No recibí respuesta. Intenta de nuevo." }]);
         return;
       }
