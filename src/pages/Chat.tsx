@@ -31,6 +31,53 @@ const VOICE_OPTIONS: VoiceOption[] = [
   { name: "es-US-Neural2-B", label: "Carlos (Neural)", gender: "MALE" },
 ];
 
+/**
+ * Limpia el texto para lectura en voz alta.
+ * Elimina símbolos que el TTS nombraría literalmente (paréntesis, comillas, asteriscos, etc.)
+ * y convierte el formato Markdown en pausas naturales de voz.
+ */
+function sanitizarParaVoz(texto: string): string {
+  let t = texto;
+
+  // 1. Eliminar dobles paréntesis ((…)) del protocolo — leer el contenido directamente
+  t = t.replace(/\(\(([^)]*)\)\)/g, '$1');
+
+  // 2. Markdown: **negrita**, *cursiva*, __subrayado__ → solo el texto
+  t = t.replace(/\*\*([^*]+)\*\*/g, '$1');
+  t = t.replace(/\*([^*]+)\*/g, '$1');
+  t = t.replace(/__([^_]+)__/g, '$1');
+  t = t.replace(/_([^_]+)_/g, '$1');
+
+  // 3. Listas numeradas → ordinal natural: "1. Texto" → "Primero: Texto"
+  const ordinals: Record<string, string> = {
+    '1': 'Primero', '2': 'Segundo', '3': 'Tercero', '4': 'Cuarto',
+    '5': 'Quinto', '6': 'Sexto', '7': 'Séptimo', '8': 'Octavo',
+    '9': 'Noveno', '10': 'Décimo',
+  };
+  t = t.replace(/^\s*(\d+)\.\s+/gm, (_: string, n: string) => `${ordinals[n] ?? `Punto ${n}`}: `);
+  t = t.replace(/^\s*[-•–]\s+/gm, '... ');
+
+  // 4. Comillas (tipográficas y rectas) → se eliminan
+  t = t.replace(/["""''«»]/g, '');
+
+  // 5. Paréntesis y corchetes → pausa natural con coma
+  t = t.replace(/[(\[]/g, ', ');
+  t = t.replace(/[)\]]/g, ', ');
+
+  // 6. Barras y pipes
+  t = t.replace(/[|\/\\]/g, ', ');
+
+  // 7. Símbolos decorativos y Markdown residual
+  t = t.replace(/[#^~`]/g, '');
+  t = t.replace(/_{2,}/g, '');
+
+  // 8. Limpiar espacios y líneas en blanco excesivas
+  t = t.replace(/[ \t]{2,}/g, ' ');
+  t = t.replace(/\n{3,}/g, '\n\n');
+
+  return t.trim();
+}
+
 const Chat = () => {
   const navigate = useNavigate();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -200,7 +247,7 @@ const Chat = () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const { data, error } = await supabase.functions.invoke("text-to-speech", {
-        body: { text, voiceName: selectedVoice.name, voiceGender: selectedVoice.gender },
+        body: { text: sanitizarParaVoz(text), voiceName: selectedVoice.name, voiceGender: selectedVoice.gender },
         headers: session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : undefined,
       });
 
@@ -363,7 +410,7 @@ const Chat = () => {
       setTimeout(() => {
         setTtsLoading(assistantIndex);
         supabase.functions.invoke("text-to-speech", {
-          body: { text: data.response, voiceName: selectedVoice.name, voiceGender: selectedVoice.gender },
+          body: { text: sanitizarParaVoz(data.response), voiceName: selectedVoice.name, voiceGender: selectedVoice.gender },
           headers: session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : undefined,
         }).then((ttsRes) => {
           if (ttsRes.error) {
