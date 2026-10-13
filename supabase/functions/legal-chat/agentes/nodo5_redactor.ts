@@ -303,7 +303,9 @@ let respuestaFinal = guionProcesado || "";
 
     // Solo llamar a GPT-4o cuando el guion del arbol_logico NO es suficiente (RESTAURADO 23-SEP)
 
-    const guionSuficiente = !!guionProcesado && guionProcesado.trim().length > 50;
+    // EXCEPCIÓN: Si es escalamiento (oficial insiste), SIEMPRE llamar a GPT-4o para generar fase 3
+    const esEscalamiento = nodoId?.endsWith('_escalamiento') || nodoId?.endsWith('_protesta') || analisis.fase === 3;
+    const guionSuficiente = !!guionProcesado && guionProcesado.trim().length > 50 && !esEscalamiento;
 
     
 

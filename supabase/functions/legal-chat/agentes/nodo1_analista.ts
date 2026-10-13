@@ -118,6 +118,10 @@ export async function nodo1_Analista(
     analisis.nodoActual = "choque_acta_conciliacion";
   } else if (esAfirmativo && ofrecioSoloMulta) {
     analisis.nodoActual = "choque_finalizacion_solo_multa";
+  } else if (analisis.insistenciaOficial && !analisis.nodoActual?.endsWith('_inicio')) {
+    // REGLA DE ESCALAMIENTO: Si el oficial insiste y ya pasamos triaje, escalar SIEMPRE a Fase 3
+    analisis.nodoActual = analisis.tema + '_escalamiento';
+    analisis.fase = 3;
   } else if (analisis.tema === "llantas" && tieneComparendo && !tieneInmovilizacion) {
     analisis.nodoActual = "llantas_solo_comparendo";
   } else if (ofrecioImpugnacion && (esAfirmativo || tieneComparendo || tieneInmovilizacion)) {
