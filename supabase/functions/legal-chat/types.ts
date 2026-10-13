@@ -1,4 +1,4 @@
-﻿export type Role = "system" | "user" | "assistant";
+export type Role = "system" | "user" | "assistant";
 
 export interface ChatMessage {
   role: Role;
@@ -7,7 +7,7 @@ export interface ChatMessage {
 
 export interface AnalisisClasificacion {
   tema: "licencia" | "polarizados" | "llantas" | "casco" | "semaforo" | "luces" | "otro" | "fuera_de_dominio";
-  fase: 1 | 2 | 3 | 4 | 5; // 1: DiagnÃ³stico, 2: Defensa, 3: Escalado, 4: Documental, 5: Final
+  fase: 1 | 2 | 3 | 4 | 5; // 1: Diagnóstico, 2: Defensa, 3: Escalado, 4: Documental, 5: Final
   clase: "automovil" | "motocicleta" | "camioneta" | "campero" | "bus" | "camion" | "tractocamion" | "otro" | null;
   servicio: "particular" | "publico" | "oficial" | "diplomatico" | null;
   autoridad: "transito" | "policia" | "otro" | null;
@@ -15,7 +15,7 @@ export interface AnalisisClasificacion {
   tipoInfraccion: string | null;
   insistenciaOficial: boolean;
   quiereMinuta: boolean;
-  objetivoAlcanzado: boolean; // Indica si se evitÃ³ la inmovilizaciÃ³n o se logrÃ³ la subsanaciÃ³n
+  objetivoAlcanzado: boolean; // Indica si se evitó la inmovilización o se logró la subsanación
   nodoActual: string | null; // ID del nodo en el grafo legal (V18)
   memoriaVariables: Record<string, any>; // Hash Table para persistencia de datos
   informacionFaltante: string[];
@@ -46,4 +46,4 @@ export interface DocumentoLegal {
 export interface EvidenciaLegal {
   documentosEncontrados: DocumentoLegal[];
 }
-
+

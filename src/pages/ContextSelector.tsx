@@ -89,8 +89,8 @@ const ContextSelector = () => {
           <input
             type="radio"
             id="situacion"
-            value="situación en vía pública, con policía o agente de tránsito"
-            checked={selectedOption === "situación en vía pública, con policía o agente de tránsito"}
+            value="situacion"
+            checked={selectedOption === "situacion"}
             onChange={(e) => setSelectedOption(e.target.value)}
             className="h-4 w-4 text-primary focus:ring-primary border-secondary rounded"
           />
