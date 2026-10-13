@@ -180,7 +180,6 @@ function esConsultaNormativa(tema: string, fase: number, mensaje: string, userCo
 
 
 
-    "llantas",
 
 
 

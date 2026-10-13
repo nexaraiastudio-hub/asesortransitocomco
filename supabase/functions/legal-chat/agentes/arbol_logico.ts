@@ -25,9 +25,13 @@ export const ARBOL_LEGAL: Record<string, NodoLegal> = {
   "llantas_defensa": {
     id: "llantas_defensa",
     contexto: "Defensa por llantas a simple vista.",
-    guion: `Entiendo la situación. El oficial utilizó [metodo_medicion] para verificar el labrado de las llantas de su [TIPO_VEHICULO], lo cual no es un método legalmente aceptado.
+    guion: `Entiendo la situación. El oficial utilizó [metodo_medicion] para verificar el labrado de las llantas de [TIPO_VEHICULO], lo cual no es un método legalmente aceptado, ya que no cumple con los estándares técnicos exigidos por la normatividad colombiana.
 
-Dígale exactamente esto: 'Señor oficial, con el respeto que usted se merece, el uso de [metodo_medicion] no es un método legal para medir la profundidad del labrado de las llantas. La Resolución 3027 de 2010 del Ministerio de Transporte establece que la profundidad mínima del labrado de las llantas de un [TIPO_VEHICULO], debe ser de [LIMIT_MM], medida con un instrumento calibrado denominado profundímetro. Asimismo, la Norma Técnica Colombiana NTC 5375 especifica que el único instrumento válido para realizar esta medición es el profundímetro calibrado. Además, el Artículo 28 del Código Nacional de Tránsito (Ley 769 de 2002) establece las condiciones técnico-mecánicas que deben cumplir los vehículos para transitar por las vías públicas, incluyendo el estado de los neumáticos. Le solicito que utilice un profundímetro calibrado, como lo establece la ley. De lo contrario, se viola mi derecho al Debido Proceso consagrado en el Artículo 29 de la Constitución Política de Colombia.'`,
+Dígale exactamente esto al oficial:
+
+'Señor oficial, con el respeto que usted se merece, el uso de [metodo_medicion] no es un método técnico válido para medir la profundidad del labrado de las llantas. La Resolución 3027 de 2010 del Ministerio de Transporte establece que la profundidad mínima del labrado de las llantas de [TIPO_VEHICULO] debe ser de [LIMIT_MM], medida con un instrumento calibrado denominado profundímetro. La Norma Técnica Colombiana NTC 5375 especifica que el único instrumento válido para realizar esta medición es el profundímetro calibrado. El Artículo 28 del Código Nacional de Tránsito (Ley 769 de 2002) establece las condiciones técnico-mecánicas que deben cumplir los vehículos, incluyendo el estado de los neumáticos. Le solicito respetuosamente que utilice un profundímetro calibrado para realizar la medición. De no hacerlo, se estaría vulnerando mi derecho al Debido Proceso consagrado en el Artículo 29 de la Constitución Política de Colombia.'
+
+¿Cómo respondió el oficial a su solicitud? ¿Acepta realizar la medición con el instrumento adecuado, o insiste en proceder sin prueba técnica?`,
     preguntasTriaje: ["¿Cómo respondió el oficial a tu solicitud? ¿Accede al procedimiento legal o insiste en la vía de hecho?"],
     leyes: ["Res 3027 de 2010", "NTC 5375", "Art 28 Ley 769", "Art 29 CP"],
     siguienteNodo: "llantas_escalamiento"
