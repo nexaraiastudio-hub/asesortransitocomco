@@ -297,6 +297,21 @@ Retorna �?NICAMENTE un objeto JSON: { "preguntas": ["¿Pregunta 1?", "¿Pregun
 
 let respuestaFinal = guionProcesado || "";
 
+    // ── PREGUNTA DE CIERRE FASE 2 (GLOBAL - aplica a TODOS los temas) ────────────
+    // Si es un nodo _defensa y el guion estático no tiene ya una pregunta de seguimiento,
+    // se agrega automáticamente la pregunta de cierre de Fase 2.
+    // Esto evita que aparezca "¿Algo más?" en medio de un procedimiento activo.
+    const esNodoDefensaGlobal = nodoId?.endsWith('_defensa') || nodoId?.endsWith('_subsanacion');
+    const yaHayPreguntaEnGuion = respuestaFinal.includes('¿Cómo respondió') ||
+                                  respuestaFinal.includes('¿Como respondio') ||
+                                  respuestaFinal.includes('¿Acepta') ||
+                                  respuestaFinal.includes('¿Accede') ||
+                                  respuestaFinal.includes('insiste en la vía de hecho');
+    if (!esPrimerMensaje && esNodoDefensaGlobal && respuestaFinal.trim().length > 50 && !yaHayPreguntaEnGuion) {
+      respuestaFinal = `${respuestaFinal.trim()}\n\n¿Cómo respondió el oficial a su solicitud? ¿Acepta su reclamación o insiste en proceder de todas formas?`;
+    }
+    // ─────────────────────────────────────────────────────────────────────────────
+
 
 
 

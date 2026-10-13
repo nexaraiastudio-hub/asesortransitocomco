@@ -183,43 +183,33 @@ function esConsultaNormativa(tema: string, fase: number, mensaje: string, userCo
 
 
 
-    "casco",
 
 
 
-    "semaforo",
 
 
 
-    "luces",
 
 
 
-    "kit_carretera",
 
 
 
-    "soat_vencido",
 
 
 
-    "licencia",
 
 
 
-    "revision_tecnicomecanica",
 
 
 
-    "velocidad",
 
 
 
-    "embriaguez",
 
 
 
-    "cinturon_seguridad"
 
 
 
