@@ -106,6 +106,10 @@ export async function nodo1_Analista(
 
   const tieneComparendo = /\bcomparendo\b|\bmulta\b|\bsanción\b/i.test(mensajeNormalizado);
   const tieneInmovilizacion = /inmovil|\binmovilizar\b|\binmovilización\b|\bgrúa\b|\bremolque\b/i.test(mensajeNormalizado);
+  const detectaInsistenciaTexto = /\bno acepta\b|\binsiste\b|\bquiere hacer\b|\bva a hacer\b|\bno quiere\b|\bse niega\b|\brechaz/i.test(mensajeNormalizado);
+  if (detectaInsistenciaTexto) {
+    analisis.insistenciaOficial = true;
+  }
   const ofrecioComparendo = tieneComparendo && !tieneInmovilizacion;
   const ofrecioInmovilizacion = tieneInmovilizacion && !tieneComparendo;
   const ofrecioNinguno = !tieneComparendo && !tieneInmovilizacion;

@@ -355,10 +355,26 @@ Nota importante: Aunque la multa (C.24) es difícil de apelar porque el hecho ex
   },
   "casco_escalamiento": {
     id: "casco_escalamiento",
-    contexto: "Fallback name",
-    guion: "",
-    preguntasTriaje: [],
-    leyes: [],
+    contexto: "Escalamiento oficial insiste en comparendo e inmovilización",
+    guion: `Dígale exactamente esto al señor oficial:
+
+"Señor oficial, reconozco que se ha incurrido en la infracción por la falta de casco del acompañante. No obstante, le solicito que, en cumplimiento del Artículo 125 del Código Nacional de Tránsito (Ley 769 de 2002), se me permita subsanar la falta en el sitio. El acompañante procederá a retirarse de la motocicleta y continuar su camino por otro medio, eliminando así la causa que originó la detención. La ley establece que la inmovilización debe cesar si se subsana la causa, y en este momento la motocicleta cumple con todas sus condiciones para transitar conmigo como único ocupante cumpliendo la norma."
+
+Si el oficial persiste en la inmovilización a pesar de que el acompañante se baje o se consiga un casco:
+
+NO se resista físicamente.
+
+Firme BAJO PROTESTA y escriba esto exactamente en las observaciones del comparendo:
+
+"Firmo bajo protesta. Se vulnera el debido proceso y el principio de proporcionalidad. El acompañante se retiró del vehículo, subsanando la causa de la inmovilización en el sitio según el Art. 125 de la Ley 769 de 2002. El agente insiste en la inmovilización de forma arbitraria a pesar de que la infracción cesó al quedar solo el conductor con su casco reglamentario."
+
+Grabe el inventario: Es vital que grabe cómo suben la moto a la grúa para evitar daños adicionales.
+
+Tome fotos: Registre que usted sí porta su casco y que el acompañante ya no está sobre el vehículo.
+
+Nota importante: Aunque la multa (C.24) es difícil de apelar porque el hecho existió, la inmovilización puede ser declarada ilegal si usted demostró que podía subsanar (bajando al parrillero) y el agente se lo impidió. Esto le ahorraría los costos de grúa y patios.`,
+    preguntasTriaje: ["¿Deseas que prepare el modelo de impugnación enfocado en la ilegalidad de la inmovilización por haber subsanado en el sitio?"],
+    leyes: ["Art 125 Ley 769", "Art 29 Constitución", "Art 131 Ley 769"],
     siguienteNodo: "casco_finalizacion"
   },
   "casco_finalizacion": {

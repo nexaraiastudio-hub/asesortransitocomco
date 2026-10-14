@@ -68,6 +68,14 @@ export async function nodo5_Redactor(
 
           nodoId = `${tema}_escalamiento`;
 
+        } else if (ARBOL_LEGAL[`${tema}_subsanacion`] && ARBOL_LEGAL[`${tema}_subsanacion`].guion) {
+          // Preferir _subsanacion si tiene guion (ej: casco_subsanacion > casco_defensa)
+          nodoId = `${tema}_subsanacion`;
+
+        } else if (ARBOL_LEGAL[`${tema}_defensa`] && ARBOL_LEGAL[`${tema}_defensa`].guion) {
+
+          nodoId = `${tema}_defensa`;
+
         } else if (ARBOL_LEGAL[`${tema}_defensa`]) {
 
           nodoId = `${tema}_defensa`;
@@ -90,7 +98,20 @@ export async function nodo5_Redactor(
 
 
 
-  const nodo = nodoId ? ARBOL_LEGAL[nodoId] : null;
+  let nodo = nodoId ? ARBOL_LEGAL[nodoId] : null;
+
+  // ── FALLBACK DE GUION VACÍO: si el nodo no tiene guion, buscar hermano con guion ──
+  if (nodo && !nodo.guion && tema && !nodoId?.endsWith('_inicio')) {
+    const candidatos = [`${tema}_subsanacion`, `${tema}_defensa`];
+    for (const candidato of candidatos) {
+      if (ARBOL_LEGAL[candidato]?.guion) {
+        console.log(`[REDACTOR] Nodo ${nodoId} tiene guion vacío. Usando ${candidato} como fallback.`);
+        nodoId = candidato;
+        nodo = ARBOL_LEGAL[candidato];
+        break;
+      }
+    }
+  }
 
 
 
@@ -604,7 +625,15 @@ AUDITOR JURÍDICO - REGLAS ESTRICTAS DE RESPUESTA:
 
 
 
-    // Removido el append hardcodeado de preguntasTriaje, ahora GPT-4o maneja las preguntas en su flujo.
+        // Restaurar preguntasTriaje / pregunta de cierre del nodo estático si no está ya presente
+    if (nodo && nodo.preguntasTriaje && nodo.preguntasTriaje.length > 0 && !esPrimerMensaje) {
+      const preguntasTexto = nodo.preguntasTriaje.join("\n");
+      const yaContiene = respuestaFinal.includes(nodo.preguntasTriaje[0].substring(0, 25));
+      if (!yaContiene) {
+        const preguntasFormateadas = nodo.preguntasTriaje.map(p => p.startsWith("((") ? p : `((${p}))`).join("\n");
+        respuestaFinal = `${respuestaFinal.trim()}\n\n${preguntasFormateadas}`;
+      }
+    }
 
 
 
