@@ -33,6 +33,10 @@ Las preguntas que AÚN FALTAN por responder deben colocarse EXACTAMENTE como est
 Si el tema es 'otro', la información faltante deben ser preguntas dinámicas que tú mismo generes para aclarar el caso (máximo 3).
 REGLA DE ORO: Si 'informacionFaltante' NO está vacío, DEBES clasificar el nodoActual como '{tema}_inicio' para que el sistema las pregunte. Solo avanza a '_defensa' o '_subsanacion' cuando 'informacionFaltante' esté vacío.
 
+REGLA DE RESPUESTA EN LISTA: Los usuarios frecuentemente responden múltiples preguntas en una sola línea separadas por comas (ej: "bogota, no lo tenemos, no" responde en orden: ciudad=bogota, tiene_casco=no dispone de ninguno, restriccion=no). En estos casos, considera TODAS las preguntas respondidas y pon 'informacionFaltante' como [].
+
+REGLA ANTI-LOOP: Si en el historial ya existe un mensaje del ABOGADO con las preguntas de triaje Y el USUARIO respondió algo en el siguiente turno (aunque sea corto), considera que ese turno contiene las respuestas. NO repitas las mismas preguntas. Extrae los datos de la respuesta y avanza al siguiente nodo.
+
 CATÁLOGO:
 ${catalogoPreguntas}
 
@@ -127,8 +131,30 @@ export async function nodo1_Analista(
   } else if (ofrecioImpugnacion && (esAfirmativo || tieneComparendo || tieneInmovilizacion)) {
     analisis.nodoActual = analisis.tema + '_finalizacion';
   } else if (analisis.informacionFaltante.length > 0) {
-    // REGLA SUPREMA: Si faltan datos, se retiene en el inicio sin importar nada más.
-    analisis.nodoActual = analisis.tema + '_inicio';
+    // REGLA ANTI-LOOP: Si el bot ya hizo las preguntas de triaje en el turno anterior
+    // y el usuario respondió algo en este turno, no retener en _inicio.
+    const botYaPregunto = ultimoMensajeBot.includes('¿En qué') || 
+                          ultimoMensajeBot.includes('¿El acompañante') ||
+                          ultimoMensajeBot.includes('¿A qué autoridad') ||
+                          ultimoMensajeBot.includes('¿Qué tipo de vehículo') ||
+                          ultimoMensajeBot.includes('¿El agente utilizó') ||
+                          ultimoMensajeBot.includes('¿Existe alguna restricción') ||
+                          ultimoMensajeBot.includes('¿Cuál es la');
+    const usuarioYaRespondio = mensaje.trim().length > 2 && !mensaje.includes('?');
+    if (botYaPregunto && usuarioYaRespondio) {
+      // Forzar avance: el usuario respondió, aunque GPT no detectó las respuestas
+      analisis.informacionFaltante = [];
+      if (analisis.nodoActual?.endsWith('_inicio')) {
+        if (analisis.tema === 'casco') analisis.nodoActual = 'casco_subsanacion';
+        else if (analisis.tema === 'choque') analisis.nodoActual = 'choque_defensa';
+        else analisis.nodoActual = analisis.tema + '_defensa';
+        analisis.fase = 2;
+      }
+      console.log(`[NODO 1 - ANTI-LOOP] Bot ya preguntó y usuario respondió. Avanzando a: ${analisis.nodoActual}`);
+    } else {
+      // REGLA SUPREMA: Si realmente faltan datos, retener en inicio.
+      analisis.nodoActual = analisis.tema + '_inicio';
+    }
   } else if (analisis.nodoActual && analisis.nodoActual.endsWith('_inicio')) {
     // Si no falta información pero sigue en inicio, avanzarlo a defensa/subsanacion
     if (analisis.tema === 'casco') analisis.nodoActual = 'casco_subsanacion';

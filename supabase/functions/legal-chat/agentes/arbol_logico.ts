@@ -300,9 +300,8 @@ Al ser un vehículo escolar, mencione en la audiencia que se está afectando la 
     contexto: "Inicio triaje casco",
     guion: "",
     preguntasTriaje: [
-      "¿En qué ciudad o municipio te encuentras actualmente?",
-      "¿El acompañante (parrillero) tiene el casco en su poder pero no lo lleva puesto, o simplemente no dispone de uno?",
-      "¿Existe alguna restricción vigente de 'parrillero' o acompañante en la zona donde te encuentras?"
+      "¿En qué ciudad o municipio te encuentras?",
+      "¿El acompañante tiene el casco en su poder pero no lo lleva puesto, o no dispone de ninguno?"
     ],
     leyes: [],
     siguienteNodo: "casco_subsanacion"
