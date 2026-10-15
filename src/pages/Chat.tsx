@@ -631,7 +631,7 @@ const Chat = () => {
             className={`mb-4 flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
           >
             <div
-              className={`max-w-[85%] rounded-xl px-4 py-3 text-lg ${msg.role === "user"
+              className={`max-w-[85%] rounded-xl px-4 py-3 text-lg overflow-hidden break-words [overflow-wrap:anywhere] ${msg.role === "user"
                 ? "bg-primary text-primary-foreground"
                 : "bg-secondary text-foreground"
                 }`}
@@ -657,7 +657,7 @@ const Chat = () => {
 
               {msg.role === "assistant" ? (
                 <div>
-                  <div className="prose prose-invert prose-lg max-w-none text-lg">
+                  <div className="prose prose-invert prose-lg max-w-none text-lg break-words [overflow-wrap:anywhere]">
                     <ReactMarkdown>{msg.content}</ReactMarkdown>
                   </div>
                   <button

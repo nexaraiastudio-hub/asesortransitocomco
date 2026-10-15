@@ -579,7 +579,11 @@ AUDITOR JURÍDICO - REGLAS ESTRICTAS DE RESPUESTA:
 
 11. Las instrucciones textuales al oficial (lo que el usuario debe DECIRLE al policía) van entre comillas y deben ser precisas con citas legales.
 
-12. DISTINCI�?N CRUCIAL (MULTA VS INMOVILIZACI�?N): Sé muy claro en que la táctica de subsanación (ej. conseguir el casco o bajar al parrillero) NO borra la multa (porque la infracción ya ocurrió y el agente tiene derecho a poner el comparendo), sino que NEUTRALIZA LA INMOVILIZACI�?N (evita la grúa y los patios). La defensa de 60 minutos es para frenar la grúa.`;
+12. DISTINCI�?N CRUCIAL (MULTA VS INMOVILIZACI�?N): Sé muy claro en que la táctica de subsanación (ej. conseguir el casco o bajar al parrillero) NO borra la multa (porque la infracción ya ocurrió y el agente tiene derecho a poner el comparendo), sino que NEUTRALIZA LA INMOVILIZACI�?N (evita la grúa y los patios). La defensa de 60 minutos es para frenar la grúa.
+
+13. INMOVILIZACIÓN ILEGAL EN POLARIZADOS (B.10) Y VEHÍCULOS DE SERVICIO PÚBLICO / ESCOLAR / ESPECIAL:
+   - La infracción B.10 (polarizados) del Código Nacional de Tránsito (Ley 769 de 2002 y Res. 3027 de 2010) NO CONTEMPLA INMOVILIZACIÓN ni para particulares ni para servicio especial/escolar. Acarrea ÚNICAMENTE comparendo (multa de 8 SMLDV). Si el agente amenaza con grúa o patios por vidrios polarizados, SE TRATA DE UNA RETENCIÓN ILEGAL Y ABUSO DE PODER (Prevaricato y Vía de Hecho).
+   - VEHÍCULO ESCOLAR / TAXI / SERVICIO ESPECIAL: Enfatiza que por ser vehículo de servicio público/escolar debidamente habilitado, inmovilizarlo arbitrariamente paraliza un servicio público esencial y causa daños y perjuicios gravísimos, acarreando quejas inmediatas ante la PROCURADURÍA GENERAL DE LA NACIÓN, la SUPERINTENDENCIA DE TRANSPORTE y control interno disciplinario de la Policía/Secretaría de Movilidad.`;
 
 
 
@@ -626,7 +630,9 @@ AUDITOR JURÍDICO - REGLAS ESTRICTAS DE RESPUESTA:
 
 
         // Restaurar preguntasTriaje / pregunta de cierre del nodo estático si no está ya presente
-    if (nodo && nodo.preguntasTriaje && nodo.preguntasTriaje.length > 0 && !esPrimerMensaje) {
+    // EXCEPCIÓN: Si la respuesta ya incluye el modelo de impugnación, NO agregar preguntas preguntando si desea redactarlo
+    const yaTieneModeloImpugnacion = respuestaFinal.includes("MODELO DEL DOCUMENTO") || respuestaFinal.includes("Impugnación del comparendo");
+    if (nodo && nodo.preguntasTriaje && nodo.preguntasTriaje.length > 0 && !esPrimerMensaje && !yaTieneModeloImpugnacion) {
       const preguntasTexto = nodo.preguntasTriaje.join("\n");
       const yaContiene = respuestaFinal.includes(nodo.preguntasTriaje[0].substring(0, 25));
       if (!yaContiene) {

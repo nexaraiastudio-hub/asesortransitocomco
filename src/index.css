@@ -57,3 +57,13 @@
     font-family: 'Georgia', 'Times New Roman', serif;
   }
 }
+
+/* Ajuste de márgenes y contenedor seguro para textos legales largos */
+.prose {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.prose pre, .prose code {
+  white-space: pre-wrap;
+  word-break: break-all;
+}
