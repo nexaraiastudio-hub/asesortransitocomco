@@ -193,7 +193,7 @@ Además, sobre los vehículos escolares, si bien la norma exige visibilidad, la 
     contexto: "Escalamiento polarizados.",
     guion: `Dígale exactamente esto al señor oficial:
 
-"Señor oficial, el comparendo y la inmovilización por la infracción B.10 no proceden legalmente bajo una apreciación subjetiva. La Resolución 3027 de 2010 y la Circular 0022 de 2002 de la Superintendencia de Puertos y Transporte establecen que para sancionar por vidrios polarizados, la autoridad DEBE contar con un fotómetro o luxómetro debidamente calibrado que certifique que el grado de transmisión de luz es inferior al permitido. Realizar este procedimiento 'a ojo' constituye una vía de hecho y una desviación de poder. Le informo que dejaré constancia de la falta de equipo técnico en el registro que estoy realizando."
+"Señor oficial, con todo el respeto, la infracción B.10 del Código Nacional de Tránsito (Ley 769 de 2002 y Resolución 3027 de 2010) NO contempla inmovilización ni traslado a patios bajo ninguna circunstancia; contempla únicamente una sanción pecuniaria, siempre y cuando se demuestre con fotómetro o luxómetro calibrado. Pretender inmovilizar este vehículo constituye una flagrante vía de hecho, abuso de poder y retención ilegal de un bien, más aún tratándose de un vehículo de servicio escolar/público que presta una labor esencial protegida por la ley. Asimismo, le recuerdo mi derecho legal a subsanar la presunta falta en el sitio según el Artículo 125 del Código Nacional de Tránsito y la Resolución 3027 de 2010. Si insiste en inmovilizarlo arbitrariamente, acudiré de inmediato con el registro fílmico ante la Procuraduría General de la Nación, la Superintendencia de Transporte y Control Interno Disciplinario."
 
 Si el oficial procede con la inmovilización a pesar de su advertencia técnica:
 
@@ -201,7 +201,7 @@ NO se resista físicamente, mantenga la calma y siga grabando.
 
 Firme BAJO PROTESTA y escriba esto exactamente en las observaciones del comparendo:
 
-"Firmo bajo protesta. Se vulnera el Debido Proceso (Art. 29 C.P.) ya que el agente impone comparendo B.10 e inmovilización basándose en una apreciación visual, sin utilizar el fotómetro/luxómetro calibrado exigido por la ley para determinar la opacidad. No existe prueba técnica de la infracción. El vehículo cumple con la visibilidad, pero el agente se niega a realizar la medición legal."
+"Firmo bajo protesta. Se vulnera el Debido Proceso (Art. 29 C.P.). Infracción B.10 NO contempla inmovilización en la Ley 769 ni en Res. 3027/2010. El agente inmoviliza arbitrariamente y a simple vista sin equipo técnico calibrado (luxómetro), negando además el derecho a subsanar en el sitio (Art. 125 Ley 769). Se interpondrá queja disciplinaria por vía de hecho y retención ilegal de vehículo de servicio escolar/especial."
 
 Exija el inventario: Asegúrese de que quede registrado el estado de los sellos, vidrios y accesorios del vehículo.
 
