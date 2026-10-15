@@ -268,9 +268,9 @@ Copia del comparendo donde consta la observación de "Firmo bajo protesta" por f
 
 SOLICITUDES: a) Se declare la NULIDAD del comparendo No. [NÚMERO] por carecer de fundamento técnico y probatorio.
 
-b) Se ordene la entrega inmediata del vehículo y la exoneración del pago de grúa y patios, toda vez que la inmovilización fue producto de un procedimiento irregular y sin soporte legal.
+b) [INCLUIR ESTA PETICIÓN ÚNICAMENTE SI EL VEHÍCULO FUE TRASLADADO FÍSICAMENTE A PATIOS CON GRÚA]: Se ordene la devolución inmediata del vehículo y la exoneración total del pago de grúa y parqueadero de patios, toda vez que la infracción B.10 no contempla inmovilización según la Ley 769 de 2002.
 
-c) Se compulse copia a la oficina de control interno disciplinario de la institución por posible extralimitación de funciones del agente.
+c) Se compulse copia a la oficina de control interno disciplinario de la institución y a la Procuraduría General de la Nación por extralimitación de funciones del agente.
 
 FIRMA: [NOMBRE COMPLETO]
 C.C. [CÉDULA]

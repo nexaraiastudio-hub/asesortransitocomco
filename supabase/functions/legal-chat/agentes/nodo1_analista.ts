@@ -126,14 +126,16 @@ export async function nodo1_Analista(
     analisis.nodoActual = "choque_acta_conciliacion";
   } else if (esAfirmativo && ofrecioSoloMulta) {
     analisis.nodoActual = "choque_finalizacion_solo_multa";
+  } else if (ofrecioImpugnacion && (esAfirmativo || tieneComparendo || tieneInmovilizacion || mensajeNormalizado.includes("redacta") || mensajeNormalizado.includes("modelo") || mensajeNormalizado.includes("escrito") || mensajeNormalizado.includes("impugnar"))) {
+    // REGLA DE FINALIZACIÓN / FASE 4: El bot ofreció el documento de impugnación y el usuario lo aceptó o pidió
+    analisis.nodoActual = analisis.tema + '_finalizacion';
+    analisis.fase = 4;
   } else if (analisis.insistenciaOficial && !analisis.nodoActual?.endsWith('_inicio')) {
     // REGLA DE ESCALAMIENTO: Si el oficial insiste y ya pasamos triaje, escalar SIEMPRE a Fase 3
     analisis.nodoActual = analisis.tema + '_escalamiento';
     analisis.fase = 3;
   } else if (analisis.tema === "llantas" && tieneComparendo && !tieneInmovilizacion) {
     analisis.nodoActual = "llantas_solo_comparendo";
-  } else if (ofrecioImpugnacion && (esAfirmativo || tieneComparendo || tieneInmovilizacion)) {
-    analisis.nodoActual = analisis.tema + '_finalizacion';
   } else if (analisis.informacionFaltante.length > 0) {
     // REGLA ANTI-LOOP: Si el bot ya hizo las preguntas de triaje en el turno anterior
     // y el usuario respondió algo en este turno, no retener en _inicio.

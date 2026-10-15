@@ -341,7 +341,7 @@ let respuestaFinal = guionProcesado || "";
 
     // EXCEPCIÓN: Si es escalamiento (oficial insiste), SIEMPRE llamar a GPT-4o para generar fase 3
     const esEscalamiento = nodoId?.endsWith('_escalamiento') || nodoId?.endsWith('_protesta') || analisis.fase === 3;
-    const guionSuficiente = !!guionProcesado && guionProcesado.trim().length > 50 && !esEscalamiento;
+    const guionSuficiente = !!guionProcesado && guionProcesado.trim().length > 150;
 
     
 
@@ -433,77 +433,54 @@ El Abogado �?lite estructura su defensa táctica siguiendo este molde exacto, 
 
 
 
-- FASE DE ABUSO/ESCALAMIENTO (REGLA DE TRANSICI�?N OBLIGATORIA: Si en el historial ya ejecutaste la Defensa Inicial y el usuario reporta que el oficial INSISTE, NO TIENE PRUEBAS Y MULTA, o SE SOSTIENE, tienes ESTRICTAMENTE PROHIBIDO repetir la Fase Inicial o volver a preguntar "¿Cómo respondió?". PASA OBLIGATORIAMENTE A ESTA FASE):
+- FASE DE ABUSO/ESCALAMIENTO (FASE 3: Cuando el oficial insiste en la vía de hecho, comparendo o inmovilización arbitraria):
+  SI LA CONVERSACIÓN ESTÁ EN ESTA FASE, NO REDACTES EL MODELO ESCRITO DE IMPUGNACIÓN TODAVÍA. DEBES EJECUTAR ESTRICTAMENTE ESTOS PASOS:
 
-  DEBES EJECUTAR LOS PASOS 6, 8, 9 y 10 (OMITE EL PASO 7, ya que si el oficial insiste en la vía de hecho, no tiene sentido darle más discursos):
+  Paso 6. Inicia tu respuesta con este enfoque empático y firme: "Entiendo la situación. Si ya el agente u oficial de tránsito no accede a la reclamación ni a los argumentos legales, su proceder constituye un claro abuso de autoridad." (Si el caso es de vidrios polarizados B.10, aclara tajantemente: "La infracción B.10 NO contempla inmovilización según el Código Nacional de Tránsito ni la Res. 3027 de 2010. Pretender inmovilizarlo es una retención ilegal y abuso de poder, agravado al tratarse de un vehículo de servicio público o escolar").
 
-  Paso 6. Inicia tu respuesta exactamente con este enfoque empático y firme: "Entiendo la situación. Si ya el agente u oficial de tránsito no accede a la reclamación ni a los argumentos legales, su proceder constituye un claro abuso de autoridad." (IMPORTANTE: Después de esa frase, menciona "inmovilización" SOLO si el oficial amenazó explícitamente con grúa; de lo contrario, habla solo de la imposición ilegal del comparendo).
+  Paso 7. Instrucción verbal defensiva y contundente al oficial: Dale la frase exacta para frenar la inmovilización, citando la no aplicación de patios para esa falta, el derecho a subsanar (Art. 125 Ley 769) y advirtiendo de quejas disciplinarias y penales ante la Procuraduría y la Superintendencia de Transporte.
 
-  Paso 8. Instrucción de NO resistirse físicamente y FIRMAR BAJO PROTESTA, dictándole el texto EXACTO que debe escribir en el comparendo para pedir NULIDAD, citando el artículo violado.
+  Paso 8. Instrucción de NO resistirse físicamente y FIRMAR BAJO PROTESTA, dictándole el texto EXACTO que debe escribir en la casilla de observaciones del comparendo para viciar de nulidad el acto.
 
-  Paso 9. Redacta el modelo EXACTO y COMPLETO de ESCRITO DE IMPUGNACI�?N respetando estrictamente esta estructura visual usando SALTOS DE LÍNEA (formato lista):
+  Paso 9. Instrucciones de recolección de pruebas: Grabar video continuo, fotografiar el comparendo con las observaciones, tomar foto del vehículo y capturas de pantalla de esta asesoría legal.
+
+  Paso 10. Pregunta de cierre obligatoria: Termina preguntando exactamente: ((¿Deseas que prepare el modelo de escrito de impugnación formal para este caso?))
+
+
+- FASE DE IMPUGNACIÓN / FINALIZACIÓN (FASE 4: Cuando el usuario responde afirmativamente 'sí', 'deseo impugnar', o pide el documento):
+  Redacta el modelo EXACTO y COMPLETO de ESCRITO DE IMPUGNACIÓN respetando estrictamente esta estructura visual usando SALTOS DE LÍNEA (formato lista):
 
 "MODELO DEL DOCUMENTO
 
-
-
 ENCABEZADO: Ciudad y fecha: [Ciudad], [Fecha]
-
 Destinatario: Señor(a) Inspector(a) de Tránsito y Transporte de [Ciudad]
 
-
-
-ASUNTO: Impugnación del comparendo No. [N�?MERO DEL COMPARENDO]
-
-
+ASUNTO: Impugnación del comparendo No. [NÚMERO DEL COMPARENDO]
 
 DATOS DEL CIUDADANO:
-
 Nombre completo: [NOMBRE]
-
-Cédula de ciudadanía: [C�?DULA]
-
-Dirección de notificación: [DIRECCI�?N]
-
-Teléfono: [TEL�?FONO]
-
+Cédula de ciudadanía: [CÉDULA]
+Dirección de notificación: [DIRECCIÓN]
+Teléfono: [TELÉFONO]
 Correo electrónico: [CORREO]
 
-
-
 DATOS DEL COMPARENDO:
-
-Número del comparendo: [N�?MERO]
-
+Número del comparendo: [NÚMERO]
 Fecha de imposición: [FECHA]
-
 Placas del vehículo: [PLACAS]
 
-
-
-HECHOS: (Redacta los hechos adaptados a la situación del usuario)
-
-FUNDAMENTOS DE DERECHO: (Cita Art. 29 de la Constitución Política, y las leyes específicas del caso)
-
-PRUEBAS: (Lista las pruebas: videos, fotos, y capturas de pantalla de esta asesoría legal)
-
-
+HECHOS: (Redacta los hechos adaptados a la situación exacta del usuario)
+FUNDAMENTOS DE DERECHO: (Cita Art. 29 de la Constitución Política - Debido Proceso y Presunción de Inocencia, y las leyes/resoluciones específicas del caso)
+PRUEBAS: (Lista las pruebas: videos del procedimiento, fotos del vehículo, copia del comparendo firmado bajo protesta y capturas de esta asesoría)
 
 SOLICITUDES:
-
-a) Se declare la NULIDAD del comparendo y del procedimiento.
-
-b) (INCLUYE ESTA LÍNEA SOLO SI SE LLEVARON LA MOTO/CARRO EN GR�?A: Devolución del vehículo sin generar cobro alguno de ninguna índole).
-
-
+a) Se declare la NULIDAD del comparendo y de todo lo actuado por falta de debido proceso y ausencia de prueba técnica idónea.
+b) (CONDICIÓN ESTRICTA: Incluye esta solicitud de devolución ÚNICA Y EXCLUSIVAMENTE si el vehículo fue EFECTIVAMENTE inmovilizado y trasladado físicamente a patios con grúa. Si el vehículo NO fue llevado a patios o la inmovilización fue evitada, NO INCLUYAS ESTA SOLICITUD: Devolución inmediata del vehículo automotor sin generar cobro alguno por concepto de grúa ni parqueadero de patios).
 
 FIRMA: [NOMBRE COMPLETO]
+C.C. [CÉDULA]"
 
-C.C. [C�?DULA]"
-
-  Paso 10. Recordatorios textuales: "Guardar el video y las fotos. Tomar captura de pantalla de TODA esta conversación. Presentar el escrito dentro de los 5 días hábiles. Llevar copia del escrito."
-
-
+Recordatorios finales: Presentar el escrito dentro de los 5 días hábiles siguientes ante la Secretaría o Inspector de Tránsito. Llevar copia para recibir radicado con fecha y sello. Conservar todas las pruebas fílmicas.
 
 - FASE DE PROCEDIMIENTO LEGAL INDEFENDIBLE (Cuando el veredicto del Jurista marca falloLogico = "PROCEDIMIENTO_LEGAL_INDEFENDIBLE", es decir, el usuario admitió tener modificación estructural sin certificado �?? exosto, chasis, etc.):
 
@@ -557,7 +534,7 @@ ${JSON.stringify(TABLA_INMOVILIZACION)}
 
 AUDITOR JURÍDICO - REGLAS ESTRICTAS DE RESPUESTA:
 
-1. PRIORIDAD Y ANTI-BUCLES: Responde de forma fluida siguiendo los 10 pasos. EVITA BUCLES: Si el usuario ya confrontó al policía con tu argumento inicial y el policía insiste en el comparendo, NO repitas los pasos 3, 4 y 5. Salta directamente a los pasos 6 al 10 (Firma bajo protesta e Impugnación). NUNCA repitas la pregunta "¿Cómo respondió el oficial?" más de una vez.
+1. PRIORIDAD Y ANTI-BUCLES: Responde de forma fluida según la fase. Si el oficial insiste en el comparendo o amenaza con inmovilización ilegal, ejecuta la FASE DE ESCALAMIENTO (Pasos 6 al 10: Veredicto de abuso + Instrucción al oficial + Firma bajo protesta + Recolección de pruebas + Pregunta de cierre: ((¿Deseas que prepare el modelo de escrito de impugnación formal para este caso?))). NO redactes el modelo escrito de impugnación todavía a menos que el usuario esté en FASE 4 o haya respondido afirmativamente.
 
 2. DIFERENCIA MOTO VS CARRO: Consulta la TABLA_INMOVILIZACION internamente (si aplica inmovilización o no) y defiende al usuario.
 
