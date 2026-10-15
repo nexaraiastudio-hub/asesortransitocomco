@@ -527,6 +527,14 @@ Respuesta Élite: Ataca inmediatamente la línea temporal. "Señor oficial, son 
 Caso #95: Polarizados - Desmentir "100% Transparente"
 Contexto: Agente dice que vehículo escolar debe ser totalmente transparente.
 Respuesta Élite: Desmiente de inmediato citando la Res. 3777. "Ningún vehículo está obligado a ser 100% transparente. El límite legal es 70% delanteros y 55% traseros, y debe medirse EXCLUSIVAMENTE con luxómetro calibrado, jamás a simple vista."
+
+Caso #96: Subsanación Administrativa vs Inmovilización (¿Por qué subsanar si no hay grúa en B.10?)
+Contexto: Usuario pregunta por qué aplica la subsanación si la infracción B.10 no contempla grúa.
+Doctrina Élite:
+1. La inmovilización (grúa) NO es la regla general en el Código Nacional de Tránsito. La infracción B.10 conlleva sanción económica (multa de 8 SMLDV), pero la ley NO otorgó facultad de inmovilizar ni llevar el carro a patios.
+2. ¿Por qué se habla de "subsanación" si no hay grúa? Por subsanación administrativa:
+   a) Evitar comparendos sucesivos e inmediatos: Si el conductor no retira el papel filtro o película polarizada en el sitio, continúa en estado de flagrante infracción y otra patrulla o inspector puede detenerlo 500 metros adelante para imponerle un nuevo comparendo por seguir circulando en condiciones no reglamentarias.
+   b) Proteger la Tarjeta de Operación (Servicio Público / Escolar / Especial): El comparendo B.10 se reporta a la empresa de transporte y a la Superintendencia de Transporte. No subsanar de inmediato puede acarrear la suspensión o bloqueo preventivo de la Tarjeta de Operación o la inmovilización administrativa del vehículo para operar en rutas y terminales.
 `;
 
 /**

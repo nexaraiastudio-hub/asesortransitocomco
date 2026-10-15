@@ -338,14 +338,12 @@ let respuestaFinal = guionProcesado || "";
 
 
     // Solo llamar a GPT-4o cuando el guion del arbol_logico NO es suficiente (RESTAURADO 23-SEP)
-
-    // EXCEPCIÓN: Si es escalamiento (oficial insiste), SIEMPRE llamar a GPT-4o para generar fase 3
+    // EXCEPCION: Si es escalamiento (oficial insiste), fase 3, o si el usuario hace una PREGUNTA de aclaracion o por que
     const esEscalamiento = nodoId?.endsWith('_escalamiento') || nodoId?.endsWith('_protesta') || analisis.fase === 3;
-    const guionSuficiente = !!guionProcesado && guionProcesado.trim().length > 150;
+    const esPreguntaAclaracion = mensajeActual.includes('?') || /\b(por que|por qué|porque|expliqueme|explique|explica|como asi|cómo así)\b/i.test(mensajeActual);
+    const guionSuficiente = !!guionProcesado && guionProcesado.trim().length > 150 && !esPreguntaAclaracion;
 
-    
-
-    if (openai && !esPrimerMensaje && !guionSuficiente) {
+    if (openai && !esPrimerMensaje && (!guionSuficiente || esEscalamiento || esPreguntaAclaracion)) {
 
       try {
 
@@ -425,9 +423,12 @@ El Abogado �?lite estructura su defensa táctica siguiendo este molde exacto, 
 
   DEBES EJECUTAR SOLO LOS PASOS 3, 4 y 5:
 
-  Paso 3. "Entiendo la situación..." + Análisis legal implacable mencionando la infracción y por qué el procedimiento es irregular según las leyes.
+  Paso 3. "Entiendo la situación..." + Análisis legal implacable mencionando la infracción y por qué el procedimiento es irregular según las leyes. ADEMÁS, DEBES ACLARARLE AL USUARIO ANTES DEL GUIÓN VERBAL:
+  a) Que la inmovilización NO procede bajo ninguna circunstancia para infracciones que no la contemplan (como B.10 polarizados, que solo contempla comparendo pecuniario de 8 SMLDV).
+  b) Que si no se utilizó el instrumento técnico adecuado (luxómetro/fotómetro calibrado para polarizados, o profundímetro para llantas), el comparendo NO APLICA ni procede por falta de prueba técnica idónea y violación al Art. 29 C.P.
+  c) Que si el oficial llegara a medir con equipo técnico y estuviera fuera de norma, APLICA LA LEY DE SUBSANACIÓN (Art. 125 Ley 769 de 2002) para retirar o corregir la falta en el sitio, en cuyo caso a lo sumo se impondría SOLO EL COMPARENDO, PERO NUNCA LA INMOVILIZACIÓN NI GRÚA.
 
-  Paso 4. "Dígale exactamente esto al señor oficial:" + Frase literal, técnica y contundente CITANDO ARTÍCULOS del Código de Tránsito.
+  Paso 4. "Dígale exactamente esto al señor oficial:" + Frase literal, técnica y contundente CITANDO ARTÍCULOS del Código de Tránsito (falta de equipo técnico = no comparendo, no inmovilización bajo B.10, y derecho a subsanar en el sitio bajo Art. 125).
 
   Paso 5. "¿Cómo respondió el oficial? ¿Accede al procedimiento legal o insiste en la vía de hecho?"
 
@@ -561,7 +562,13 @@ AUDITOR JURÍDICO - REGLAS ESTRICTAS DE RESPUESTA:
 13. INMOVILIZACIÓN ILEGAL EN POLARIZADOS (B.10), SUBSANACIÓN Y VEHÍCULOS DE SERVICIO PÚBLICO / ESCOLAR / ESPECIAL:
    - La infracción B.10 (polarizados) del Código Nacional de Tránsito (Ley 769 de 2002 y Res. 3027 de 2010) NO CONTEMPLA INMOVILIZACIÓN ni para particulares ni para servicio especial/escolar. Acarrea ÚNICAMENTE comparendo (multa de 8 SMLDV). Si el agente amenaza con grúa o patios por vidrios polarizados, SE TRATA DE UNA RETENCIÓN ILEGAL Y ABUSO DE PODER (Prevaricato y Vía de Hecho).
    - DERECHO A SUBSANAR EN EL SITIO: Aplica el Artículo 125 del Código Nacional de Tránsito y el principio de proporcionalidad. El conductor tiene derecho a retirar o adecuar la película en el lugar o demostrar visibilidad, cesando cualquier intento de inmovilización.
-   - VEHÍCULO ESCOLAR / TAXI / SERVICIO ESPECIAL: Enfatiza que por ser vehículo de servicio público/escolar debidamente habilitado, inmovilizarlo arbitrariamente paraliza un servicio público esencial y causa daños y perjuicios gravísimos, acarreando quejas inmediatas ante la PROCURADURÍA GENERAL DE LA NACIÓN, la SUPERINTENDENCIA DE TRANSPORTE y control interno disciplinario de la Policía/Secretaría de Movilidad.`;
+   - VEHÍCULO ESCOLAR / TAXI / SERVICIO ESPECIAL: Enfatiza que por ser vehículo de servicio público/escolar debidamente habilitado, inmovilizarlo arbitrariamente paraliza un servicio público esencial y causa daños y perjuicios gravísimos, acarreando quejas inmediatas ante la PROCURADURÍA GENERAL DE LA NACIÓN, la SUPERINTENDENCIA DE TRANSPORTE y control interno disciplinario de la Policía/Secretaría de Movilidad.
+14. SUBSANACIÓN ADMINISTRATIVA SIN INMOVILIZACIÓN (B.10 / SERVICIO ESCOLAR Y PÚBLICO):
+   - Si el usuario pregunta por qué aplica la subsanación si no hay grúa en este caso, o cuestiona la necesidad de subsanar cuando una infracción no contempla inmovilización, explícale con total claridad pedagógica y contundencia técnica los dos ejes fundamentales:
+     1. La Inmovilización (Grúa) NO es la regla general para todas las multas: En el Código Nacional de Tránsito, la infracción B.10 (vidrios polarizados) solo conlleva sanción económica (multa de 8 SMLDV). La ley NO facultó al agente para llamar grúa ni llevarse el vehículo a patios.
+     2. ¿Por qué se habla de "subsanación" si no hay grúa? Por Subsanación Administrativa y Operativa:
+        a) Para evitar comparendos sucesivos e inmediatos por flagrancia continua: Si no se retira la película polarizada en el sitio, el vehículo continúa en flagrante infracción y otra patrulla o inspector puede detenerlo 500 metros más adelante e imponerle un segundo comparendo por seguir circulando en condiciones antirreglamentarias.
+        b) Para evitar la suspensión o bloqueo de la Tarjeta de Operación (Servicio Público / Escolar / Especial): La imposición reiterada o el reporte de circular sin condiciones técnico-mecánicas reglamentarias se notifica a la empresa afiliadora y a la Superintendencia de Transporte, lo cual puede derivar en la inmovilización administrativa del vehículo en terminales o la suspensión preventiva de la capacidad transportadora de la ruta escolar.`;
 
 
 
