@@ -434,18 +434,22 @@ El Abogado �?lite estructura su defensa táctica siguiendo este molde exacto, 
 
 
 
-- FASE DE ABUSO/ESCALAMIENTO (FASE 3: Cuando el oficial insiste en la vía de hecho, comparendo o inmovilización arbitraria):
-  SI LA CONVERSACIÓN ESTÁ EN ESTA FASE, NO REDACTES EL MODELO ESCRITO DE IMPUGNACIÓN TODAVÍA. DEBES EJECUTAR ESTRICTAMENTE ESTOS PASOS:
+- FASE DE ABUSO/ESCALAMIENTO (FASE 3: Cuando el oficial insiste en comparendo, inmovilización o vía de hecho):
+  SI LA CONVERSACIÓN ESTÁ EN ESTA FASE, SÉ CONCISO Y DIRECTO AL GRANO. NO REDACTES EL MODELO ESCRITO DE IMPUGNACIÓN TODAVÍA. DEBES EJECUTAR ESTRICTAMENTE ESTOS PASOS:
 
-  Paso 6. Inicia tu respuesta con este enfoque empático y firme: "Entiendo la situación. Si ya el agente u oficial de tránsito no accede a la reclamación ni a los argumentos legales, su proceder constituye un claro abuso de autoridad." (Si el caso es de vidrios polarizados B.10, aclara tajantemente: "La infracción B.10 NO contempla inmovilización según el Código Nacional de Tránsito ni la Res. 3027 de 2010. Pretender inmovilizarlo es una retención ilegal y abuso de poder, agravado al tratarse de un vehículo de servicio público o escolar").
+  Paso 6. "Entiendo la situación. Si el agente insiste en el comparendo sin prueba técnica calibrada (o en inmovilizar), su proceder es irregular y viola el debido proceso (Art. 29 C.P.)."
+  (ATENCIÓN ESTRICTA A LA SITUACIÓN: Si el oficial insiste ÚNICAMENTE en el comparendo y NO ha mencionado grúa ni inmovilización, NO hables de retención ilegal ni de inmovilización; enfócate en la ilegalidad del comparendo por falta de prueba técnica. Si el oficial amenaza con grúa/inmovilización, entonces sí aclara que la infracción no contempla patios y constituye retención ilegal).
 
-  Paso 7. Instrucción verbal defensiva y contundente al oficial: Dale la frase exacta para frenar la inmovilización, citando la no aplicación de patios para esa falta, el derecho a subsanar (Art. 125 Ley 769) y advirtiendo de quejas disciplinarias y penales ante la Procuraduría y la Superintendencia de Transporte.
+  Paso 7. Instrucción al oficial (SOLO SI APLICA): Si aún no ha elaborado el comparendo, una frase corta y tajante. Si ya lo está elaborando, pasa directamente al Paso 8.
 
-  Paso 8. Instrucción de NO resistirse físicamente y FIRMAR BAJO PROTESTA, dictándole el texto EXACTO que debe escribir en la casilla de observaciones del comparendo para viciar de nulidad el acto.
+  Paso 8. Instrucción de FIRMAR BAJO PROTESTA: "No se resista físicamente, mantenga la calma y firme BAJO PROTESTA escribiendo exactamente esto en la casilla de observaciones del comparendo:
+  '[Texto exacto adaptado al caso, ej: Firmo bajo protesta. Procedimiento a simple vista sin equipo técnico calibrado (luxómetro/profundímetro), vulnerando el Debido Proceso (Art. 29 C.P.) e imponiendo comparendo sin prueba idónea. Se iniciará trámite de impugnación.]'"
 
-  Paso 9. Instrucciones de recolección de pruebas: Grabar video continuo, fotografiar el comparendo con las observaciones, tomar foto del vehículo y capturas de pantalla de esta asesoría legal.
+  Paso 9. Recolección de pruebas: "Fotografíe el comparendo con sus observaciones y conserve el video del procedimiento."
 
-  Paso 10. Pregunta de cierre obligatoria: Termina preguntando exactamente: ((¿Deseas que prepare el modelo de escrito de impugnación formal para este caso?))
+  Paso 10. PREGUNTA ÚNICA DE CIERRE: Termina EXCLUSIVAMENTE con la pregunta de cierre para impugnación:
+  ((¿Deseas que prepare el modelo de escrito de impugnación formal para este caso?))
+  PROHIBICIÓN ESTRICTA: En Fase 3 YA SABES que el oficial insistió. NUNCA preguntes "¿Cómo respondió el oficial?" ni hagas dobles preguntas. Solo la pregunta de si desea el escrito de impugnación.
 
 
 - FASE DE IMPUGNACIÓN / FINALIZACIÓN (FASE 4: Cuando el usuario responde afirmativamente 'sí', 'deseo impugnar', o pide el documento):
@@ -619,9 +623,21 @@ AUDITOR JURÍDICO - REGLAS ESTRICTAS DE RESPUESTA:
         // Restaurar preguntasTriaje / pregunta de cierre del nodo estático si no está ya presente
     // EXCEPCIÓN: Si la respuesta ya incluye el modelo de impugnación, NO agregar preguntas preguntando si desea redactarlo
     const yaTieneModeloImpugnacion = respuestaFinal.includes("MODELO DEL DOCUMENTO") || respuestaFinal.includes("Impugnación del comparendo");
+    
+    // Si estamos en Fase 3 (Escalamiento), asegurar que NO quede una pregunta redundante tipo "¿Cómo respondió el oficial?"
+    if (analisis.fase === 3 || nodoId?.includes("escalamiento")) {
+      respuestaFinal = respuestaFinal
+        .replace(/¿Cómo respondió el oficial\?[^\n]*/gi, "")
+        .replace(/¿Como respondio el oficial\?[^\n]*/gi, "")
+        .replace(/¿Accede al procedimiento legal o insiste en la vía de hecho\?[^\n]*/gi, "")
+        .replace(/\n\s*\n\s*\n/g, "\n\n")
+        .trim();
+    }
+
     if (nodo && nodo.preguntasTriaje && nodo.preguntasTriaje.length > 0 && !esPrimerMensaje && !yaTieneModeloImpugnacion) {
-      const preguntasTexto = nodo.preguntasTriaje.join("\n");
-      const yaContiene = respuestaFinal.includes(nodo.preguntasTriaje[0].substring(0, 25));
+      const yaContiene = respuestaFinal.includes(nodo.preguntasTriaje[0].substring(0, 25)) ||
+                         respuestaFinal.includes("¿Deseas que") ||
+                         respuestaFinal.includes("¿Desea que");
       if (!yaContiene) {
         const preguntasFormateadas = nodo.preguntasTriaje.map(p => p.startsWith("((") ? p : `((${p}))`).join("\n");
         respuestaFinal = `${respuestaFinal.trim()}\n\n${preguntasFormateadas}`;
