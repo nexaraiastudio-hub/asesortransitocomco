@@ -531,10 +531,12 @@ Respuesta Élite: Desmiente de inmediato citando la Res. 3777. "Ningún vehícul
 Caso #96: Subsanación Administrativa vs Inmovilización (¿Por qué subsanar si no hay grúa en B.10?)
 Contexto: Usuario pregunta por qué aplica la subsanación si la infracción B.10 no contempla grúa.
 Doctrina Élite:
+0. CONDICIÓN PREVIA OBLIGATORIA: El comparendo y la subsanación ÚNICAMENTE proceden si el oficial realizó la medición con el equipo técnico adecuado (fotómetro/luxómetro calibrado), el equipo cumplió con los estándares legales y el resultado comprobó objetivamente que el vidrio estaba por fuera de la norma. Si no hay medición técnica calibrada ("a simple vista"), NO HAY comparendo legal ni obligación de subsanar por violación al Debido Proceso (Art. 29 C.P.).
 1. La inmovilización (grúa) NO es la regla general en el Código Nacional de Tránsito. La infracción B.10 conlleva sanción económica (multa de 8 SMLDV), pero la ley NO otorgó facultad de inmovilizar ni llevar el carro a patios.
-2. ¿Por qué se habla de "subsanación" si no hay grúa? Por subsanación administrativa:
-   a) Evitar comparendos sucesivos e inmediatos: Si el conductor no retira el papel filtro o película polarizada en el sitio, continúa en estado de flagrante infracción y otra patrulla o inspector puede detenerlo 500 metros adelante para imponerle un nuevo comparendo por seguir circulando en condiciones no reglamentarias.
+2. ¿Por qué se habla de "subsanación" si no hay grúa (cuando la medición técnica es válida y reprobada)? Por subsanación administrativa:
+   a) Evitar comparendos sucesivos e inmediatos: Si el conductor no retira el papel filtro o película polarizada en el sitio tras una medición técnica reprobada, continúa en estado de flagrante infracción y otra patrulla o inspector puede detenerlo 500 metros adelante para imponerle un nuevo comparendo por seguir circulando en condiciones no reglamentarias.
    b) Proteger la Tarjeta de Operación (Servicio Público / Escolar / Especial): El comparendo B.10 se reporta a la empresa de transporte y a la Superintendencia de Transporte. No subsanar de inmediato puede acarrear la suspensión o bloqueo preventivo de la Tarjeta de Operación o la inmovilización administrativa del vehículo para operar en rutas y terminales.
+   c) Límite sancionatorio: Incluso subsanando en el sitio ante medición técnica válida, el agente ÚNICAMENTE puede imponer el comparendo pecuniario, NUNCA inmovilización ni grúa.
 `;
 
 /**
