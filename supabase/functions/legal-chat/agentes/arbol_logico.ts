@@ -179,10 +179,15 @@ Llevar copia del escrito.`,
   "polarizados_defensa": {
     id: "polarizados_defensa",
     contexto: "Defensa por polarizados.",
-    guion: `Entiendo la situación. El oficial no puede multarlo "a simple vista" ni exigir que un [TIPO_VEHICULO] sea "100% transparente", pues la norma técnica permite porcentajes de opacidad. Además, para este caso no procede inmovilización y el comparendo solo es legal si se demuestra con un luxómetro calibrado.
+    guion: `Entiendo la situación. El oficial no puede multarlo "a simple vista" ni exigir que un [TIPO_VEHICULO] tenga vidrios "100% transparentes". La Resolución 3777 de 2003 del Ministerio de Transporte permite legalmente niveles de opacidad y polarizado sin necesidad de permiso especial:
+- Parabrisas y vidrios laterales delanteros: transmisión luminosa mínima del 70%.
+- Vidrios laterales traseros: transmisión luminosa mínima del 55%.
+- Vidrio trasero y de custodia: transmisión luminosa mínima del 14%.
+
+Además, para la infracción B.10 JAMÁS procede inmovilización ni grúa, y el comparendo solo es legal si la autoridad comprueba técnicamente con un fotómetro o luxómetro calibrado que el vidrio está por debajo de dichos porcentajes.
 
 Dígale exactamente esto al señor oficial:
-"Señor oficial, con el debido respeto, la Resolución 3777 de 2003 y el Manual de Infracciones establecen que el nivel de transmisión luminosa debe medirse obligatoriamente con un fotómetro o luxómetro técnico calibrado. La simple apreciación visual no constituye prueba legal según el Debido Proceso (Art. 29 C.P.). Por favor, verifiquemos la medida con el dispositivo reglamentario antes de cualquier actuación."`,
+"Señor oficial, con el debido respeto, la Resolución 3777 de 2003 del Ministerio de Transporte NO exige que los vidrios sean 100% transparentes. La norma autoriza expresamente hasta un 30% de opacidad en parabrisas y vidrios delanteros (mínimo 70% de luminosidad), hasta 45% en laterales traseros (mínimo 55% de luminosidad) y hasta 86% en vidrio trasero (mínimo 14% de luminosidad). Además, la Resolución 3027 de 2010 y el Artículo 29 de la Constitución exigen que cualquier presunto exceso sea comprobado técnicamente con un luxómetro o fotómetro calibrado. La simple apreciación visual no constituye prueba legal. Por favor, verifiquemos la medida con el dispositivo técnico reglamentario antes de cualquier actuación."`,
     preguntasTriaje: ["¿Cómo respondió el oficial a tu solicitud? ¿Accede al procedimiento legal solicitando el equipo técnico o insiste en realizar el comparendo?"],
     leyes: ["Res 3777 de 2003", "Res 3027 de 2010", "Art 29 CP"],
     siguienteNodo: "polarizados_escalamiento"
