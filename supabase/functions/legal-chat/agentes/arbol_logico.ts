@@ -316,16 +316,12 @@ Al ser un vehículo escolar, mencione en la audiencia que se está afectando la 
   "casco_subsanacion": {
     id: "casco_subsanacion",
     contexto: "Defensa por casco",
-    guion: `Entiendo la situación. Tu acompañante no dispone de casco, lo cual representa una infracción directa a las normas de seguridad vial en Colombia.
+    guion: `Entiendo la situación. Al no disponer de casco el acompañante, la infracción se configura y da lugar al comparendo C.24 (15 SMLDV). Sin embargo, la inmovilización de la motocicleta se puede y se debe evitar de inmediato ejerciendo el derecho a subsanar en el sitio (Artículo 125 de la Ley 769 de 2002).
 
-En este caso, la norma es clara. El oficial tiene la facultad de intervenir. Dígale esto para intentar manejar el procedimiento dentro de la legalidad: 'Señor oficial, reconozco la falta frente al Artículo 94 y 96 de la Ley 769 de 2002, que exige el uso de casco tanto para el conductor como para el acompañante. Sin embargo, le solicito respetuosamente que se me permita subsanar la falta en el sitio, trayendo un casco reglamentario para mi acompañante o permitiendo que este continúe su trayecto por otro medio, evitando así la inmovilización del vehículo, basándome en el principio de proporcionalidad y eficiencia administrativa'.
-
-No obstante, técnicamente, según el Código Nacional de Tránsito, la infracción C.24 (Conducir motocicleta sin observar las normas establecidas) conlleva una multa de 15 salarios mínimos legales diarios vigentes. Es importante que sepas que, a diferencia de otras faltas, el no llevar el casco reglamentario sí da lugar a la inmovilización inmediata del vehículo según el Artículo 131, literal C, numeral 24.
-
-RECOMENDACIÓN TÉCNICA:
-Si el oficial decide proceder, verifique que el comparendo sea impuesto por la infracción C.24. Si el oficial intenta registrar una infracción diferente o más grave, deje la anotación en las observaciones.`,
-    preguntasTriaje: ["¿Cómo respondió el oficial a tu solicitud de subsanar? ¿Está redactando el comparendo o ya solicitó la grúa para la inmovilización?"],
-    leyes: ["Art 94 y 96 Ley 769", "Art 131 Ley 769"],
+Dígale exactamente esto al señor oficial:
+"Señor oficial, con el debido respeto, conforme al Artículo 125 del Código Nacional de Tránsito, solicito que se me permita subsanar la falta en el sitio. Mi acompañante se bajará de la motocicleta en este instante y continuará su trayecto por otro medio. Al quedar yo solo como conductor portando mi casco reglamentario, cesa la causa de la inmovilización. Proceda con el comparendo si lo considera, pero le solicito que se abstenga de inmovilizar el vehículo."`,
+    preguntasTriaje: ["¿Cómo respondió el oficial a tu solicitud de subsanar? ¿Está redactando el comparendo o insiste en llamar la grúa para inmovilizar?"],
+    leyes: ["Art 94 y 96 Ley 769", "Art 125 Ley 769", "Art 131 Ley 769"],
     siguienteNodo: "casco_protesta"
   },
   "casco_protesta": {
