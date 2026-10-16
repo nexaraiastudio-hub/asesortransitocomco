@@ -58,15 +58,9 @@ const CIERRE_NORMATIVA = `¿Algo más en que pueda colaborarte?`;
 
 
 
-function esConsultaNormativa(tema: string, fase: number, mensaje: string, userContext?: string): boolean {
-
-
-
-  // Si NO es fase 1, no es consulta normativa pura
-
-
-
-  if (fase !== 1) return false;
+function esConsultaNormativa(tema: string, fase: number, mensaje: string, userContext?: string, historyLength: number = 0): boolean {
+  // Si NO es el primer mensaje del usuario o no es fase 1, es un procedimiento interactivo, NUNCA normativa pura
+  if (historyLength > 0 || fase !== 1) return false;
 
 
 
@@ -654,7 +648,7 @@ Deno.serve(async (req: Request) => {
 
 
 
-    if (esConsultaNormativa(analisis.tema, analisis.fase, message, userContext)) {
+    if (esConsultaNormativa(analisis.tema, analisis.fase, message, userContext, history.length)) {
 
 
 

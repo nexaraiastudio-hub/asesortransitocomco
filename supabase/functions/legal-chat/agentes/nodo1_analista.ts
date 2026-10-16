@@ -134,8 +134,9 @@ export async function nodo1_Analista(
     // REGLA DE ESCALAMIENTO: Si el oficial insiste y ya pasamos triaje, escalar SIEMPRE a Fase 3
     analisis.nodoActual = analisis.tema + '_escalamiento';
     analisis.fase = 3;
-  } else if (analisis.tema === "llantas" && tieneComparendo && !tieneInmovilizacion) {
+  } else if (analisis.tema === "llantas" && historial.length > 0 && tieneComparendo && !tieneInmovilizacion && (mensajeNormalizado.includes("subsan") || mensajeNormalizado.includes("cambiar") || mensajeNormalizado.includes("repuesto") || mensajeNormalizado.includes("deja") || mensajeNormalizado.includes("permite"))) {
     analisis.nodoActual = "llantas_solo_comparendo";
+    analisis.fase = 3;
   } else if (analisis.informacionFaltante.length > 0) {
     // REGLA ANTI-LOOP: Si el bot ya hizo las preguntas de triaje en el turno anterior
     // y el usuario respondió algo en este turno, no retener en _inicio.
