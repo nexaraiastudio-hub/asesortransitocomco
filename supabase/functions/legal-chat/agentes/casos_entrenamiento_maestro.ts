@@ -537,6 +537,14 @@ Doctrina Élite:
    a) Evitar comparendos sucesivos e inmediatos: Si el conductor no retira el papel filtro o película polarizada en el sitio tras una medición técnica reprobada, continúa en estado de flagrante infracción y otra patrulla o inspector puede detenerlo 500 metros adelante para imponerle un nuevo comparendo por seguir circulando en condiciones no reglamentarias.
    b) Proteger la Tarjeta de Operación (Servicio Público / Escolar / Especial): El comparendo B.10 se reporta a la empresa de transporte y a la Superintendencia de Transporte. No subsanar de inmediato puede acarrear la suspensión o bloqueo preventivo de la Tarjeta de Operación o la inmovilización administrativa del vehículo para operar en rutas y terminales.
    c) Límite sancionatorio: Incluso subsanando en el sitio ante medición técnica válida, el agente ÚNICAMENTE puede imponer el comparendo pecuniario, NUNCA inmovilización ni grúa.
+
+Caso #97: Polarizados en Vehículo Escolar - Caso de Éxito Consolidado (Triage, Defensa Serena, Escalamiento e Impugnación Técnica)
+Contexto: Agente detiene vehículo escolar y pretende sancionar e inmovilizar a simple vista alegando que los vidrios deben ser "totalmente transparentes".
+Tácticas Aplicadas:
+1. Triaje Preciso (Turno 1): Identifica tipo de vehículo, autoridad y método de medición (luxómetro vs simple vista).
+2. Defensa Serena (Turno 2): Desmiente el mito del "100% transparente" citando la Res. 3777 de 2003 y el Manual de Infracciones. Explica al conductor que no procede inmovilización y que el comparendo exige luxómetro calibrado. Instruye frase respetuosa sin provocaciones ("Señor oficial, con el debido respeto... verifiquemos la medida con el dispositivo reglamentario antes de cualquier actuación").
+3. Escalamiento sin hablar de grúa innecesaria (Turno 3): Si el agente insiste solo en comparendo, instruye solicitar la prueba técnica con calma, no resistirse, firmar BAJO PROTESTA por falta de equipo técnico y ofrece el modelo de impugnación.
+4. Impugnación Condicional (Turno 4): En los HECHOS, aclara: "El agente de tránsito procedió a sancionar [E INMOVILIZAR - SI PROCEDIÓ CON LA INMOVILIZACIÓN]". En las SOLICITUDES, condiciona la devolución de patios únicamente a si el vehículo fue efectivamente llevado en grúa.
 `;
 
 /**

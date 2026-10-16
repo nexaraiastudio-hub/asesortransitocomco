@@ -475,7 +475,7 @@ Número del comparendo: [NÚMERO]
 Fecha de imposición: [FECHA]
 Placas del vehículo: [PLACAS]
 
-HECHOS: (Redacta los hechos adaptados a la situación exacta del usuario)
+HECHOS: (Redacta los hechos adaptados a la situación exacta del usuario. Si el usuario no fue objeto de inmovilización o no mencionó grúa, NO afirmes que fue inmovilizado; redacta: 'El agente procedió a imponer comparendo [o e inmovilizar - si procedió con la inmovilización] basándose únicamente en su apreciación visual...')
 FUNDAMENTOS DE DERECHO: (Cita Art. 29 de la Constitución Política - Debido Proceso y Presunción de Inocencia, y las leyes/resoluciones específicas del caso)
 PRUEBAS: (Lista las pruebas: videos del procedimiento, fotos del vehículo, copia del comparendo firmado bajo protesta y capturas de esta asesoría)
 

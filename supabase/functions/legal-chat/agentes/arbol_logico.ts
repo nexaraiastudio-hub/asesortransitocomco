@@ -247,7 +247,7 @@ Número del comparendo: [NÚMERO]
 Fecha de imposición: [FECHA]
 Placas del vehículo: [PLACAS]
 
-HECHOS: El día [FECHA], mi vehículo fue objeto de un comparendo por presunto incumplimiento en la norma de vidrios polarizados. El agente de tránsito procedió a sancionar e inmovilizar basándose únicamente en su percepción sensorial (vista), omitiendo el uso del equipo técnico (fotómetro/luxómetro) obligatorio para medir la transmisión lumínica, a pesar de que se le solicitó expresamente cumplir con dicho protocolo legal.
+HECHOS: El día [FECHA], mi vehículo fue objeto de un comparendo por presunto incumplimiento en la norma de vidrios polarizados. El agente de tránsito procedió a sancionar [E INMOVILIZAR - SI PROCEDIÓ CON LA INMOVILIZACIÓN] basándose únicamente en su percepción sensorial (vista), omitiendo el uso del equipo técnico (fotómetro/luxómetro) obligatorio para medir la transmisión lumínica, a pesar de que se le solicitó expresamente cumplir con dicho protocolo legal.
 
 FUNDAMENTOS DE DERECHO:
 
