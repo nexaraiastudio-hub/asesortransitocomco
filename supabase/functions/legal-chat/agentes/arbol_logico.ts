@@ -57,8 +57,8 @@ Grabe TODO: el inventario del vehículo, las condiciones, y cómo usted tenía l
 Tome fotos del estado del vehículo ANTES de que se lo lleven.
 Recuerda que tienes un plazo de 5 días hábiles para solicitar una audiencia de descargos ante la autoridad de tránsito competente.
 Tomar captura de pantalla de TODA esta conversación.
-Si procedió, prepararemos un documento de apelación.`,
-    preguntasTriaje: ["¿Deseas que redacte el documento de apelación incluyendo la violación al derecho a subsanar?"],
+Si procedió, prepararemos un documento de impugnación formal.`,
+    preguntasTriaje: ["¿Deseas que redacte el documento formal de impugnación incluyendo la violación al derecho a subsanar?"],
     leyes: ["Art 21 Ley 1801", "Res 3027 de 2010", "NTC 5375", "Art 125 Ley 769"],
     siguienteNodo: "llantas_finalizacion"
   },
@@ -94,7 +94,7 @@ Grabe TODO el procedimiento. Tome foto del comparendo firmado con sus observacio
     id: "llantas_protesta",
     contexto: "Fallback por si el modelo usa este nombre",
     guion: "",
-    preguntasTriaje: ["¿Deseas que redacte el documento de apelación?"],
+    preguntasTriaje: ["¿Deseas que redacte el documento formal de impugnación del comparendo?"],
     leyes: [],
     siguienteNodo: "llantas_finalizacion"
   },

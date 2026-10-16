@@ -116,7 +116,7 @@ export async function nodo1_Analista(
 
   const ofrecioConciliacion = ultimoMensajeBot.includes("Acta de Conciliación");
   const ofrecioSoloMulta = ultimoMensajeBot.includes("solicitar la nulidad de esta multa") || ultimoMensajeBot.includes("sin inmovilización");
-  const ofrecioImpugnacion = ultimoMensajeBot.includes("impugnación") || ultimoMensajeBot.includes("impugnacion");
+  const ofrecioImpugnacion = ultimoMensajeBot.includes("impugnación") || ultimoMensajeBot.includes("impugnacion") || ultimoMensajeBot.includes("apelación") || ultimoMensajeBot.includes("apelacion") || ultimoMensajeBot.includes("documento");
 
   if (analisis.tema === "choque" && ofrecioComparendo) {
     analisis.nodoActual = "choque_solo_comparendo";
@@ -126,8 +126,8 @@ export async function nodo1_Analista(
     analisis.nodoActual = "choque_acta_conciliacion";
   } else if (esAfirmativo && ofrecioSoloMulta) {
     analisis.nodoActual = "choque_finalizacion_solo_multa";
-  } else if (ofrecioImpugnacion && (esAfirmativo || tieneComparendo || tieneInmovilizacion || mensajeNormalizado.includes("redacta") || mensajeNormalizado.includes("modelo") || mensajeNormalizado.includes("escrito") || mensajeNormalizado.includes("impugnar"))) {
-    // REGLA DE FINALIZACIÓN / FASE 4: El bot ofreció el documento de impugnación y el usuario lo aceptó o pidió
+  } else if (ofrecioImpugnacion && (esAfirmativo || tieneComparendo || tieneInmovilizacion || mensajeNormalizado.includes("redacta") || mensajeNormalizado.includes("modelo") || mensajeNormalizado.includes("escrito") || mensajeNormalizado.includes("impugnar") || mensajeNormalizado.includes("apelar"))) {
+    // REGLA DE FINALIZACIÓN / FASE 4: El bot ofreció el documento de impugnación/apelación y el usuario lo aceptó o pidió
     analisis.nodoActual = analisis.tema + '_finalizacion';
     analisis.fase = 4;
   } else if (analisis.insistenciaOficial && !analisis.nodoActual?.endsWith('_inicio')) {

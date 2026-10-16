@@ -634,9 +634,15 @@ AUDITOR JURÍDICO - REGLAS ESTRICTAS DE RESPUESTA:
 
 
 
-        // Restaurar preguntasTriaje / pregunta de cierre del nodo estático si no está ya presente
-    // EXCEPCIÓN: Si la respuesta ya incluye el modelo de impugnación, NO agregar preguntas preguntando si desea redactarlo
-    const yaTieneModeloImpugnacion = respuestaFinal.includes("MODELO DEL DOCUMENTO") || respuestaFinal.includes("Impugnación del comparendo");
+    // Restaurar preguntasTriaje / pregunta de cierre del nodo estático si no está ya presente
+    // EXCEPCIÓN: Si la respuesta ya incluye el modelo de impugnación o estamos en Fase 4 (Finalización), NO agregar preguntas preguntando si desea redactarlo
+    const yaTieneModeloImpugnacion = respuestaFinal.includes("MODELO DEL DOCUMENTO") || 
+                                     respuestaFinal.includes("Impugnación del comparendo") ||
+                                     respuestaFinal.includes("Impugnacion del comparendo") ||
+                                     respuestaFinal.includes("ENCABEZADO:") ||
+                                     respuestaFinal.includes("DATOS DEL CIUDADANO:") ||
+                                     analisis.fase === 4 ||
+                                     nodoId?.includes("finalizacion");
     
     // Si estamos en Fase 3 (Escalamiento), asegurar que NO quede una pregunta redundante tipo "¿Cómo respondió el oficial?"
     if (analisis.fase === 3 || nodoId?.includes("escalamiento")) {
