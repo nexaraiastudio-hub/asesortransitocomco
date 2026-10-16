@@ -577,7 +577,14 @@ AUDITOR JURÍDICO - REGLAS ESTRICTAS DE RESPUESTA:
 
 12. DISTINCI�?N CRUCIAL (MULTA VS INMOVILIZACI�?N): Sé muy claro en que la táctica de subsanación (ej. conseguir el casco o bajar al parrillero) NO borra la multa (porque la infracción ya ocurrió y el agente tiene derecho a poner el comparendo), sino que NEUTRALIZA LA INMOVILIZACI�?N (evita la grúa y los patios). La defensa de 60 minutos es para frenar la grúa.
 
-13. INMOVILIZACIÓN ILEGAL EN POLARIZADOS (B.10), SUBSANACIÓN Y VEHÍCULOS DE SERVICIO PÚBLICO / ESCOLAR / ESPECIAL:
+13. INMOVILIZACIÓN ILEGAL EN POLARIZADOS (B.10), SUBSANACIÓN Y DISTINCIÓN ENTRE SERVICIO ESPECIAL/ESCOLAR VS COLECTIVO URBANO:
+   - DISTINCIÓN NORMATIVA OBLIGATORIA (SERVICIO ESPECIAL / ESCOLAR VS COLECTIVO URBANO):
+     a) SERVICIO PÚBLICO COLECTIVO URBANO (Buses, busetas y microbuses de ruta urbana tradicional): El Parágrafo del Artículo 90 de la Ley 769 de 2002 establece que "Todos los vidrios de estos vehículos serán transparentes". Esta prohibición de polarizados rige EXCLUSIVAMENTE para el transporte colectivo urbano.
+     b) SERVICIO PÚBLICO TERRESTRE AUTOMOTOR ESPECIAL Y ESCOLAR: Se encuentra regulado por el Decreto 348 de 2015, compilado en el Decreto Único Reglamentario 1079 de 2015. NO está cobijado por el Artículo 90 de la Ley 769. Por lo tanto, se rige plenamente por la Resolución 3777 de 2003 del Ministerio de Transporte, la cual autoriza legalmente niveles de opacidad sin permiso:
+        * Mínimo 70% de luminosidad (hasta 30% opacidad) en parabrisas y laterales delanteros.
+        * Mínimo 55% de luminosidad (hasta 45% opacidad) en laterales traseros.
+        * Mínimo 14% de luminosidad (hasta 86% opacidad) en vidrio trasero y custodia.
+     c) RECHAZO TÉCNICO INMEDIATO SI EL OFICIAL PRETENDE QUE SEA 100% TRANSPARENTE: El agente comete una flagrante confusión de regímenes legales. Indícale al oficial la cita textual del Decreto 348/2015 (compilado en Decreto 1079/2015) y la Resolución 3777 de 2003.
    - La infracción B.10 (polarizados) del Código Nacional de Tránsito (Ley 769 de 2002 y Res. 3027 de 2010) NO CONTEMPLA INMOVILIZACIÓN ni para particulares ni para servicio especial/escolar. Acarrea ÚNICAMENTE comparendo (multa de 8 SMLDV). Si el agente amenaza con grúa o patios por vidrios polarizados, SE TRATA DE UNA RETENCIÓN ILEGAL Y ABUSO DE PODER (Prevaricato y Vía de Hecho).
    - DERECHO A SUBSANAR EN EL SITIO: Aplica el Artículo 125 del Código Nacional de Tránsito y el principio de proporcionalidad. El conductor tiene derecho a retirar o adecuar la película en el lugar o demostrar visibilidad, cesando cualquier intento de inmovilización.
    - VEHÍCULO ESCOLAR / TAXI / SERVICIO ESPECIAL: Enfatiza que por ser vehículo de servicio público/escolar debidamente habilitado, inmovilizarlo arbitrariamente paraliza un servicio público esencial y causa daños y perjuicios gravísimos, acarreando quejas inmediatas ante la PROCURADURÍA GENERAL DE LA NACIÓN, la SUPERINTENDENCIA DE TRANSPORTE y control interno disciplinario de la Policía/Secretaría de Movilidad.

@@ -179,17 +179,19 @@ Llevar copia del escrito.`,
   "polarizados_defensa": {
     id: "polarizados_defensa",
     contexto: "Defensa por polarizados.",
-    guion: `Entiendo la situación. El oficial no puede multarlo "a simple vista" ni exigir que un [TIPO_VEHICULO] tenga vidrios "100% transparentes". La Resolución 3777 de 2003 del Ministerio de Transporte permite legalmente niveles de opacidad y polarizado sin necesidad de permiso especial:
-- Parabrisas y vidrios laterales delanteros: transmisión luminosa mínima del 70%.
-- Vidrios laterales traseros: transmisión luminosa mínima del 55%.
-- Vidrio trasero y de custodia: transmisión luminosa mínima del 14%.
+    guion: `Entiendo la situación. El oficial está confundiendo la norma: la exigencia de vidrios "totalmente transparentes" (Parágrafo del Artículo 90 de la Ley 769 de 2002) aplica EXCLUSIVAMENTE al Servicio Público Colectivo Urbano (buses y busetas urbanas de ruta tradicional). 
+
+Para los vehículos de SERVICIO PÚBLICO ESPECIAL Y ESCOLAR (regulados por el Decreto 348 de 2015, compilado en el Decreto Único Reglamentario 1079 de 2015), rige la Resolución 3777 de 2003 del Ministerio de Transporte, la cual autoriza legalmente niveles de opacidad y polarizado sin requerir permiso especial:
+- Parabrisas y vidrios laterales delanteros: transmisión luminosa mínima del 70% (hasta 30% de opacidad).
+- Vidrios laterales traseros: transmisión luminosa mínima del 55% (hasta 45% de opacidad).
+- Vidrio trasero y de custodia: transmisión luminosa mínima del 14% (hasta 86% de opacidad).
 
 Además, para la infracción B.10 JAMÁS procede inmovilización ni grúa, y el comparendo solo es legal si la autoridad comprueba técnicamente con un fotómetro o luxómetro calibrado que el vidrio está por debajo de dichos porcentajes.
 
 Dígale exactamente esto al señor oficial:
-"Señor oficial, con el debido respeto, la Resolución 3777 de 2003 del Ministerio de Transporte NO exige que los vidrios sean 100% transparentes. La norma autoriza expresamente hasta un 30% de opacidad en parabrisas y vidrios delanteros (mínimo 70% de luminosidad), hasta 45% en laterales traseros (mínimo 55% de luminosidad) y hasta 86% en vidrio trasero (mínimo 14% de luminosidad). Además, la Resolución 3027 de 2010 y el Artículo 29 de la Constitución exigen que cualquier presunto exceso sea comprobado técnicamente con un luxómetro o fotómetro calibrado. La simple apreciación visual no constituye prueba legal. Por favor, verifiquemos la medida con el dispositivo técnico reglamentario antes de cualquier actuación."`,
+"Señor oficial, con el debido respeto, usted está aplicando una norma errónea. La exigencia de vidrios totalmente transparentes del Artículo 90 de la Ley 769 de 2002 rige únicamente para el transporte colectivo urbano de pasajeros, no para el Servicio Especial ni Escolar. Este vehículo opera bajo la modalidad de Servicio Público Terrestre Automotor Especial (Decreto 348 de 2015, compilado en el Decreto 1079 de 2015) y se rige por la Resolución 3777 de 2003 del Ministerio de Transporte. Dicha resolución autoriza expresamente circular con hasta 30% de opacidad en parabrisas y vidrios delanteros (mínimo 70% de luminosidad), hasta 45% en laterales traseros (mínimo 55% de luminosidad) y hasta 86% en vidrio trasero (mínimo 14% de luminosidad). Además, según la Resolución 3027 de 2010 y el Artículo 29 de la Constitución, cualquier presunto exceso debe comprobarse obligatoriamente con un luxómetro técnico calibrado y no a simple vista. Por favor, verifiquemos la medida con el dispositivo técnico reglamentario antes de cualquier actuación."`,
     preguntasTriaje: ["¿Cómo respondió el oficial a tu solicitud? ¿Accede al procedimiento legal solicitando el equipo técnico o insiste en realizar el comparendo?"],
-    leyes: ["Res 3777 de 2003", "Res 3027 de 2010", "Art 29 CP"],
+    leyes: ["Res 3777 de 2003", "Decreto 348 de 2015", "Decreto 1079 de 2015", "Art 90 Ley 769", "Res 3027 de 2010", "Art 29 CP"],
     siguienteNodo: "polarizados_escalamiento"
   },
   "polarizados_escalamiento": {
