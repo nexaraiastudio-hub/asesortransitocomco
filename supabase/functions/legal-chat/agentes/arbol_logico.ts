@@ -427,10 +427,17 @@ El hecho de que la infracción C.24 sea real no le da derecho al policía a inmo
   },
   "casco_exito": {
     id: "casco_exito",
-    contexto: "Exito",
-    guion: "¡Excelente! Has logrado ejercer tu derecho y el oficial ha respetado el debido proceso.",
+    contexto: "Exito al subsanar en sitio y evitar inmovilización",
+    guion: `¡Excelente resultado! Lograste ejercer eficazmente tu derecho a subsanar en el sitio conforme al Artículo 125 del Código Nacional de Tránsito (Ley 769 de 2002), evitando así la inmovilización de tu motocicleta y los costos de grúa y patios.
+
+Recomendaciones para finalizar:
+1. Permite que el oficial diligencie el comparendo C.24 (15 SMLDV) con calma y recíbelo sin inconvenientes.
+2. Recuerda que tienes 5 días hábiles siguientes a la imposición para pagar con el 50% de descuento realizando el curso pedagógico sobre normas de tránsito.
+3. Asegúrate de que tu acompañante continúe su trayecto en otro medio de transporte y tú continúa portando siempre tu casco reglamentario debidamente abrochado.
+
+¡Buen viaje y continúa con total seguridad en la vía!`,
     preguntasTriaje: [],
-    leyes: [],
+    leyes: ["Art 125 Ley 769 de 2002", "Art 136 Ley 769 de 2002"],
     esExito: true
   },
 

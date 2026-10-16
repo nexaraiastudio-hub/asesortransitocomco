@@ -646,17 +646,20 @@ AUDITOR JURÍDICO - REGLAS ESTRICTAS DE RESPUESTA:
 
 
     // Restaurar preguntasTriaje / pregunta de cierre del nodo estático si no está ya presente
-    // EXCEPCIÓN: Si la respuesta ya incluye el modelo de impugnación o estamos en Fase 4 (Finalización), NO agregar preguntas preguntando si desea redactarlo
+    // EXCEPCIÓN: Si la respuesta ya incluye el modelo de impugnación o estamos en Fase 4 (Finalización) o Fase 5 (Éxito/Victoria), NO agregar preguntas
     const yaTieneModeloImpugnacion = respuestaFinal.includes("MODELO DEL DOCUMENTO") || 
                                      respuestaFinal.includes("Impugnación del comparendo") ||
                                      respuestaFinal.includes("Impugnacion del comparendo") ||
                                      respuestaFinal.includes("ENCABEZADO:") ||
                                      respuestaFinal.includes("DATOS DEL CIUDADANO:") ||
                                      analisis.fase === 4 ||
-                                     nodoId?.includes("finalizacion");
+                                     analisis.fase === 5 ||
+                                     nodoId?.includes("finalizacion") ||
+                                     nodoId?.includes("exito") ||
+                                     Boolean(nodo?.esExito);
     
-    // Si estamos en Fase 3 (Escalamiento), asegurar que NO quede una pregunta redundante tipo "¿Cómo respondió el oficial?"
-    if (analisis.fase === 3 || nodoId?.includes("escalamiento")) {
+    // Si estamos en Fase 3 (Escalamiento) o Fase 5 (Éxito), asegurar que NO quede una pregunta redundante tipo "¿Cómo respondió el oficial?"
+    if (analisis.fase === 3 || analisis.fase === 5 || nodoId?.includes("escalamiento") || nodoId?.includes("exito")) {
       respuestaFinal = respuestaFinal
         .replace(/¿Cómo respondió el oficial\?[^\n]*/gi, "")
         .replace(/¿Como respondio el oficial\?[^\n]*/gi, "")

@@ -118,7 +118,15 @@ export async function nodo1_Analista(
   const ofrecioSoloMulta = ultimoMensajeBot.includes("solicitar la nulidad de esta multa") || ultimoMensajeBot.includes("sin inmovilización");
   const ofrecioImpugnacion = ultimoMensajeBot.includes("impugnación") || ultimoMensajeBot.includes("impugnacion") || ultimoMensajeBot.includes("apelación") || ultimoMensajeBot.includes("apelacion") || ultimoMensajeBot.includes("documento");
 
-  if (analisis.tema === "choque" && ofrecioComparendo) {
+  const oficialAceptoOVictoria = /acept[oó]|me deja ir|va a dejar ir|solo el comparendo|solo comparendo|no se lleva la moto|no se lleva el carro|no va a inmovilizar|no me va a inmovilizar|solo va a hacer el comparendo|solo va a imponer el comparendo|acepta subsanar|deja ir/i.test(mensajeNormalizado);
+
+  if (oficialAceptoOVictoria) {
+    analisis.nodoActual = analisis.tema + '_exito';
+    analisis.fase = 5;
+    analisis.insistenciaOficial = false;
+    analisis.informacionFaltante = [];
+    analisis.objetivoAlcanzado = true;
+  } else if (analisis.tema === "choque" && ofrecioComparendo) {
     analisis.nodoActual = "choque_solo_comparendo";
   } else if (analisis.tema === "choque" && ofrecioInmovilizacion) {
     analisis.nodoActual = "choque_solo_inmovilizacion";
