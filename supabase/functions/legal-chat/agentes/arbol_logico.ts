@@ -179,10 +179,10 @@ Llevar copia del escrito.`,
   "polarizados_defensa": {
     id: "polarizados_defensa",
     contexto: "Defensa por polarizados.",
-    guion: `Entiendo la situación. El oficial no puede multarlo "a simple vista" ni inventar que un [TIPO_VEHICULO] debe ser "100% transparente". Además, la infracción B.10 NO autoriza inmovilización (solo multa pecuniaria de 8 SMLDV), y tanto el comparendo como la subsanación SOLO proceden si demuestra el incumplimiento con un luxómetro calibrado.
+    guion: `Entiendo la situación. El oficial no puede multarlo "a simple vista" ni exigir que un [TIPO_VEHICULO] sea "100% transparente", pues la norma técnica permite porcentajes de opacidad. Además, para este caso no procede inmovilización y el comparendo solo es legal si se demuestra con un luxómetro calibrado.
 
 Dígale exactamente esto al señor oficial:
-"Señor oficial, con el debido respeto, la norma técnica colombiana (Resolución 3777 de 2003 y Resolución 3027 de 2010) exige obligatoriamente medir la opacidad con un fotómetro o luxómetro calibrado. La simple apreciación visual carece de validez legal y viola mi Debido Proceso (Art. 29 C.P.). Asimismo, le recuerdo que la infracción B.10 jamás contempla inmovilización ni grúa, y que la exigencia de subsanar o la imposición de comparendo solo procederían ante una medición técnica válida que arroje niveles fuera de norma, nunca por criterio subjetivo."`,
+"Señor oficial, con el debido respeto, la Resolución 3777 de 2003 y el Manual de Infracciones establecen que el nivel de transmisión luminosa debe medirse obligatoriamente con un fotómetro o luxómetro técnico calibrado. La simple apreciación visual no constituye prueba legal según el Debido Proceso (Art. 29 C.P.). Por favor, verifiquemos la medida con el dispositivo reglamentario antes de cualquier actuación."`,
     preguntasTriaje: ["¿Cómo respondió el oficial a tu solicitud? ¿Accede al procedimiento legal solicitando el equipo técnico o insiste en realizar el comparendo?"],
     leyes: ["Res 3777 de 2003", "Res 3027 de 2010", "Art 29 CP"],
     siguienteNodo: "polarizados_escalamiento"
