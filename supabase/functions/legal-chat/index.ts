@@ -447,36 +447,22 @@ Deno.serve(async (req: Request) => {
     // --- FASE 3: VERIFICACI???????????��???�?????N SERVER-SIDE DE CR???????????��???�??�DITOS ---
 
 
-    const { data: hasCredits, error: creditsError } = await supabase.rpc("consume_credit");
-
-
-    
-
-
-    if (creditsError) {
-
-
-      console.error("[HIVE-LAW] Error verificando créditos:", creditsError);
-
-
-      return new Response(JSON.stringify({ error: "Error interno al verificar autorización" }), {
-
-
-        status: 500,
-
-
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-
-
-      });
-
-
+    // --- FASE 3: VERIFICACIÓN SERVER-SIDE DE CRÉDITOS ---
+    const esUsuarioPruebas = user.email === "bermudezcarlose1977@gmail.com" || user.id === "62c76c65-3bf3-4678-b7b5-fad8e8625552";
+    let hasCredits = true;
+    if (!esUsuarioPruebas) {
+      const { data: creditsData, error: creditsError } = await supabase.rpc("consume_credit");
+      if (creditsError) {
+        console.error("[HIVE-LAW] Error verificando créditos:", creditsError);
+        return new Response(JSON.stringify({ error: "Error interno al verificar autorización" }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      hasCredits = !!creditsData;
+    } else {
+      console.log(`[HIVE-LAW] Bypass de créditos para usuario de pruebas: ${user.email}`);
     }
-
-
-    
-
-
     if (!hasCredits) {
 
 
