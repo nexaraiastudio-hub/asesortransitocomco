@@ -319,7 +319,7 @@ Al ser un vehículo escolar, mencione en la audiencia que se está afectando la 
     guion: `Entiendo la situación. Al no disponer de casco el acompañante, la infracción se configura y da lugar al comparendo C.24 (15 SMLDV). Sin embargo, la inmovilización de la motocicleta se puede y se debe evitar de inmediato ejerciendo el derecho a subsanar en el sitio (Artículo 125 de la Ley 769 de 2002).
 
 Dígale exactamente esto al señor oficial:
-"Señor oficial, con el debido respeto, conforme al Artículo 125 del Código Nacional de Tránsito, solicito que se me permita subsanar la falta en el sitio. Mi acompañante se bajará de la motocicleta en este instante y continuará su trayecto por otro medio. Al quedar yo solo como conductor portando mi casco reglamentario, cesa la causa de la inmovilización. Proceda con el comparendo si lo considera, pero le solicito que se abstenga de inmovilizar el vehículo."`,
+"Señor oficial, con el debido respeto, conforme al Artículo 125 del Código Nacional de Tránsito, solicito que se me permita subsanar la falta en el sitio. Mi acompañante se bajará de la motocicleta en este instante y continuará su trayecto por otro medio. Al quedar yo solo como conductor portando mi casco reglamentario, cesa de pleno derecho la causa de la inmovilización, por lo cual le solicito que se abstenga de inmovilizar el vehículo."`,
     preguntasTriaje: ["¿Cómo respondió el oficial a tu solicitud de subsanar? ¿Está redactando el comparendo o insiste en llamar la grúa para inmovilizar?"],
     leyes: ["Art 94 y 96 Ley 769", "Art 125 Ley 769", "Art 131 Ley 769"],
     siguienteNodo: "casco_protesta"
@@ -329,7 +329,7 @@ Dígale exactamente esto al señor oficial:
     contexto: "Escalamiento casco",
     guion: `Dígale exactamente esto al señor oficial:
 
-"Señor oficial, con el debido respeto, conforme al Artículo 125 del Código Nacional de Tránsito (Ley 769 de 2002), procedo a subsanar la falta en el sitio. Mi acompañante se retira de la motocicleta y continúa su camino por otro medio. Al cesar la presencia del parrillero, desaparece la causa que motivaba la inmovilización, quedando la motocicleta en regla conmigo como único conductor con mi casco reglamentario. Le solicito respetuosamente que elabore el comparendo correspondiente pero se abstenga de inmovilizar el vehículo."
+"Señor oficial, con el debido respeto, conforme al Artículo 125 del Código Nacional de Tránsito (Ley 769 de 2002), procedo a subsanar la falta en el sitio. Mi acompañante se retira de la motocicleta y continúa su camino por otro medio. Al cesar la presencia del parrillero, desaparece la causa que motivaba la inmovilización, quedando la motocicleta en regla conmigo como único conductor con mi casco reglamentario. Le solicito que se abstenga de inmovilizar el vehículo."
 
 Si el oficial persiste en la inmovilización a pesar de que el acompañante se baje:
 
@@ -349,7 +349,7 @@ Fotografíe el comparendo con sus observaciones y registre en video que el acomp
     contexto: "Escalamiento oficial insiste en comparendo e inmovilización",
     guion: `Dígale exactamente esto al señor oficial:
 
-"Señor oficial, con el debido respeto, conforme al Artículo 125 del Código Nacional de Tránsito (Ley 769 de 2002), procedo a subsanar la falta en el sitio. Mi acompañante se retira de la motocicleta y continúa su camino por otro medio. Al cesar la presencia del parrillero, desaparece la causa que motivaba la inmovilización, quedando la motocicleta en regla conmigo como único conductor con mi casco reglamentario. Le solicito respetuosamente que elabore el comparendo correspondiente pero se abstenga de inmovilizar el vehículo."
+"Señor oficial, con el debido respeto, conforme al Artículo 125 del Código Nacional de Tránsito (Ley 769 de 2002), procedo a subsanar la falta en el sitio. Mi acompañante se retira de la motocicleta y continúa su camino por otro medio. Al cesar la presencia del parrillero, desaparece la causa que motivaba la inmovilización, quedando la motocicleta en regla conmigo como único conductor con mi casco reglamentario. Le solicito que se abstenga de inmovilizar el vehículo."
 
 Si el oficial persiste en la inmovilización a pesar de que el acompañante se baje:
 
