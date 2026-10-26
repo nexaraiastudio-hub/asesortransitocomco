@@ -992,7 +992,7 @@ PRUEBAS:
 
 SOLICITUDES:
 a) Se declare la NULIDAD absoluta del comparendo No. [NÚMERO].
-b) c) (En caso de haberse efectuado inmovilización): "Se ordene la entrega y devolución inmediata del vehículo sin generar cobro alguno por concepto de grúa o patios".
+b) (En caso de haberse efectuado inmovilización): "Se ordene la entrega y devolución inmediata del vehículo sin generar cobro alguno por concepto de grúa o patios".
 c) Se exhorte al cuerpo de agentes de tránsito a abstenerse de sancionar conductas no tipificadas en la ley.
 
 FIRMA: [NOMBRE COMPLETO]

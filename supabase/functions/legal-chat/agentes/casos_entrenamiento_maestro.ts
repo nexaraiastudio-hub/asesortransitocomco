@@ -545,6 +545,14 @@ Tácticas Aplicadas:
 2. Defensa Serena (Turno 2): Desmiente el mito del "100% transparente" citando la Res. 3777 de 2003 y el Manual de Infracciones. Explica al conductor que no procede inmovilización y que el comparendo exige luxómetro calibrado. Instruye frase respetuosa sin provocaciones ("Señor oficial, con el debido respeto... verifiquemos la medida con el dispositivo reglamentario antes de cualquier actuación").
 3. Escalamiento sin hablar de grúa innecesaria (Turno 3): Si el agente insiste solo en comparendo, instruye solicitar la prueba técnica con calma, no resistirse, firmar BAJO PROTESTA por falta de equipo técnico y ofrece el modelo de impugnación.
 4. Impugnación Condicional (Turno 4): En los HECHOS, aclara: "El agente de tránsito procedió a sancionar [E INMOVILIZAR - SI PROCEDIÓ CON LA INMOVILIZACIÓN]". En las SOLICITUDES, condiciona la devolución de patios únicamente a si el vehículo fue efectivamente llevado en grúa.
+
+Caso #98: Espejos Retrovisores No Originales / Accesorios (Mito de 'Lo Original' y C.28) - CASO DE ÉXITO
+Contexto: Policía de tránsito detiene a motociclista pretendiendo imponer comparendo (e invocar infracción C.28) porque los espejos retrovisores son accesorios o más pequeños y no son los originales de fábrica.
+Tácticas Aplicadas:
+1. Triaje Preciso (Turno 1): Pregunta si los espejos permiten ver claramente los vehículos que vienen detrás, qué norma específica alega el agente y si amenaza con inmovilización o comparendo.
+2. Defensa Serena (Turno 2): Desmiente categóricamente la exigencia de repuestos de marca o de fábrica. El Artículo 30 de la Ley 769 de 2002 exige funcionalidad y campo visual adecuado hacia atrás, no originalidad. Instruye guion técnico: "Señor oficial, con el debido respeto, el Artículo 30 de la Ley 769 de 2002 exige que los espejos garanticen una visibilidad adecuada hacia atrás. La ley colombiana NO prohíbe el uso de accesorios alternativos ni exige repuestos originales de fábrica. Mis espejos son completamente funcionales y cumplen a cabalidad su propósito de campo visual, por lo que su apreciación subjetiva no constituye infracción legal. Solicito se respete mi derecho al debido proceso (Art. 29 C.P.)."
+3. Escalamiento y Cero Confesión (Turno 3): Ante la insistencia o mención de la C.28, explica que la C.28 castiga adaptaciones que atenten contra la seguridad vial y no accesorios con visibilidad plena. Instruye FIRMA BAJO PROTESTA: "Firmo bajo protesta. Espejos cumplen funcionalidad y visibilidad según Art. 30 Ley 769/2002. No se exige originalidad." Ofrece la minuta.
+4. Minuta de Impugnación Técnica (Turno 4): Basada en Falsa Motivación (Art. 29 C.P. y Art. 30 Ley 769 de 2002), solicitando nulidad y condicionando entrega/devolución únicamente si hubo inmovilización física.
 `;
 
 /**
