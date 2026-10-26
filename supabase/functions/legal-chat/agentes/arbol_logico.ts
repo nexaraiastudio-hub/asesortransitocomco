@@ -138,8 +138,7 @@ Registro en video del procedimiento
 Fotografías del vehículo y la señalización
 Capturas de pantalla de esta asesoría legal
 
-SOLICITUDES: a) Se declare la NULIDAD del comparendo No. [NÚMERO] por incumplimiento de los procedimientos técnicos y legales establecidos. b) Se tomen las medidas administrativas correspondientes para evitar la repetición de procedimientos irregulares.
-Y se solicita la devolución del vehículo sin generar cobro alguno de ninguna índole.
+SOLICITUDES: a) Se declare la NULIDAD del comparendo No. [NÚMERO] por incumplimiento de los procedimientos técnicos y legales establecidos. b) Se tomen las medidas administrativas correspondientes para evitar la repetición de procedimientos irregulares. c) (En caso de haberse efectuado inmovilización): "Se ordene la entrega y devolución inmediata del vehículo sin generar cobro alguno por concepto de grúa o patios".
 
 FIRMA: [NOMBRE COMPLETO]
 C.C. [CÉDULA]

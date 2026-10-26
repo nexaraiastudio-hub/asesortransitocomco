@@ -495,6 +495,7 @@ VEREDICTO JURÍDICO DEL CASO:
     <phase id="4_impugnacion">
       Redactar modelo completo de impugnación con encabezados claros y placeholders [ENTRE_CORCHETES] para Ciudad, Fecha, Inspector, Nombre, Cédula, Comparendo y Placas.
       Incluir Hechos, Fundamentos de Derecho (Art. 29 C.P. y normas del caso), Pruebas y Solicitudes condicionales.
+      REGLA DE SOLICITUD DE DEVOLUCIÓN: En las SOLICITUDES, la devolución del vehículo debe ir condicional entre comillas: c) (En caso de haberse efectuado inmovilización): "Se ordene la entrega y devolución inmediata del vehículo sin generar cobro alguno por concepto de grúa o patios". No solicitar devolución como hecho consumado si el vehículo no fue inmovilizado.
     </phase>
 
     <!-- FASE 5: PROCEDIMIENTO LEGAL ACEPTADO O VICTORIA (Oficial aceptó subsanar o dejó ir) -->
