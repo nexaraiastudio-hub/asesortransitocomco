@@ -909,6 +909,112 @@ Tomar captura de pantalla de TODA esta conversación.`,
   },
 
   // === CASO 7: OTRO (SOAT, Pico y Placa, Tecnomecánica, Alcoholemia, etc.) ===
+  "espejos_inicio": {
+    id: "espejos_inicio",
+    contexto: "Inicio de triaje para comparendos o detenciones por espejos retrovisores no originales o accesorios.",
+    guion: "",
+    preguntasTriaje: [
+      "¿Los espejos que tienes instalados te permiten ver claramente los vehículos que vienen detrás?",
+      "¿El agente de tránsito te especificó qué norma supuestamente prohíbe tener espejos accesorios o no originales?",
+      "¿El oficial amenaza con inmovilizar la motocicleta o únicamente con imponer el comparendo?"
+    ],
+    leyes: ["Artículo 30 Ley 769 de 2002", "Artículo 29 Constitución Política"],
+    siguienteNodo: "espejos_defensa"
+  },
+  "espejos_defensa": {
+    id: "espejos_defensa",
+    contexto: "Defensa legal contra comparendo arbitrario por espejos no originales o modificados.",
+    guion: `Entiendo la situación. El agente comete una clara FALSA MOTIVACIÓN. El Artículo 30 del Código Nacional de Tránsito (Ley 769 de 2002) exige que los vehículos cuenten con espejos retrovisores que garanticen visibilidad y seguridad hacia atrás, pero la ley colombiana JAMÁS prohíbe el uso de espejos accesorios ni exige marcas o repuestos originales de fábrica. La infracción C.28 o C.35 no procede si los espejos cumplen a cabalidad su propósito visual.
+
+Dígale exactamente esto al señor oficial:
+
+"Señor oficial, con el debido respeto, el Artículo 30 de la Ley 769 de 2002 exige que los espejos garanticen una visibilidad adecuada hacia atrás. La ley colombiana NO prohíbe el uso de accesorios alternativos ni exige repuestos originales de fábrica. Mis espejos son completamente funcionales y cumplen a cabalidad su propósito de campo visual, por lo que su apreciación subjetiva no constituye infracción legal. Solicito se respete mi derecho al debido proceso (Art. 29 C.P.)."`,
+    preguntasTriaje: [
+      "¿Cómo respondió el oficial a su solicitud? ¿Acepta su reclamación o insiste en proceder de todas formas?"
+    ],
+    leyes: ["Artículo 30 Ley 769", "Artículo 29 Constitución Política"],
+    siguienteNodo: "espejos_escalamiento"
+  },
+  "espejos_escalamiento": {
+    id: "espejos_escalamiento",
+    contexto: "Escalamiento por insistencia del oficial en sancionar por espejos funcionales.",
+    guion: `Entiendo la situación. El oficial insiste en sancionarlo de manera arbitraria basándose en una exigencia inexistente en el Código Nacional de Tránsito.
+
+Mantenga la calma y siga estas instrucciones de protección legal:
+
+1. Instrucción al oficial: "Señor oficial, reitero que el Artículo 30 de la Ley 769 exige visibilidad funcional, no originalidad de fábrica. Cualquier comparendo bajo C.28 sin sustento técnico será objeto de impugnación y queja disciplinaria."
+
+2. FIRMA BAJO PROTESTA: No se resista físicamente, mantenga la calma y firme BAJO PROTESTA escribiendo exactamente esto en las observaciones del comparendo: "Firmo bajo protesta. Mis espejos son 100% funcionales conforme al Art. 30 Ley 769. El agente sanciona ilegalmente exigiendo repuestos originales no requeridos por la ley. Procedimiento nulo."
+
+3. Conservación de pruebas: Grabe video continuo del procedimiento y tome fotografías desde la posición del conductor demostrando que los espejos reflejan perfectamente el campo visual trasero.`,
+    preguntasTriaje: [
+      "¿Deseas que prepare el modelo de escrito de impugnación formal para este caso?"
+    ],
+    leyes: ["Artículo 30 Ley 769", "Artículo 29 Constitución Política", "Artículo 21 Ley 1801"],
+    siguienteNodo: "espejos_finalizacion"
+  },
+  "espejos_finalizacion": {
+    id: "espejos_finalizacion",
+    contexto: "Modelo de impugnación formal por comparendo indebido de espejos retrovisores.",
+    guion: `A continuación le presento el modelo de escrito de impugnación. Complete los datos marcados entre corchetes con su información personal:
+
+MODELO DEL DOCUMENTO
+
+ENCABEZADO:
+Ciudad y fecha: [Ciudad], [Fecha]
+Destinatario: Señor(a) Inspector(a) de Tránsito y Transporte de [Ciudad]
+
+ASUNTO: Impugnación del comparendo No. [NÚMERO DEL COMPARENDO] - Nulidad por Falsa Motivación y Violación al Debido Proceso.
+
+DATOS DEL CIUDADANO:
+Nombre completo: [NOMBRE]
+Cédula de ciudadanía: [CÉDULA]
+Dirección de notificación: [DIRECCIÓN]
+Teléfono: [TELÉFONO]
+Correo electrónico: [CORREO]
+
+DATOS DEL COMPARENDO:
+Número del comparendo: [NÚMERO]
+Fecha de imposición: [FECHA]
+Placas del vehículo: [PLACAS]
+
+HECHOS:
+El día [FECHA], fui detenido por un agente de tránsito quien impuso comparendo alegando que los espejos retrovisores de mi motocicleta no eran los originales de fábrica. Sin embargo, dichos espejos se encuentran debidamente instalados, son completamente funcionales y garantizan visibilidad adecuada hacia atrás. El Código Nacional de Tránsito no exige repuestos originales de fábrica ni certificaciones especiales para espejos retrovisores, por lo que la sanción carece de sustento legal y constituye una flagrante falsa motivación.
+
+FUNDAMENTOS DE DERECHO:
+1. Artículo 29 de la Constitución Política de Colombia (Derecho fundamental al Debido Proceso y principio de legalidad).
+2. Artículo 30 de la Ley 769 de 2002 (Código Nacional de Tránsito): Establece que los vehículos deben transitar con elementos que garanticen visibilidad y seguridad, sin imponer marcas ni repuestos originales de fábrica.
+
+PRUEBAS:
+1. Fotografías de los espejos instalados y de la visibilidad que ofrecen desde el puesto de conducción.
+2. Registro en video ininterrumpido del procedimiento.
+3. Copia del comparendo con la observación "Firmo bajo protesta".
+
+SOLICITUDES:
+a) Se declare la NULIDAD absoluta del comparendo No. [NÚMERO].
+b) c) (En caso de haberse efectuado inmovilización): "Se ordene la entrega y devolución inmediata del vehículo sin generar cobro alguno por concepto de grúa o patios".
+c) Se exhorte al cuerpo de agentes de tránsito a abstenerse de sancionar conductas no tipificadas en la ley.
+
+FIRMA: [NOMBRE COMPLETO]
+C.C. [CÉDULA]`,
+    preguntasTriaje: [],
+    leyes: ["Art. 30 Ley 769", "Art. 29 C.P."],
+    esExito: true
+  },
+  "espejos_exito": {
+    id: "espejos_exito",
+    contexto: "El oficial acepta la explicación legal y desiste del comparendo.",
+    guion: `¡Excelente resultado! Lograste hacer valer el Artículo 30 de la Ley 769 de 2002, demostrando que tus espejos son funcionales y evitando un comparendo arbitrario e infundado.
+
+Recomendaciones para continuar tu ruta:
+1. Verifica que los espejos sigan bien ajustados y proporcionen el mejor ángulo de visión.
+2. Continúa tu recorrido con total tranquilidad y portando todos tus elementos de seguridad vial.
+
+¡Buen viaje y continúa con total seguridad en la vía!`,
+    preguntasTriaje: [],
+    leyes: ["Artículo 30 Ley 769 de 2002"],
+    esExito: true
+  },
   "otro_inicio": {
     id: "otro_inicio",
     contexto: "Inicio de triaje para casos no estándar (SOAT, Pico y Placa, Tecnomecánica, Alcoholemia, etc.)",

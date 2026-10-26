@@ -115,7 +115,7 @@ export async function nodo5_Redactor(
 
 
 
-  if ((nodoId && nodoId.endsWith("_inicio")) || (esPrimerMensaje && (!nodo || !nodo.guion))) {
+  if ((nodoId && nodoId.endsWith("_inicio") && (esPrimerMensaje || !nodo || !nodo.preguntasTriaje || nodo.preguntasTriaje.length === 0)) || (esPrimerMensaje && (!nodo || !nodo.guion))) {
 
     let preguntasTriaje: string[] = [];
 
@@ -168,6 +168,8 @@ Analiza el tipo de infracción descrita y haz SOLO las preguntas que aporten a e
 
 
 - CARRIL EXCLUSIVO DE BUSES (C.14): Pregunta SIEMPRE: (1) ¿Las líneas pintadas en el pavimento (demarcación horizontal) están visibles y en buen estado, o están borradas/desgastadas? (2) ¿Hay señales verticales (vallas/avisos) visibles en ese tramo que indiquen claramente que es carril exclusivo? (3) ¿Ingresaste al carril por una situación de fuerza mayor o emergencia para evitar un accidente? ESTAS RESPUESTAS DETERMINAN SI HAY DEFENSA (señalización borrosa = defensa fuerte) O SI APLICA EL POLO ASESOR (señalización clara = orientar sobre descuentos sin confrontación).
+
+  - ESPEJOS RETROVISORES / ACCESORIOS / MANUBRIO (Mito de 'lo original'): Pregunta únicamente: (1) ¿Los espejos permiten ver claramente los vehículos que vienen detrás? (2) ¿El agente especificó qué norma le prohíbe usar accesorios funcionales no originales? (3) ¿El vehículo es moto o carro? NUNCA preguntes por homologación técnica ni confundas con exosto.
 
   - EXOSTO / ESCAPE MODIFICADO O RUIDOSO: Haz SIEMPRE estas 3 preguntas ESPECÍFICAS: (1) ¿El exosto tiene silenciador/db-killer instalado o es tubo directo/abierto? (2) ¿Tienes alguna certificación de homologación o ficha técnica del componente? (3) ¿El agente tiene sonómetro calibrado o solo lo determina a simple vista/audición? PREGUNTA ADICIONAL CRÍTICA: Si el usuario responde que el agente SÍ tiene sonómetro Y además NO tiene certificado, DEBES preguntar: "¿Cuál fue el resultado exacto de la medición? ¿El sonómetro mostró cuántos decibeles?" Esto determina si hay defensa (�?�86 dB = defensa: el propio equipo del agente refuta la infracción) o si procede el protocolo de daños (>86 dB = procedimiento legal).
 
@@ -465,6 +467,13 @@ VEREDICTO JURÍDICO DEL CASO:
       3. Vehículos pesados (camiones, tractomulas, mulas, buses, busetas superiores a 3.5 toneladas): 2.0 mm (con estándar preventivo recomendado de hasta 3.0 mm por seguridad vial).
       Cualquier medición debe realizarse OBLIGATORIAMENTE con un profundímetro técnico calibrado, NUNCA a simple vista ni con monedas.
     </rule>
+    <rule id="5.5">
+      ESPEJOS, ACCESORIOS Y MITO DE 'LO ORIGINAL' (Art. 30 Ley 769 de 2002):
+      - La norma exige FUNCIONALIDAD y VISIBILIDAD adecuada hacia atrás, NUNCA marcas de fábrica, repuestos originales ni certificaciones de homologación para espejos retrovisores.
+      - La infracción C.28 (hacer adaptaciones o modificaciones que atenten contra la seguridad vial) o C.35 NO aplican por tener espejos accesorios o más pequeños si estos permiten el campo visual.
+      - Si el agente pretende imponer comparendo C.28 o inmovilizar por espejos 'no originales', comete FALSA MOTIVACIÓN y VÍA DE HECHO. El usuario debe exigir la norma exacta que obligue a repuestos originales e impugnar con base en el Art. 30 Ley 769 y Art. 29 C.P.
+      - NUNCA confundir espejos con exosto ni saltar a preguntas de silenciador o sonómetro cuando el problema planteado son espejos o accesorios estéticos.
+    </rule>
   </core_doctrines>
 
   <execution_workflow>
@@ -612,7 +621,7 @@ ${JSON.stringify(TABLA_INMOVILIZACION)}
         .trim();
     }
 
-    if (nodo && nodo.preguntasTriaje && nodo.preguntasTriaje.length > 0 && !esPrimerMensaje && !yaTieneModeloImpugnacion) {
+    if (nodo && nodo.preguntasTriaje && nodo.preguntasTriaje.length > 0 && !esPrimerMensaje && !yaTieneModeloImpugnacion && !nodoId?.endsWith('_inicio')) {
       const yaContiene = respuestaFinal.includes(nodo.preguntasTriaje[0].substring(0, 25)) ||
                          respuestaFinal.includes("¿Deseas que") ||
                          respuestaFinal.includes("¿Desea que");
