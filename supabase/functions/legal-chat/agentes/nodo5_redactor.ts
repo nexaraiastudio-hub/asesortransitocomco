@@ -497,6 +497,19 @@ VEREDICTO JURÍDICO DEL CASO:
   </output_format_standards>
 
   <case_context>
+    <active_phase>
+      FASE_ACTUAL: ${analisis.fase}
+      NODO_ACTUAL: ${nodoId || analisis.nodoActual}
+      TEMA: ${analisis.tema}
+      INSISTENCIA_AUTORIDAD: ${analisis.insistenciaOficial ? 'SI (Fase 3: Escalamiento / Arbitrariedad del oficial)' : 'NO'}
+      REGLA_OBLIGATORIA_DE_FASE: ${
+        analisis.fase === 3 || nodoId?.includes('escalamiento')
+          ? 'ESTÁS EN FASE 3 (ESCALAMIENTO). El oficial YA insistió o rechazó la petición técnica. DEBES ordenar firma BAJO PROTESTA con texto exacto para observaciones, fotos/video, y preguntar: ((¿Deseas que prepare el modelo de escrito de impugnación formal para este caso?)). NUNCA preguntes cómo respondió el oficial.'
+          : analisis.fase === 5 || nodoId?.includes('exito')
+          ? 'ESTÁS EN FASE 5 (VICTORIA/ACUERDO). CERO guiones, CERO impugnación. Felicitar y dar pronto pago o cierre seguro.'
+          : 'ESTÁS EN FASE 2 (DEFENSA INICIAL). Dar guion corto al oficial y preguntar: ¿Cómo respondió el oficial a su solicitud? ¿Acepta su reclamación o insiste en proceder de todas formas?'
+      }
+    </active_phase>
     <history>
 ${historialResumido}
     </history>
@@ -570,9 +583,11 @@ ${JSON.stringify(TABLA_INMOVILIZACION)}
     // Si estamos en Fase 3 (Escalamiento) o Fase 5 (Éxito), asegurar que NO quede una pregunta redundante tipo "¿Cómo respondió el oficial?"
     if (analisis.fase === 3 || analisis.fase === 5 || nodoId?.includes("escalamiento") || nodoId?.includes("exito")) {
       respuestaFinal = respuestaFinal
-        .replace(/¿Cómo respondió el oficial\?[^\n]*/gi, "")
-        .replace(/¿Como respondio el oficial\?[^\n]*/gi, "")
-        .replace(/¿Accede al procedimiento legal o insiste en la vía de hecho\?[^\n]*/gi, "")
+        .replace(/¿Cómo respondió[^\n]*\?/gi, "")
+        .replace(/¿Como respondio[^\n]*\?/gi, "")
+        .replace(/¿Acepta su reclamación[^\n]*\?/gi, "")
+        .replace(/¿Acepta realizar[^\n]*\?/gi, "")
+        .replace(/¿Accede al procedimiento legal[^\n]*\?/gi, "")
         .replace(/\n\s*\n\s*\n/g, "\n\n")
         .trim();
     }
