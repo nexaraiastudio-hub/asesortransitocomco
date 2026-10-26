@@ -299,8 +299,19 @@ Retorna �?NICAMENTE un objeto JSON: { "preguntas": ["¿Pregunta 1?", "¿Pregun
       ? (vars.metodo_medicion || "simple apreciaci\u00F3n visual")
       : "el m\u00E9todo utilizado";
 
-    const esMoto = vehiculo.toLowerCase().includes("moto") || vehiculo.toLowerCase().includes("motocicleta");
-    const limiteMm = esMoto ? "1.0 mil\u00EDmetros" : "1.6 mil\u00EDmetros";
+    const vehiculoLower = vehiculo.toLowerCase();
+    const esMoto = vehiculoLower.includes("moto") || vehiculoLower.includes("motocicleta") || vehiculoLower.includes("motocarro");
+    const esPesado = vehiculoLower.includes("pesad") || vehiculoLower.includes("camion") || vehiculoLower.includes("camión") || 
+                     vehiculoLower.includes("mula") || vehiculoLower.includes("tractomula") || vehiculoLower.includes("bus") || 
+                     vehiculoLower.includes("buseta") || vehiculoLower.includes("volqueta") || vehiculoLower.includes("> 3.5") || 
+                     vehiculoLower.includes("superior a 3.5");
+    
+    let limiteMm = "1.6 milímetros";
+    if (esMoto) {
+      limiteMm = "1.0 milímetros";
+    } else if (esPesado) {
+      limiteMm = "2.0 milímetros (con recomendación preventiva técnica de hasta 3.0 milímetros)";
+    }
 
     if (guionProcesado) {
       guionProcesado = guionProcesado
@@ -445,6 +456,14 @@ VEREDICTO JURÍDICO DEL CASO:
     </rule>
     <rule id="5.3">
       MOTOCICLETAS (LEY 2435 DE 2024): Prohíbe la inmovilización de motocicletas para infracciones D.03, D.04, D.05, D.06 y D.07.
+    </rule>
+    <rule id="5.4">
+      TABLA DE MEDIDAS MÍNIMAS LEGALES DE LABRADO DE LLANTAS (Res. 3027/2010 y NTC 5375):
+      Diferenciar de forma ESTRICTA el tipo de vehículo para determinar la profundidad mínima legal permitida:
+      1. Motos y motocarros: 1.0 mm.
+      2. Carros particulares y livianos (menores a 3.5 toneladas): 1.6 mm.
+      3. Vehículos pesados (camiones, tractomulas, mulas, buses, busetas superiores a 3.5 toneladas): 2.0 mm (con estándar preventivo recomendado de hasta 3.0 mm por seguridad vial).
+      Cualquier medición debe realizarse OBLIGATORIAMENTE con un profundímetro técnico calibrado, NUNCA a simple vista ni con monedas.
     </rule>
   </core_doctrines>
 
