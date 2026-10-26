@@ -1015,6 +1015,115 @@ Recomendaciones para continuar tu ruta:
     leyes: ["Artículo 30 Ley 769 de 2002"],
     esExito: true
   },
+  "exosto_inicio": {
+    id: "exosto_inicio",
+    contexto: "Inicio de triaje para casos de exosto, escape modificado, resonador o ruido excesivo.",
+    guion: "",
+    preguntasTriaje: [
+      "¿El exosto tiene silenciador/db-killer instalado o es tubo directo/abierto?",
+      "¿Tienes alguna certificación de homologación o ficha técnica del componente?",
+      "¿El agente tiene sonómetro calibrado o solo lo determina a simple vista/audición?"
+    ],
+    leyes: ["Ley 2450 de 2025 (Ley Antirruido)", "Resolución 3027 de 2010", "Artículo 29 Constitución Política"],
+    siguienteNodo: "exosto_defensa"
+  },
+  "exosto_defensa": {
+    id: "exosto_defensa",
+    contexto: "Defensa técnica contra sanción de exosto/ruido según la prueba técnica y estado del componente.",
+    guion: `Entiendo la situación. Conforme a la Ley 2450 de 2025 (Ley Antirruido) y el Código Nacional de Tránsito, la autoridad NO puede sancionar ni inmovilizar por ruido basándose exclusivamente en su apreciación auditiva subjetiva ("a oído"). Toda infracción por emisión sonora exige medición técnica objetiva mediante sonómetro debidamente calibrado que demuestre la superación de los límites legales permitidos (86 dB). Además, la infracción C.28 o D.17 exige peritaje técnico o prueba instrumental objetiva.
+
+Dígale exactamente esto al señor oficial:
+
+"Señor oficial, con el debido respeto, conforme a la Ley 2450 de 2025 y el Artículo 29 de la Constitución Política, la determinación de ruido excesivo o alteración acústica NO puede realizarse por percepción auditiva subjetiva 'a oído'. Se requiere obligatoriamente un sonómetro técnico calibrado con certificado de metrología vigente que demuestre que el vehículo supera los 86 decibeles permitidos. Al no contar con dicho instrumento técnico de medición, carece de prueba material objetiva para fundamentar comparendo o inmovilización. Le solicito respetuosamente que se abstenga de proceder sin la prueba técnica exigida por la ley."`,
+    preguntasTriaje: [
+      "¿Cómo respondió el oficial a su solicitud? ¿Acepta su reclamación o insiste en proceder de todas formas?"
+    ],
+    leyes: ["Ley 2450 de 2025", "Resolución 3027 de 2010", "Artículo 29 Constitución Política"],
+    siguienteNodo: "exosto_escalamiento"
+  },
+  "exosto_escalamiento": {
+    id: "exosto_escalamiento",
+    contexto: "Escalamiento por insistencia del oficial en sancionar o inmovilizar por exosto sin sonómetro.",
+    guion: `Entiendo la situación. El oficial insiste en sancionar e inmovilizar sin contar con la prueba técnica obligatoria (sonómetro calibrado), incurriendo en una vía de hecho y vulneración al debido proceso legal.
+
+Mantenga la calma y siga estrictamente estas instrucciones:
+
+1. Instrucción al oficial: "Señor oficial, reitero que la Ley 2450 de 2025 exige sonómetro calibrado. Imponer comparendo o inmovilización a simple oído constituye una sanción sin prueba técnica y una flagrante violación al Debido Proceso (Art. 29 C.P.)."
+
+2. FIRMA BAJO PROTESTA: No se resista físicamente, mantenga la calma y firme BAJO PROTESTA escribiendo exactamente esto en las observaciones del comparendo: "Firmo bajo protesta. Procedimiento nulo por falta de prueba técnica. El agente sanciona e inmoviliza a simple oído sin sonómetro calibrado, violando la Ley 2450 de 2025 y el Art. 29 C.P."
+
+3. En caso de inmovilización: Exija copia completa y detallada del inventario de grúa y patios (registre estado de pintura, accesorios y componentes).
+
+4. Conservación de pruebas: Grabe video continuo del procedimiento donde quede constancia de que el oficial no cuenta con sonómetro ni realizó medición técnica.`,
+    preguntasTriaje: [
+      "¿Deseas que prepare el modelo de escrito de impugnación formal para este caso?"
+    ],
+    leyes: ["Ley 2450 de 2025", "Artículo 29 C.P.", "Artículo 21 Ley 1801 de 2016"],
+    siguienteNodo: "exosto_finalizacion"
+  },
+  "exosto_finalizacion": {
+    id: "exosto_finalizacion",
+    contexto: "Modelo de impugnación formal por comparendo de exosto/ruido impuesto sin sonómetro.",
+    guion: `A continuación le presento el modelo de escrito de impugnación. Complete los datos marcados entre corchetes con su información personal:
+
+MODELO DEL DOCUMENTO
+
+ENCABEZADO:
+Ciudad y fecha: [Ciudad], [Fecha]
+Destinatario: Señor(a) Inspector(a) de Tránsito y Transporte de [Ciudad]
+
+ASUNTO: Impugnación del comparendo No. [NÚMERO DEL COMPARENDO] - Nulidad por Ausencia de Prueba Técnica (Ley 2450 de 2025 y Art. 29 C.P.).
+
+DATOS DEL CIUDADANO:
+Nombre completo: [NOMBRE]
+Cédula de ciudadanía: [CÉDULA]
+Dirección de notificación: [DIRECCIÓN]
+Teléfono: [TELÉFONO]
+Correo electrónico: [CORREO]
+
+DATOS DEL COMPARENDO:
+Número del comparendo: [NÚMERO]
+Fecha de imposición: [FECHA]
+Placas del vehículo: [PLACAS]
+
+HECHOS:
+El día [FECHA], fui requerido por un agente de tránsito quien procedió a imponer comparendo [E INMOVILIZAR EL VEHÍCULO] bajo el argumento de ruido excesivo y modificación de exosto. No obstante, el agente actuó exclusivamente con base en su percepción auditiva ("a oído"), sin emplear sonómetro técnico ni exhibir certificado de calibración metrológica vigente, contraviniendo las disposiciones de la Ley 2450 de 2025 (Ley Antirruido) y el principio de prueba objetiva.
+
+FUNDAMENTOS DE DERECHO:
+1. Artículo 29 de la Constitución Política de Colombia: Debido Proceso, presunción de inocencia y legalidad de la prueba.
+2. Ley 2450 de 2025 (Ley Antirruido): Establece la obligatoriedad de medición técnica instrumental para determinar niveles contaminantes de ruido.
+3. Resolución 3027 de 2010 del Ministerio de Transporte: Exige soporte técnico instrumental para infracciones de naturaleza cuantitativa.
+
+PRUEBAS:
+1. Registro fílmico ininterrumpido donde consta que la autoridad no portaba ni utilizó sonómetro.
+2. Copia del comparendo con anotación de "Firma bajo protesta".
+3. Fotografías del sistema de escape del vehículo.
+
+SOLICITUDES:
+a) Se declare la NULIDAD absoluta del comparendo No. [NÚMERO] por carencia absoluta de prueba material técnica.
+b) (En caso de haberse efectuado inmovilización): "Se ordene la entrega y devolución inmediata del vehículo sin generar cobro alguno por concepto de grúa o patios".
+c) Se compulse copia a la oficina de control disciplinario interno por actuación administrativa sin prueba técnica legal.
+
+FIRMA: [NOMBRE COMPLETO]
+C.C. [CÉDULA]`,
+    preguntasTriaje: [],
+    leyes: ["Ley 2450 de 2025", "Art. 29 C.P."],
+    esExito: true
+  },
+  "exosto_exito": {
+    id: "exosto_exito",
+    contexto: "El oficial desiste del comparendo de exosto o acepta que no tiene sonómetro.",
+    guion: `¡Excelente resultado! Lograste hacer valer la exigencia de medición técnica objetiva conforme a la Ley 2450 de 2025 y el Artículo 29 de la Constitución Política, evitando una sanción arbitraria sin prueba instrumental.
+
+Recomendaciones para continuar:
+1. Conduce con prudencia y mantén tu vehículo en óptimas condiciones mecánicas y de mitigación acústica.
+2. Continúa tu recorrido con total tranquilidad.
+
+¡Buen viaje y continúa con total seguridad en la vía!`,
+    preguntasTriaje: [],
+    leyes: ["Ley 2450 de 2025", "Artículo 29 C.P."],
+    esExito: true
+  },
   "otro_inicio": {
     id: "otro_inicio",
     contexto: "Inicio de triaje para casos no estándar (SOAT, Pico y Placa, Tecnomecánica, Alcoholemia, etc.)",

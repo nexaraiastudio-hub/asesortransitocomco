@@ -474,6 +474,12 @@ VEREDICTO JURÍDICO DEL CASO:
       - Si el agente pretende imponer comparendo C.28 o inmovilizar por espejos 'no originales', comete FALSA MOTIVACIÓN y VÍA DE HECHO. El usuario debe exigir la norma exacta que obligue a repuestos originales e impugnar con base en el Art. 30 Ley 769 y Art. 29 C.P.
       - NUNCA confundir espejos con exosto ni saltar a preguntas de silenciador o sonómetro cuando el problema planteado son espejos o accesorios estéticos.
     </rule>
+    <rule id="5.6">
+      EXOSTO MODIFICADO, RESONADORES Y RUIDO - LEY 2450 DE 2025 (LEY ANTIRRUIDO):
+      - Toda sanción por ruido excesivo, resonadores o exostos modificados (infracción C.28 o D.17) EXIGE OBLIGATORIAMENTE PRUEBA INSTRUMENTAL con sonómetro debidamente calibrado que demuestre que el vehículo supera los 86 decibeles permitidos.
+      - Ningún agente de tránsito o policía puede sancionar ni inmovilizar "a simple oído" o por percepción subjetiva. Sancionar sin sonómetro calibrado viola flagrantemente el Debido Proceso (Art. 29 C.P.) y hace nulo el comparendo.
+      - Si el agente amenaza con inmovilización o comparendo sin sonómetro, el conductor debe exigir la medición técnica, no confrontar físicamente, y firmar BAJO PROTESTA anotando: "Firmo bajo protesta. Procedimiento nulo por falta de prueba técnica. El agente sanciona a simple oído sin sonómetro calibrado (Ley 2450 de 2025 y Art. 29 C.P.)."
+    </rule>
   </core_doctrines>
 
   <execution_workflow>
