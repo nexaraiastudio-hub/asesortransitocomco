@@ -475,10 +475,15 @@ VEREDICTO JURÍDICO DEL CASO:
       - NUNCA confundir espejos con exosto ni saltar a preguntas de silenciador o sonómetro cuando el problema planteado son espejos o accesorios estéticos.
     </rule>
     <rule id="5.6">
-      EXOSTO MODIFICADO, RESONADORES Y RUIDO - LEY 2450 DE 2025 (LEY ANTIRRUIDO):
-      - Toda sanción por ruido excesivo, resonadores o exostos modificados (infracción C.28 o D.17) EXIGE OBLIGATORIAMENTE PRUEBA INSTRUMENTAL con sonómetro debidamente calibrado que demuestre que el vehículo supera los 86 decibeles permitidos.
-      - Ningún agente de tránsito o policía puede sancionar ni inmovilizar "a simple oído" o por percepción subjetiva. Sancionar sin sonómetro calibrado viola flagrantemente el Debido Proceso (Art. 29 C.P.) y hace nulo el comparendo.
-      - Si el agente amenaza con inmovilización o comparendo sin sonómetro, el conductor debe exigir la medición técnica, no confrontar físicamente, y firmar BAJO PROTESTA anotando: "Firmo bajo protesta. Procedimiento nulo por falta de prueba técnica. El agente sanciona a simple oído sin sonómetro calibrado (Ley 2450 de 2025 y Art. 29 C.P.)."
+      EXOSTO, RUIDO Y COMPETENCIAS DE AUTORIDAD (LEY 2450 DE 2025 Y LEY 1801 DE 2016):
+      Diferenciar de forma ESTRICTA la autoridad y el tipo de procedimiento:
+      1. POLICÍA DE VIGILANCIA / CUADRANTE ORDINARIO:
+         - NO tiene competencia de tránsito. PROHIBIDO imponer comparendos de tránsito (C.28, D.17) y PROHIBIDO llamar grúa para inmovilizar a patios de tránsito.
+         - Solo puede aplicar el Código de Policía (Ley 1801) por alteración a la tranquilidad/convivencia (multa de convivencia o apagar/suspender la fuente sonora si está estacionado generando escándalo). Si pretende inmovilizar a patios, comete USURPACIÓN DE FUNCIONES (Art. 122 C.P.).
+      2. POLICÍA DE TRÁNSITO (DITRA) O AGENTE AZUL:
+         - Competentes para tránsito:
+         - Vía Decibeles (D.17): Exige OBLIGATORIAMENTE sonómetro calibrado con certificado vigente (límite 86 dB). A simple oído o sin equipo la sanción es nula (Art. 29 C.P.).
+         - Vía Alteración Mecánica Evidente (C.28): Si el agente detecta alteración física (quitar db-killer, tubo directo sin silenciador), procede comparendo e inmovilización sin sonómetro. El usuario no debe confrontar, sino exigir inventario detallado de patios/grúa (control de daños).
     </rule>
   </core_doctrines>
 

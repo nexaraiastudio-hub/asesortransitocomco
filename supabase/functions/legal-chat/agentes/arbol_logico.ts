@@ -1020,9 +1020,9 @@ Recomendaciones para continuar tu ruta:
     contexto: "Inicio de triaje para casos de exosto, escape modificado, resonador o ruido excesivo.",
     guion: "",
     preguntasTriaje: [
+      "¿La autoridad que te detuvo es Policía de Tránsito/Agente Azul o es Policía de Vigilancia del cuadrante?",
       "¿El exosto tiene silenciador/db-killer instalado o es tubo directo/abierto?",
-      "¿Tienes alguna certificación de homologación o ficha técnica del componente?",
-      "¿El agente tiene sonómetro calibrado o solo lo determina a simple vista/audición?"
+      "¿El agente utilizó un sonómetro calibrado o pretende sancionar solo a simple oído?"
     ],
     leyes: ["Ley 2450 de 2025 (Ley Antirruido)", "Resolución 3027 de 2010", "Artículo 29 Constitución Política"],
     siguienteNodo: "exosto_defensa"
