@@ -1124,6 +1124,127 @@ Recomendaciones para continuar:
     leyes: ["Ley 2450 de 2025", "Artículo 29 C.P."],
     esExito: true
   },
+  "plataformas_inicio": {
+    id: "plataformas_inicio",
+    contexto: "Inicio de triaje para casos de supuesta prestación de servicio no autorizado o plataformas (Uber, Didi, etc.).",
+    guion: "",
+    preguntasTriaje: [
+      "¿La autoridad que te detuvo es Policía de Tránsito/Agente Azul o es Policía de Vigilancia del cuadrante?",
+      "¿El agente te está exigiendo que le entregues o desbloquees tu teléfono celular?",
+      "¿El oficial está interrogando o presionando a tus acompañantes para que digan que es un servicio pagado?"
+    ],
+    leyes: ["Artículo 15 Constitución Política (Intimidad)", "Artículo 29 Constitución Política (Debido Proceso)", "Artículo 135 Ley 769 de 2002"],
+    siguienteNodo: "plataformas_defensa"
+  },
+  "plataformas_defensa": {
+    id: "plataformas_defensa",
+    contexto: "Defensa legal contra acusación de plataformas, revisión indebida de celular e interrogatorio a pasajeros.",
+    guion: `Entiendo la situación. El procedimiento es completamente irregular y lesivo de tus derechos fundamentales. 
+
+1. El control de tránsito es estrictamente DOCUMENTAL (licencia, SOAT, tecnomecánica y tarjeta de propiedad).
+2. Nadie está obligado a exhibir ni desbloquear su teléfono celular. Exigir la revisión del celular sin orden previa de un juez viola tu derecho fundamental a la Intimidad y a la inviolabilidad de comunicaciones (Artículo 15 de la Constitución Política) y tipifica Abuso de Autoridad (Art. 416 Código Penal).
+3. La autoridad de tránsito o vigilancia NO tiene facultades de Policía Judicial para interrogar a tus acompañantes ni exigirles confesar un pago.
+4. Si es un Policía de Vigilancia, carece por completo de competencia de tránsito (Art. 135 Ley 769 de 2002).
+
+Dígale exactamente esto al señor oficial:
+
+"Señor oficial, con el debido respeto, el control en vía pública es estrictamente documental y aquí tiene mis documentos al día. Conforme al Artículo 15 de la Constitución Política, mi teléfono celular y mis comunicaciones privadas son inviolables y ningún funcionario puede exigirme que los exhiba o desbloquee sin una orden judicial previa. Así mismo, mis acompañantes no están obligados a responder interrogatorios. Le solicito respetuosamente que verifique los documentos y me permita continuar mi marcha en respeto al Debido Proceso (Art. 29 C.P.)."`,
+    preguntasTriaje: [
+      "¿Cómo respondió el oficial a su solicitud? ¿Acepta su reclamación o insiste en proceder de todas formas?"
+    ],
+    leyes: ["Artículo 15 C.P.", "Artículo 29 C.P.", "Artículo 135 Ley 769", "Artículo 21 Ley 1801"],
+    siguienteNodo: "plataformas_escalamiento"
+  },
+  "plataformas_escalamiento": {
+    id: "plataformas_escalamiento",
+    contexto: "Escalamiento por insistencia del oficial, amenaza de inmovilización D.12 o llamada al tránsito.",
+    guion: `Entiendo la situación. El oficial insiste de manera arbitraria o pretende llamar a un agente de tránsito para que actúe sin haber presenciado ninguna infracción en movimiento.
+
+Mantenga la calma y siga estrictamente estas instrucciones de protección legal:
+
+1. Si el policía de vigilancia dice que "va a llamar al tránsito":
+Dígale esto con firmeza y serenidad: "Señor agente, el Artículo 135 de la Ley 769 de 2002 exige que la orden de comparendo solo proceda cuando la autoridad de tránsito presencie directamente la infracción en vía pública. Usted como policía de vigilancia no tiene competencia de tránsito y retenerme para que un tercero venga a multar sobre hechos que no presenció constituye una retención arbitraria y vicia de nulidad absoluta el procedimiento."
+
+2. Nadie entrega celulares ni rinde declaraciones:
+Ni usted ni sus acompañantes deben entregar teléfonos ni responder preguntas sobre su destino o relación personal.
+
+3. En caso de que llegue un agente de tránsito y pretenda imponer comparendo (D.12) o inmovilizar:
+No se resista físicamente, mantenga la calma y firme BAJO PROTESTA escribiendo exactamente esto en las observaciones del comparendo:
+"Firmo bajo protesta. Procedimiento nulo por falta de flagrancia. Retenido ilegalmente por policía de vigilancia sin competencia. El agente de tránsito no presenció los hechos (Art. 135 Ley 769). Se violó la intimidad (Art. 15 C.P.) y el Debido Proceso (Art. 29 C.P.)."
+
+4. Conservación de pruebas: Continúe grabando en video ininterrumpido (Art. 21 Ley 1801).`,
+    preguntasTriaje: [
+      "¿Deseas que prepare el modelo de escrito de impugnación formal para este caso?"
+    ],
+    leyes: ["Artículo 15 C.P.", "Artículo 29 C.P.", "Artículo 135 Ley 769", "Artículo 122 Código Penal"],
+    siguienteNodo: "plataformas_finalizacion"
+  },
+  "plataformas_finalizacion": {
+    id: "plataformas_finalizacion",
+    contexto: "Modelo de impugnación formal por comparendo D.12 o procedimiento ilegal de plataformas.",
+    guion: `A continuación le presento el modelo de escrito de impugnación. Complete los datos marcados entre corchetes con su información personal:
+
+MODELO DEL DOCUMENTO
+
+ENCABEZADO:
+Ciudad y fecha: [Ciudad], [Fecha]
+Destinatario: Señor(a) Inspector(a) de Tránsito y Transporte de [Ciudad]
+
+ASUNTO: Impugnación del comparendo No. [NÚMERO DEL COMPARENDO] - Nulidad por Violación al Debido Proceso (Art. 29 C.P.), Violación al Derecho a la Intimidad (Art. 15 C.P.) e Infracción al Artículo 135 de la Ley 769 de 2002.
+
+DATOS DEL CIUDADANO:
+Nombre completo: [NOMBRE]
+Cédula de ciudadanía: [CÉDULA]
+Dirección de notificación: [DIRECCIÓN]
+Teléfono: [TELÉFONO]
+Correo electrónico: [CORREO]
+
+DATOS DEL COMPARENDO:
+Número del comparendo: [NÚMERO]
+Fecha de imposición: [FECHA]
+Placas del vehículo: [PLACAS]
+
+HECHOS:
+1. El día [FECHA], fui interceptado y retenido en la vía pública por un policía de vigilancia del cuadrante, funcionario que carece de competencia legal para ejercer funciones de control de tránsito.
+2. Dicho funcionario pretendió obligarme a exhibir y desbloquear mi teléfono celular personal y someter a interrogatorio a mis acompañantes, incurriendo en transgresión directa del Artículo 15 de la Constitución Política.
+3. Posteriormente, el funcionario retuvo el vehículo hasta convocar a un agente de tránsito, quien procedió a imponer comparendo e inmovilizar [SI HUBO INMOVILIZACIÓN], a pesar de no haber presenciado de manera directa ninguna conducta infractora en circulación, contraviniendo de forma flagrante el Artículo 135 de la Ley 769 de 2002.
+
+FUNDAMENTOS DE DERECHO:
+1. Artículo 15 de la Constitución Política de Colombia: Inviolabilidad de las comunicaciones privadas y derecho a la intimidad personal.
+2. Artículo 29 de la Constitución Política: Derecho fundamental al Debido Proceso y principio de legalidad de la prueba.
+3. Artículo 135 de la Ley 769 de 2002: Exige que la autoridad de tránsito competente presencie directamente los hechos en flagrancia.
+4. Código Penal, Artículos 122 (Usurpación de funciones públicas) y 416 (Abuso de autoridad).
+
+PRUEBAS:
+1. Registro en video ininterrumpido del procedimiento.
+2. Copia del comparendo con constancia expresa de firma bajo protesta.
+3. Documentos en regla del vehículo y conductor.
+
+SOLICITUDES:
+a) Se declare la NULIDAD absoluta del comparendo No. [NÚMERO] por carecer de soporte legal y probatorio directo.
+b) (En caso de haberse efectuado inmovilización): "Se ordene la entrega y devolución inmediata del vehículo sin generar cobro alguno por concepto de grúa o patios".
+c) Se compulse copias ante la Procuraduría General de la Nación y la Dirección General de la Policía Nacional por extralimitación y usurpación de funciones.
+
+FIRMA: [NOMBRE COMPLETO]
+C.C. [CÉDULA]`,
+    preguntasTriaje: [],
+    leyes: ["Art. 15 C.P.", "Art. 29 C.P.", "Art. 135 Ley 769"],
+    esExito: true
+  },
+  "plataformas_exito": {
+    id: "plataformas_exito",
+    contexto: "El oficial desiste de la retención o acepta que no puede revisar el celular ni multar.",
+    guion: `¡Excelente resultado! Lograste hacer respetar tu derecho fundamental a la intimidad (Art. 15 C.P.) y frenar un procedimiento ilegal de tránsito adelantado por personal sin competencia.
+
+Recomendaciones para continuar:
+1. Guarda el registro en video en un lugar seguro por si requieres radicar queja disciplinaria.
+2. Continúa tu recorrido con total tranquilidad y con tus documentos reglamentarios al día.
+
+¡Buen viaje y continúa con total seguridad en la vía!`,
+    preguntasTriaje: [],
+    leyes: ["Art. 15 C.P.", "Art. 29 C.P."],
+    esExito: true
+  },
   "otro_inicio": {
     id: "otro_inicio",
     contexto: "Inicio de triaje para casos no estándar (SOAT, Pico y Placa, Tecnomecánica, Alcoholemia, etc.)",

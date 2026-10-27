@@ -13,7 +13,7 @@ export function getPromptAnalista(): string {
 Tu misión es identificar el estado actual de la conversación y situar al usuario en el NODO exacto del Grafo Legal.
 
 ### PROTOCOLO DE NAVEGACIÓN (V18):
-1. IDENTIFICAR TEMA: Determina si es llantas, polarizados, casco, semaforo, luces, espejos, exosto, choque o 'otro'.
+1. IDENTIFICAR TEMA: Determina si es llantas, polarizados, casco, semaforo, luces, espejos, exosto, plataformas, choque o 'otro'.
 2. IDENTIFICAR NODO: Mira el historial y decide qué nodo del grafo corresponde.
 
 ### REGLA DE FIDELIDAD DE HECHOS (CRÍTICA - V18.11):
@@ -42,7 +42,7 @@ ${catalogoPreguntas}
 
 ### SALIDA JSON ÚNICAMENTE:
 {
-  "tema": "llantas" | "polarizados" | "casco" | "semaforo" | "luces" | "espejos" | "exosto" | "choque" | "otro" | "fuera_de_dominio",
+  "tema": "llantas" | "polarizados" | "casco" | "semaforo" | "luces" | "espejos" | "exosto" | "plataformas" | "choque" | "otro" | "fuera_de_dominio",
   "nodoActual": string,
   "fase": 1 | 2 | 3 | 4 | 5,
   "clase": "automovil" | "motocicleta" | "camioneta" | "campero" | "bus" | "camion" | "tractocamion" | "otro" | null,
@@ -106,7 +106,7 @@ export async function nodo1_Analista(
 
   const tieneComparendo = /\bcomparendo\b|\bmulta\b|\bsanción\b/i.test(mensajeNormalizado);
   const tieneInmovilizacion = /inmovil|\binmovilizar\b|\binmovilización\b|\bgrúa\b|\bremolque\b/i.test(mensajeNormalizado);
-  const detectaInsistenciaTexto = /\bno acepta\b|\binsiste\b|\bquiere hacer\b|\bva a hacer\b|\bno quiere\b|\bse niega\b|\brechaz|infracci[oó]n\s+[a-z]\.?\d+|c\.?28|c\.?35|d\.?17|patios directo|da patios|inmovilizaci[oó]n directo/i.test(mensajeNormalizado);
+  const detectaInsistenciaTexto = /\bno acepta\b|\binsiste\b|\bquiere hacer\b|\bva a hacer\b|\bno quiere\b|\bse niega\b|\brechaz|infracci[oó]n\s+[a-z]\.?\d+|c\.?28|c\.?35|d\.?17|d\.?12|patios directo|da patios|inmovilizaci[oó]n directo|va a llamar|llama a|llamando a|llamara|llamar un agente|llamar a un agente/i.test(mensajeNormalizado);
   if (detectaInsistenciaTexto) {
     analisis.insistenciaOficial = true;
   }

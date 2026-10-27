@@ -485,6 +485,14 @@ VEREDICTO JURÍDICO DEL CASO:
          - Vía Decibeles (D.17): Exige OBLIGATORIAMENTE sonómetro calibrado con certificado vigente (límite 86 dB). A simple oído o sin equipo la sanción es nula (Art. 29 C.P.).
          - Vía Alteración Mecánica Evidente (C.28): Si el agente detecta alteración física (quitar db-killer, tubo directo sin silenciador), procede comparendo e inmovilización sin sonómetro. El usuario no debe confrontar, sino exigir inventario detallado de patios/grúa (control de daños).
     </rule>
+    <rule id="5.8">
+      PLATAFORMAS (UBER/DIDI/INDISPLAY), CELULAR E INTERROGATORIO (Art. 15 y 29 C.P.):
+      - El control vial de tránsito es estrictamente DOCUMENTAL (licencia, SOAT, tecnomecánica y tarjeta de propiedad).
+      - INVIOLABILIDAD DEL CELULAR: Ningún policía de tránsito ni de vigilancia puede exigir que el conductor o los pasajeros exhiban, desbloqueen o entreguen su teléfono celular sin orden judicial previa (Art. 15 C.P.). Exigirlo es abuso de autoridad (Art. 416 C.P.).
+      - PROHIBICIÓN DE INTERROGATORIOS: La autoridad carece de facultades de policía judicial en retenes de tránsito para interrogar a pasajeros sobre si pagaron, a dónde van o su relación personal con el conductor.
+      - La infracción D.12 (servicio no autorizado / piratería) exige plena prueba directa, no presunciones ni confesiones forzadas.
+      - Si el policía de vigilancia amenaza con llamar a tránsito por plataformas, aplicar la regla 5.7: el comparendo es nulo por falta de inmediatez y flagrancia directa (Art. 135 CNT).
+    </rule>
     <rule id="5.7">
       DOCTRINA VITAL: ILEGALIDAD DE RETENCIÓN POR POLICÍA DE VIGILANCIA PARA LLAMAR AL TRÁNSITO (Art. 135 Ley 769 de 2002):
       - Si un policía de vigilancia (cuadrante) detiene o retiene al conductor y "llama al tránsito" para que venga a multarlo o inmovilizarlo por infracciones en movimiento (ruido, maniobras, luces, etc.): EL PROCEDIMIENTO ES ILEGAL Y NULO DE PLENO DERECHO.
