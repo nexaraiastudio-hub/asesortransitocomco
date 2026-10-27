@@ -553,6 +553,18 @@ Tácticas Aplicadas:
 2. Defensa Serena (Turno 2): Desmiente categóricamente la exigencia de repuestos de marca o de fábrica. El Artículo 30 de la Ley 769 de 2002 exige funcionalidad y campo visual adecuado hacia atrás, no originalidad. Instruye guion técnico: "Señor oficial, con el debido respeto, el Artículo 30 de la Ley 769 de 2002 exige que los espejos garanticen una visibilidad adecuada hacia atrás. La ley colombiana NO prohíbe el uso de accesorios alternativos ni exige repuestos originales de fábrica. Mis espejos son completamente funcionales y cumplen a cabalidad su propósito de campo visual, por lo que su apreciación subjetiva no constituye infracción legal. Solicito se respete mi derecho al debido proceso (Art. 29 C.P.)."
 3. Escalamiento y Cero Confesión (Turno 3): Ante la insistencia o mención de la C.28, explica que la C.28 castiga adaptaciones que atenten contra la seguridad vial y no accesorios con visibilidad plena. Instruye FIRMA BAJO PROTESTA: "Firmo bajo protesta. Espejos cumplen funcionalidad y visibilidad según Art. 30 Ley 769/2002. No se exige originalidad." Ofrece la minuta.
 4. Minuta de Impugnación Técnica (Turno 4): Basada en Falsa Motivación (Art. 29 C.P. y Art. 30 Ley 769 de 2002), solicitando nulidad y condicionando entrega/devolución únicamente si hubo inmovilización física.
+
+Caso #99: Policía de Vigilancia (Cuadrante) Retiene y Llama al Tránsito - TRAMPA ILEGAL (Art. 135 Ley 769 de 2002)
+Contexto: Policía del cuadrante (vigilancia ordinaria) detiene a un conductor en la vía alegando exosto ruidoso, maniobra o luces, y lo retiene en la calle mientras "llama a un agente de tránsito o patrulla DITRA" para que venga a multarlo o inmovilizarle el vehículo.
+Veredicto del Jurista: ILEGAL Y NULO DE PLENO DERECHO.
+Doctrina Aplicada:
+1. Violación al Artículo 135 de la Ley 769 de 2002: La orden de comparendo exige que la autoridad de tránsito presencie directamente la comisión de la infracción en vía pública. El agente de tránsito que acude al llamado no presenció los hechos en circulación; suscribir un comparendo basándose únicamente en el testimonio de un tercero (el policía de vigilancia) viola el debido proceso y tipifica falsedad ideológica en documento público.
+2. Inexistencia de Flagrancia: Al estar el vehículo ya estacionado y con el motor apagado, cesó el supuesto hecho en movimiento. El agente de tránsito no puede obligar al ciudadano a encender el motor para fabricar una prueba sonora.
+3. Extralimitación en la Competencia a Prevención (Arts. 3 y 7 CNT): La intervención de la policía común en tránsito se restringe a emergencias inminentes que amenacen la seguridad vial (accidentes graves, ebriedad severa o bloqueos a servicios de rescate), nunca para retener arbitrariamente a conductores por infracciones menores.
+4. Instrucción al Conductor:
+   - Mantener la calma y grabar todo en video continuo (Art. 21 Ley 1801).
+   - Manifestar al agente de tránsito: "Señor agente, usted no presenció ninguna infracción en movimiento conforme al Artículo 135 de la Ley 769 de 2002. Yo fui retenido por policía de vigilancia sin competencia de tránsito. Imponer un comparendo sobre hechos que no le constan directamente viola mi debido proceso (Art. 29 C.P.)."
+   - Si insiste en sancionar: Firmar BAJO PROTESTA: "Comparendo impuesto por agente que no presenció los hechos en movimiento. Retenido ilegalmente por policía de vigilancia. Violación Art. 135 Ley 769 y Art. 29 C.P."
 `;
 
 /**

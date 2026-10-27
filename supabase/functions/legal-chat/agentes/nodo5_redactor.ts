@@ -478,12 +478,20 @@ VEREDICTO JURÍDICO DEL CASO:
       EXOSTO, RUIDO Y COMPETENCIAS DE AUTORIDAD (LEY 2450 DE 2025 Y LEY 1801 DE 2016):
       Diferenciar de forma ESTRICTA la autoridad y el tipo de procedimiento:
       1. POLICÍA DE VIGILANCIA / CUADRANTE ORDINARIO:
-         - NO tiene competencia de tránsito. PROHIBIDO imponer comparendos de tránsito (C.28, D.17) y PROHIBIDO llamar grúa para inmovilizar a patios de tránsito.
-         - Solo puede aplicar el Código de Policía (Ley 1801) por alteración a la tranquilidad/convivencia (multa de convivencia o apagar/suspender la fuente sonora si está estacionado generando escándalo). Si pretende inmovilizar a patios, comete USURPACIÓN DE FUNCIONES (Art. 122 C.P.).
+         - NO tiene funciones de tránsito. PROHIBIDO imponer comparendos de tránsito (C.28, D.17) y PROHIBIDO llamar grúa para inmovilizar a patios de tránsito.
+         - Solo puede aplicar el Código de Convivencia (Ley 1801) si el vehículo está estacionado generando escándalo público (ordenar apagar el equipo/motor o imponer comparendo de convivencia). Si pretende inmovilizar a patios, comete USURPACIÓN DE FUNCIONES (Art. 122 C.P.).
       2. POLICÍA DE TRÁNSITO (DITRA) O AGENTE AZUL:
-         - Competentes para tránsito:
+         - Competentes para tránsito vial:
          - Vía Decibeles (D.17): Exige OBLIGATORIAMENTE sonómetro calibrado con certificado vigente (límite 86 dB). A simple oído o sin equipo la sanción es nula (Art. 29 C.P.).
          - Vía Alteración Mecánica Evidente (C.28): Si el agente detecta alteración física (quitar db-killer, tubo directo sin silenciador), procede comparendo e inmovilización sin sonómetro. El usuario no debe confrontar, sino exigir inventario detallado de patios/grúa (control de daños).
+    </rule>
+    <rule id="5.7">
+      DOCTRINA VITAL: ILEGALIDAD DE RETENCIÓN POR POLICÍA DE VIGILANCIA PARA LLAMAR AL TRÁNSITO (Art. 135 Ley 769 de 2002):
+      - Si un policía de vigilancia (cuadrante) detiene o retiene al conductor y "llama al tránsito" para que venga a multarlo o inmovilizarlo por infracciones en movimiento (ruido, maniobras, luces, etc.): EL PROCEDIMIENTO ES ILEGAL Y NULO DE PLENO DERECHO.
+      - RAZÓN JURÍDICA #1 (TESTIGO DIRECTO - Art. 135 CNT): La orden de comparendo solo es válida cuando la autoridad de tránsito presencie directamente la comisión de la infracción en vía. El agente de tránsito que llega después NO vio ni escuchó el vehículo transitando; multar basándose en el testimonio del vigilante constituye falsa motivación y falsedad ideológica en documento público.
+      - RAZÓN JURÍDICA #2 (RUPTURA DE FLAGRANCIA): Al estar el vehículo ya detenido y apagado, no hay flagrancia en movimiento. El agente de tránsito no puede obligar al ciudadano a encender y acelerar el motor para "fabricar" la prueba técnica.
+      - RAZÓN JURÍDICA #3 (COMPETENCIA A PREVENCIÓN RESTRINGIDA): Los Artículos 3 y 7 del CNT solo permiten intervención de policía ordinario ante emergencias de seguridad vial inminentes (accidentes graves, bloqueos a ambulancias, conductores en embriaguez extrema), NUNCA para retener conductores por infracciones menores esperando al tránsito.
+      - EXCEPCIÓN ÚNICA AUTÓNOMA: Si al llegar el agente de tránsito constata directamente en el RUNT falta de SOAT (D.02) o Tecnomecánica (C.35), la sanción documental SÍ procede por ser comprobada directamente, pero la infracción inicial alegada por el cuadrante es totalmente nula.
     </rule>
   </core_doctrines>
 
