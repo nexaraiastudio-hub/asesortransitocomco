@@ -222,18 +222,37 @@ REGLAS ABSOLUTAS PARA SEMÁFORO (SIN EXCEPCIÓN):
   
   "escape": {
     normas: [
-      "Resolución 8321 de 1983",
-      "Artículo 29 Constitución Política",
+      "Ley 2450 de 2025 - Ley Contra el Ruido (Calidad Acústica y Control de Emisiones)",
+      "Resolución 8321 de 1983 (Ministerio de Salud - Niveles de Ruido)",
+      "Resolución 3027 de 2010 (Manual de Infracciones - Soporte Técnico)",
+      "Artículo 29 Constitución Política (Debido Proceso y Legalidad de la Prueba)",
       "Sentencia C-038 de 2020"
     ],
-    metodo_legal: "sonómetro o decibelímetro calibrado",
-    metodo_invalido: "apreciación auditiva, a simple oído, 'suena muy fuerte'",
+    metodo_legal: "sonómetro técnico calibrado con certificado metrológico vigente (límite 86 dB)",
+    metodo_invalido: "apreciación auditiva, a simple oído, 'hace mucho ruido', percepción subjetiva del agente",
     subsanable: false,
-    notas: "Determinación a simple oído no constituye prueba técnica legal",
+    notas: "La Ley 2450 de 2025 y el Art. 29 C.P. exigen obligatoriamente prueba instrumental objetiva. La determinación a simple oído no constituye prueba técnica legal y anula el comparendo y la inmovilización.",
     preguntas_fase1: [
-      "¿Qué tipo de vehículo y qué tipo de motor tiene? (moto de dos tiempos, moto cuatro tiempos, carro gasolina, carro diésel)",
-      "¿El oficial utilizó algún instrumento electrónico para medir el nivel de ruido del escape, como un sonómetro o decibelímetro? ¿O está determinando el nivel de ruido a simple oído?",
-      "¿El escape del vehículo tiene algún documento o certificación de fábrica?"
+      "¿El exosto tiene silenciador/db-killer instalado o es tubo directo/abierto?",
+      "¿Tienes alguna certificación de homologación o ficha técnica del componente?",
+      "¿El agente tiene sonómetro calibrado o solo lo determina a simple vista/audición?"
+    ]
+  },
+  "exosto": {
+    normas: [
+      "Ley 2450 de 2025 - Ley Contra el Ruido (Calidad Acústica y Control de Emisiones)",
+      "Resolución 8321 de 1983",
+      "Resolución 3027 de 2010",
+      "Artículo 29 Constitución Política (Debido Proceso)"
+    ],
+    metodo_legal: "sonómetro o decibelímetro calibrado con certificado vigente",
+    metodo_invalido: "apreciación auditiva, a simple oído, 'suena muy duro'",
+    subsanable: false,
+    notas: "Toda sanción por exosto ruidoso o modificado exige medición técnica objetiva con sonómetro calibrado bajo la Ley 2450 de 2025.",
+    preguntas_fase1: [
+      "¿El exosto tiene silenciador/db-killer instalado o es tubo directo/abierto?",
+      "¿Tienes alguna certificación de homologación o ficha técnica del componente?",
+      "¿El agente tiene sonómetro calibrado o solo lo determina a simple vista/audición?"
     ]
   },
   
